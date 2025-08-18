@@ -1,0 +1,128 @@
+---
+title: "OAuth Authentication Callback"
+openapi: "GET /v1/integrations/auth-callback"
+---
+
+This endpoint handles OAuth callback redirects from integration providers. It's automatically called by the OAuth provider after the user completes the authentication flow.
+
+<Warning>
+  This endpoint is **not typically called directly** by your application. It's
+  designed to be used as a callback URL by OAuth providers during the
+  authentication process.
+</Warning>
+
+## How OAuth Flow Works
+
+1. **User initiates connection** - Your app calls the [connect endpoint](/api-reference/integrations/connect)
+2. **User gets redirect URL** - The connect endpoint returns an OAuth authorization URL
+3. **User authorizes** - User visits the OAuth provider and grants permission
+4. **Provider calls this endpoint** - OAuth provider redirects to this callback with status
+5. **User gets redirected** - This endpoint redirects user back to your app with the result
+
+## Query Parameters
+
+The OAuth provider will include these parameters when calling this endpoint:
+
+### Required Parameters
+
+- **status** - Either `"success"` or `"error"` indicating the auth result
+- **connectedAccountId** - The unique ID of the connected account from the provider
+
+### Optional Parameters
+
+- **appName** - The name of the connected application
+
+## Response Behavior
+
+### With Custom Callback URL
+
+If you provided a `callback_url` when calling the connect endpoint, users will be redirected to your URL with additional parameters:
+
+```
+https://yourapp.com/oauth-success?status=success&integrationId=github&user_id=user123
+```
+
+### Without Custom Callback URL
+
+If no callback URL was provided, a JSON response is returned:
+
+**Success:**
+
+```json
+{
+  "message": "Authentication successful!",
+  "status": "success",
+  "connected_account_id": "acc_1234567890",
+  "app_name": "GitHub"
+}
+```
+
+**Error:**
+
+```json
+{
+  "message": "Authentication failed",
+  "status": "error",
+  "connected_account_id": "acc_1234567890",
+  "app_name": "GitHub"
+}
+```
+
+## Error Responses
+
+**400 Bad Request - Missing Parameters:**
+
+```json
+{
+  "error": "Missing connected account ID",
+  "instructions": "OAuth callback must include connectedAccountId parameter"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+  "error": "Database error during callback processing",
+  "status": "success",
+  "connected_account_id": "acc_1234567890",
+  "app_name": "GitHub"
+}
+```
+
+## Setup Instructions
+
+### 1. Configure OAuth Provider
+
+When setting up OAuth with an integration provider (GitHub, Google, etc.), use this URL as your callback/redirect URI:
+
+```
+https://yourdomain.com/v1/integrations/auth-callback
+```
+
+### 2. Handle the Redirect
+
+If using a custom callback URL, your application should be prepared to handle the redirect with status parameters:
+
+```javascript
+// Example: Handling the callback in your app
+const urlParams = new URLSearchParams(window.location.search);
+const status = urlParams.get("status");
+const integrationId = urlParams.get("integrationId");
+const userId = urlParams.get("user_id");
+
+if (status === "success") {
+  console.log(`Successfully connected ${integrationId} for user ${userId}`);
+  // Show success message, refresh UI, etc.
+} else {
+  console.log("Authentication failed");
+  // Show error message, retry option, etc.
+}
+```
+
+## Security Notes
+
+- This endpoint validates the callback parameters to prevent abuse
+- All OAuth flows are logged for security monitoring
+- Failed callbacks are handled gracefully with appropriate error messages
+- Database errors during callback processing fall back to simple JSON responses

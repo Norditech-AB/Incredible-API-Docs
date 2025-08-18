@@ -1,0 +1,81 @@
+---
+title: "Connect to Integration"
+openapi: "POST /v1/integrations/{integration_id}/connect"
+---
+
+Establish a connection to a specific integration. The connection process varies depending on the integration's authentication method.
+
+## Authentication Methods
+
+### API Key Authentication
+For integrations that use API keys, provide the key directly in the request:
+
+```json
+{
+  "user_id": "user123",
+  "api_key": "your-api-key-here"
+}
+```
+
+**Response for API Key Auth:**
+```json
+{
+  "success": true,
+  "message": "Successfully connected to [Integration Name]"
+}
+```
+
+### OAuth Authentication (OAuth1 & OAuth2)
+For OAuth-based integrations, you'll receive a redirect URL:
+
+```json
+{
+  "user_id": "user123",
+  "callback_url": "https://yourapp.com/oauth-success" // optional
+}
+```
+
+**Response for OAuth:**
+```json
+{
+  "redirect_url": "https://provider.com/oauth/authorize?...",
+  "instructions": "Please visit the redirect URL to complete authentication"
+}
+```
+
+## Request Body
+
+### Required Fields
+- **user_id** - Your unique user identifier
+
+### Optional Fields  
+- **api_key** - Required only for API key-based integrations
+- **callback_url** - Where to redirect after OAuth completion (optional)
+
+## OAuth Flow
+
+1. **Call this endpoint** with `user_id` and optional `callback_url`
+2. **Redirect user** to the provided `redirect_url`
+3. **User authorizes** your application on the provider's site
+4. **Provider redirects** back to our auth callback endpoint
+5. **We redirect** to your `callback_url` (if provided) with status parameters
+
+## Error Responses
+
+- **400 Bad Request** - Missing required parameters (user_id or api_key)
+- **404 Not Found** - Integration does not exist
+- **500 Internal Server Error** - Connection failed due to server error
+
+## Example: Connecting to GitHub
+
+```bash
+curl -X POST "https://api.example.com/v1/integrations/github/connect" \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "callback_url": "https://myapp.com/github-connected"
+  }'
+```
+
+The user will be redirected to GitHub for authorization, then back to your callback URL.

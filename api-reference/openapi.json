@@ -1,37 +1,54 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Incredible API - Integrations",
-    "description": "API for managing third-party integrations and executing their features",
+    "title": "Integrations API",
+    "description": "API for managing and accessing various integrations and their capabilities",
+    "license": {
+      "name": "MIT"
+    },
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "https://api.incredible.com",
+      "url": "https://api.incredible.one/",
       "description": "Production server"
-    },
-    {
-      "url": "http://localhost:8000",
-      "description": "Development server"
     }
   ],
   "paths": {
     "/v1/integrations": {
       "get": {
         "summary": "List all integrations",
-        "description": "Retrieve a list of all available integrations with their details",
-        "operationId": "listAllIntegrations",
-        "tags": ["Integrations"],
+        "description": "Returns a list of all available integrations with details such as name, description, logo URL, app URL, functions, and authentication method",
         "responses": {
           "200": {
-            "description": "List of all available integrations",
+            "description": "Successful response with list of integrations",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/IntegrationInfo"
+                    "$ref": "#/components/schemas/Integration"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -42,9 +59,7 @@
     "/v1/integrations/{integration_id}": {
       "get": {
         "summary": "Get integration details",
-        "description": "Retrieve detailed information about a specific integration",
-        "operationId": "getIntegrationDetails",
-        "tags": ["Integrations"],
+        "description": "Returns detailed information about a specific integration including its capabilities and authentication requirements",
         "parameters": [
           {
             "name": "integration_id",
@@ -58,11 +73,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Integration details",
+            "description": "Integration details retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IntegrationInfo"
+                  "$ref": "#/components/schemas/Integration"
                 }
               }
             }
@@ -83,15 +98,13 @@
     "/v1/integrations/{integration_id}/connect": {
       "post": {
         "summary": "Connect to integration",
-        "description": "Establish a connection to a specific integration",
-        "operationId": "connectToIntegration",
-        "tags": ["Integrations"],
+        "description": "Establishes a connection to a specific integration. The connection process varies based on the integration's authentication method (API key, OAuth1, OAuth2)",
         "parameters": [
           {
             "name": "integration_id",
             "in": "path",
             "required": true,
-            "description": "The unique identifier of the integration",
+            "description": "The unique identifier of the integration to connect to",
             "schema": {
               "type": "string"
             }
@@ -102,38 +115,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/ApiKeyConnectionRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/OAuthConnectionRequest"
-                  }
-                ]
+                "$ref": "#/components/schemas/ConnectRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Connection successful",
+            "description": "Connection successful or OAuth redirect URL provided",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiKeyConnectionResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/OAuthConnectionResponse"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/ConnectResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Bad request - missing required parameters",
             "content": {
               "application/json": {
                 "schema": {
@@ -144,6 +143,16 @@
           },
           "404": {
             "description": "Integration not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Connection failed",
             "content": {
               "application/json": {
                 "schema": {
@@ -158,9 +167,7 @@
     "/v1/integrations/{integration_id}/execute": {
       "post": {
         "summary": "Execute integration feature",
-        "description": "Execute a specific feature from an integration",
-        "operationId": "executeIntegrationFeature",
-        "tags": ["Integrations"],
+        "description": "Executes a specific feature or function from an integration. Used by agentic models to perform actions through connected integrations",
         "parameters": [
           {
             "name": "integration_id",
@@ -177,7 +184,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FeatureExecutionRequest"
+                "$ref": "#/components/schemas/ExecuteRequest"
               }
             }
           }
@@ -188,13 +195,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeatureExecutionResponse"
+                  "$ref": "#/components/schemas/ExecuteResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Bad request - invalid parameters or feature not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -212,21 +219,30 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Feature execution failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/integrations/auth-callback": {
       "get": {
-        "summary": "OAuth callback handler",
-        "description": "Handle OAuth callback redirects from Composio",
-        "operationId": "authCallback",
-        "tags": ["Integrations"],
+        "summary": "OAuth authentication callback",
+        "description": "Handles OAuth callback redirects from integration providers. This endpoint processes the authentication result and redirects users to their specified callback URL",
         "parameters": [
           {
             "name": "status",
             "in": "query",
-            "description": "The status of the authentication flow",
+            "required": true,
+            "description": "The status of the authentication flow (success or error)",
             "schema": {
               "type": "string",
               "enum": ["success", "error"]
@@ -235,7 +251,8 @@
           {
             "name": "connectedAccountId",
             "in": "query",
-            "description": "The ID of the connected account from Composio",
+            "required": true,
+            "description": "The ID of the connected account provided by the integration provider",
             "schema": {
               "type": "string"
             }
@@ -243,7 +260,8 @@
           {
             "name": "appName",
             "in": "query",
-            "description": "The name of the app being authenticated",
+            "required": false,
+            "description": "The name of the connected application",
             "schema": {
               "type": "string"
             }
@@ -251,7 +269,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Authentication callback processed",
+            "description": "Authentication callback processed successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -260,8 +278,21 @@
               }
             }
           },
+          "302": {
+            "description": "Redirect to user's callback URL with status parameters"
+          },
           "400": {
-            "description": "Bad request",
+            "description": "Bad request - missing required parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Callback processing failed",
             "content": {
               "application/json": {
                 "schema": {
@@ -276,189 +307,163 @@
   },
   "components": {
     "schemas": {
-      "IntegrationInfo": {
+      "Integration": {
+        "required": [
+          "name",
+          "description"
+        ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the integration"
-          },
           "name": {
-            "type": "string",
-            "description": "Display name of the integration"
+            "description": "The name of the integration",
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "description": "Description of what the integration does"
+            "description": "A description of what the integration does",
+            "type": "string"
           },
           "logo_url": {
+            "description": "URL to the integration's logo image",
             "type": "string",
-            "format": "uri",
-            "description": "URL to the integration's logo"
+            "format": "uri"
           },
           "app_url": {
+            "description": "URL to the integration's main application or website",
             "type": "string",
-            "format": "uri",
-            "description": "URL to the integration's main application"
+            "format": "uri"
           },
           "functions": {
+            "description": "List of available functions or capabilities provided by the integration",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/IntegrationFunction"
-            },
-            "description": "List of available functions/features"
-          },
-          "auth_method": {
-            "type": "string",
-            "enum": ["API_KEY", "OAUTH2", "OAUTH1", "BASIC", "BEARER_TOKEN"],
-            "description": "Authentication method required for this integration"
-          }
-        },
-        "required": ["id", "name", "description", "functions", "auth_method"]
-      },
-      "IntegrationFunction": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the function"
-          },
-          "description": {
-            "type": "string",
-            "description": "Description of what the function does"
-          },
-          "parameters": {
-            "type": "object",
-            "description": "Parameters required for the function",
-            "additionalProperties": {
               "type": "string"
             }
+          },
+          "auth_method": {
+            "description": "The authentication method used by the integration",
+            "type": "string",
+            "enum": ["oauth", "api_key", "basic_auth", "none"]
           }
-        },
-        "required": ["name", "description"]
+        }
       },
-      "ApiKeyConnectionRequest": {
+      "ConnectRequest": {
+        "required": [
+          "user_id"
+        ],
         "type": "object",
         "properties": {
           "user_id": {
-            "type": "string",
-            "description": "Unique identifier for the user"
+            "description": "The unique identifier of the user attempting to connect",
+            "type": "string"
           },
           "api_key": {
-            "type": "string",
-            "description": "API key for the integration"
-          }
-        },
-        "required": ["user_id", "api_key"]
-      },
-      "OAuthConnectionRequest": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "description": "Unique identifier for the user"
+            "description": "The API key for API key-based authentication (required only for integrations using API key auth)",
+            "type": "string"
           },
           "callback_url": {
+            "description": "The URL to redirect to after OAuth authentication completes (optional for OAuth flows)",
             "type": "string",
-            "format": "uri",
-            "description": "URL to redirect to after OAuth completion"
+            "format": "uri"
           }
-        },
-        "required": ["user_id"]
+        }
       },
-      "ApiKeyConnectionResponse": {
+      "ConnectResponse": {
         "type": "object",
         "properties": {
           "success": {
+            "description": "Whether the connection was successful (for API key auth)",
             "type": "boolean"
           },
           "message": {
+            "description": "Success or error message",
             "type": "string"
           },
-          "integration_id": {
-            "type": "string"
-          },
-          "user_id": {
-            "type": "string"
-          }
-        },
-        "required": ["success"]
-      },
-      "OAuthConnectionResponse": {
-        "type": "object",
-        "properties": {
           "redirect_url": {
+            "description": "The OAuth authorization URL to redirect the user to (for OAuth flows)",
             "type": "string",
-            "format": "uri",
-            "description": "URL to redirect user for OAuth authentication"
+            "format": "uri"
           },
           "instructions": {
-            "type": "string",
-            "description": "Instructions for completing OAuth flow"
+            "description": "Instructions for the user on how to complete the authentication",
+            "type": "string"
           }
-        },
-        "required": ["redirect_url", "instructions"]
+        }
       },
-      "FeatureExecutionRequest": {
+      "ExecuteRequest": {
+        "required": [
+          "user_id",
+          "feature_name"
+        ],
         "type": "object",
         "properties": {
           "user_id": {
-            "type": "string",
-            "description": "Unique identifier for the user"
+            "description": "The unique identifier of the user executing the feature",
+            "type": "string"
           },
           "feature_name": {
-            "type": "string",
-            "description": "Name of the feature to execute"
+            "description": "The name of the feature/function to execute",
+            "type": "string"
           },
           "inputs": {
+            "description": "The input parameters for the feature execution",
             "type": "object",
-            "description": "Input parameters for the feature",
             "additionalProperties": true
           }
-        },
-        "required": ["user_id", "feature_name"]
+        }
       },
-      "FeatureExecutionResponse": {
+      "ExecuteResponse": {
+        "required": [
+          "success",
+          "integration_id",
+          "feature_name",
+          "user_id"
+        ],
         "type": "object",
         "properties": {
           "success": {
+            "description": "Whether the feature execution was successful",
             "type": "boolean"
           },
           "result": {
+            "description": "The result data from the feature execution",
             "type": "object",
-            "description": "Result of the feature execution",
             "additionalProperties": true
           },
           "integration_id": {
+            "description": "The ID of the integration that executed the feature",
             "type": "string"
           },
           "feature_name": {
+            "description": "The name of the feature that was executed",
             "type": "string"
           },
           "user_id": {
+            "description": "The ID of the user who executed the feature",
             "type": "string"
           }
-        },
-        "required": ["success", "integration_id", "feature_name", "user_id"]
+        }
       },
       "AuthCallbackResponse": {
         "type": "object",
         "properties": {
           "message": {
+            "description": "Success or error message about the authentication",
             "type": "string"
           },
           "status": {
+            "description": "The status of the authentication callback",
             "type": "string",
             "enum": ["success", "error"]
           },
           "connected_account_id": {
+            "description": "The ID of the connected account",
             "type": "string"
           },
           "app_name": {
+            "description": "The name of the connected application",
             "type": "string"
           }
-        },
-        "required": ["message", "status", "connected_account_id", "app_name"]
+        }
       },
       "Error": {
         "type": "object",

@@ -1,12 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Incredible API Documentation",
+  "name": "Incredible",
   "colors": {
     "primary": "#FF6200",
-    "light": "#FF8533",
-    "dark": "#CC4E00"
+    "light": "#FF6200",
+    "dark": "#FF6200"
   },
+  "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; }",
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
@@ -46,21 +47,18 @@
             ]
           },
           {
-            "group": "Integrations API",
+            "group": "Authentication",
             "pages": [
-              "api-reference/integrations",
-              "api-reference/integrations-guide",
-              "api-reference/integrations-summary"
+              "api-reference/authentication/auth-callback"
             ]
           },
           {
-            "group": "Integrations Endpoints",
+            "group": "Integrations",
             "pages": [
-              "api-reference/endpoint/list-integrations",
-              "api-reference/endpoint/get-integration",
-              "api-reference/endpoint/connect-integration",
-              "api-reference/endpoint/execute-feature",
-              "api-reference/endpoint/auth-callback"
+              "api-reference/integrations/list",
+              "api-reference/integrations/get-details",
+              "api-reference/integrations/connect",
+              "api-reference/integrations/execute"
             ]
           }
         ]
@@ -75,7 +73,7 @@
         },
         {
           "anchor": "Community",
-          "href": "https://www.incredible.one/community",
+          "href": "https://discord.com/invite/pNmdkxgBe2",
           "icon": "slack"
         },
         {
@@ -87,8 +85,8 @@
     }
   },
   "logo": {
-    "light": "/images/Incredible — Logomark White Orange.svg",
-    "dark": "/images/Incredible — Logomark Black Orange.svg"
+    "light": "/images/Incredible — Logomark Black Orange.svg",
+    "dark": "/images/Incredible — Logomark White Orange.svg"
   },
   "navbar": {
     "links": [
