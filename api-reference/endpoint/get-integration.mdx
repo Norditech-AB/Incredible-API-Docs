@@ -1,0 +1,34 @@
+---
+title: 'Get Integration Details'
+openapi: 'GET /v1/integrations/{integration_id}'
+---
+
+<ResponseExample>
+
+```json Response
+{
+  "id": "gmail",
+  "name": "Gmail",
+  "description": "Gmail integration for sending and managing emails",
+  "logo_url": "https://example.com/gmail-logo.png",
+  "app_url": "https://gmail.com",
+  "functions": [
+    {
+      "name": "GMAIL_SEND_EMAIL",
+      "description": "Send an email via Gmail",
+      "parameters": {
+        "to": "string",
+        "subject": "string",
+        "body": "string"
+      }
+    }
+  ],
+  "auth_method": "OAUTH2"
+}
+```
+
+</ResponseExample>
+
+<ParamField header="integration_id" type="string" required>
+  The unique identifier of the integration (e.g., "gmail", "perplexity")
+</ParamField>

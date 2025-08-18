@@ -1,90 +1,74 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
+    "title": "Incredible API - Integrations",
+    "description": "API for managing third-party integrations and executing their features",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
+      "url": "https://api.incredible.com",
+      "description": "Production server"
+    },
     {
-      "bearerAuth": []
+      "url": "http://localhost:8000",
+      "description": "Development server"
     }
   ],
   "paths": {
-    "/plants": {
+    "/v1/integrations": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
+        "summary": "List all integrations",
+        "description": "Retrieve a list of all available integrations with their details",
+        "operationId": "listAllIntegrations",
+        "tags": ["Integrations"],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "List of all available integrations",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Plant"
+                    "$ref": "#/components/schemas/IntegrationInfo"
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
           }
         }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
+      }
+    },
+    "/v1/integrations/{integration_id}": {
+      "get": {
+        "summary": "Get integration details",
+        "description": "Retrieve detailed information about a specific integration",
+        "operationId": "getIntegrationDetails",
+        "tags": ["Integrations"],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the integration",
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Integration details",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/IntegrationInfo"
                 }
               }
             }
           },
-          "400": {
-            "description": "unexpected error",
+          "404": {
+            "description": "Integration not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,28 +80,70 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/v1/integrations/{integration_id}/connect": {
+      "post": {
+        "summary": "Connect to integration",
+        "description": "Establish a connection to a specific integration",
+        "operationId": "connectToIntegration",
+        "tags": ["Integrations"],
         "parameters": [
           {
-            "name": "id",
+            "name": "integration_id",
             "in": "path",
-            "description": "ID of plant to delete",
             "required": true,
+            "description": "The unique identifier of the integration",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ApiKeyConnectionRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OAuthConnectionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "Connection successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiKeyConnectionResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OAuthConnectionResponse"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Integration not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -128,25 +154,121 @@
           }
         }
       }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
+    },
+    "/v1/integrations/{integration_id}/execute": {
       "post": {
-        "description": "Information about a new plant added to the store",
+        "summary": "Execute integration feature",
+        "description": "Execute a specific feature from an integration",
+        "operationId": "executeIntegrationFeature",
+        "tags": ["Integrations"],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the integration",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
-          "description": "Plant added to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/FeatureExecutionRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "description": "Feature executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Integration not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integrations/auth-callback": {
+      "get": {
+        "summary": "OAuth callback handler",
+        "description": "Handle OAuth callback redirects from Composio",
+        "operationId": "authCallback",
+        "tags": ["Integrations"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "The status of the authentication flow",
+            "schema": {
+              "type": "string",
+              "enum": ["success", "error"]
+            }
+          },
+          {
+            "name": "connectedAccountId",
+            "in": "query",
+            "description": "The ID of the connected account from Composio",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appName",
+            "in": "query",
+            "description": "The name of the app being authenticated",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentication callback processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthCallbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -154,63 +276,207 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "IntegrationInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the integration"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the integration"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of what the integration does"
+          },
+          "logo_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the integration's logo"
+          },
+          "app_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the integration's main application"
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationFunction"
+            },
+            "description": "List of available functions/features"
+          },
+          "auth_method": {
+            "type": "string",
+            "enum": ["API_KEY", "OAUTH2", "OAUTH1", "BASIC", "BEARER_TOKEN"],
+            "description": "Authentication method required for this integration"
+          }
+        },
+        "required": ["id", "name", "description", "functions", "auth_method"]
+      },
+      "IntegrationFunction": {
         "type": "object",
         "properties": {
           "name": {
-            "description": "The name of the plant",
-            "type": "string"
+            "type": "string",
+            "description": "Name of the function"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+          "description": {
+            "type": "string",
+            "description": "Description of what the function does"
           },
-          {
-            "required": [
-              "id"
-            ],
+          "parameters": {
             "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
+            "description": "Parameters required for the function",
+            "additionalProperties": {
+              "type": "string"
             }
           }
-        ]
+        },
+        "required": ["name", "description"]
       },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "ApiKeyConnectionRequest": {
         "type": "object",
         "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
+          "user_id": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "API key for the integration"
+          }
+        },
+        "required": ["user_id", "api_key"]
+      },
+      "OAuthConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to redirect to after OAuth completion"
+          }
+        },
+        "required": ["user_id"]
+      },
+      "ApiKeyConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
           },
           "message": {
             "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
           }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+        },
+        "required": ["success"]
+      },
+      "OAuthConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "redirect_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to redirect user for OAuth authentication"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Instructions for completing OAuth flow"
+          }
+        },
+        "required": ["redirect_url", "instructions"]
+      },
+      "FeatureExecutionRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          },
+          "feature_name": {
+            "type": "string",
+            "description": "Name of the feature to execute"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "Input parameters for the feature",
+            "additionalProperties": true
+          }
+        },
+        "required": ["user_id", "feature_name"]
+      },
+      "FeatureExecutionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "result": {
+            "type": "object",
+            "description": "Result of the feature execution",
+            "additionalProperties": true
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "feature_name": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "integration_id", "feature_name", "user_id"]
+      },
+      "AuthCallbackResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "error"]
+          },
+          "connected_account_id": {
+            "type": "string"
+          },
+          "app_name": {
+            "type": "string"
+          }
+        },
+        "required": ["message", "status", "connected_account_id", "app_name"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "string",
+            "description": "Additional error details"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Instructions for resolving the error"
+          }
+        },
+        "required": ["error"]
       }
     }
   }

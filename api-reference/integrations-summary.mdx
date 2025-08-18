@@ -1,0 +1,112 @@
+---
+title: 'Integrations API Documentation'
+description: 'Complete documentation for the Integrations API'
+---
+
+# Integrations API Documentation
+
+Welcome to the complete documentation for the Integrations API. This API allows you to connect to and interact with various third-party services through a unified interface.
+
+## Documentation Structure
+
+### 📖 [Main API Overview](/api-reference/integrations)
+Get started with the Integrations API, including base URLs, authentication, and quick start examples.
+
+### 📚 [Complete API Guide](/api-reference/integrations-guide)
+Comprehensive guide covering all aspects of using the Integrations API, including authentication methods, OAuth flows, and best practices.
+
+### 🔗 [OpenAPI Specification](/api-reference/integrations-openapi.json)
+Complete OpenAPI 3.1.0 specification for programmatic access and API client generation.
+
+## Available Endpoints
+
+### Core Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/integrations` | GET | [List all available integrations](/api-reference/endpoint/list-integrations) |
+| `/v1/integrations/{integration_id}` | GET | [Get details for a specific integration](/api-reference/endpoint/get-integration) |
+| `/v1/integrations/{integration_id}/connect` | POST | [Connect to an integration](/api-reference/endpoint/connect-integration) |
+| `/v1/integrations/{integration_id}/execute` | POST | [Execute a feature from an integration](/api-reference/endpoint/execute-feature) |
+
+### OAuth Support
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/integrations/auth-callback` | GET | [Handle OAuth callback redirects](/api-reference/endpoint/auth-callback) |
+
+## Supported Integrations
+
+### Currently Available
+
+- **Gmail** (`gmail`): Email management with OAuth2 authentication
+- **Perplexity** (`perplexity`): AI-powered search with API key authentication
+
+### Authentication Methods
+
+- **API Key**: Simple API key authentication for services like Perplexity
+- **OAuth2**: OAuth 2.0 authentication for services like Gmail
+- **OAuth1**: OAuth 1.0 authentication (supported but not currently used)
+
+## Quick Examples
+
+### List All Integrations
+```bash
+curl -X GET "https://api.incredible.com/v1/integrations"
+```
+
+### Connect to Gmail (OAuth)
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "callback_url": "https://your-app.com/oauth/callback"
+  }'
+```
+
+### Connect to Perplexity (API Key)
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/perplexity/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "api_key": "your_api_key"
+  }'
+```
+
+### Execute a Feature
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/execute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "feature_name": "GMAIL_SEND_EMAIL",
+    "inputs": {
+      "to": "recipient@example.com",
+      "subject": "Test Email",
+      "body": "Hello from the API!"
+    }
+  }'
+```
+
+## Key Features
+
+- **Unified Interface**: Connect to multiple services through a single API
+- **Flexible Authentication**: Support for both API key and OAuth authentication
+- **Feature Execution**: Execute specific features/functions from each integration
+- **Error Handling**: Comprehensive error responses with helpful instructions
+- **OAuth Support**: Complete OAuth flow handling with callback management
+
+## Getting Help
+
+- 📖 Start with the [API Guide](/api-reference/integrations-guide) for detailed usage instructions
+- 🔍 Check individual endpoint documentation for specific details
+- 📋 Use the [OpenAPI specification](/api-reference/integrations-openapi.json) for programmatic access
+- 💬 Contact support for additional assistance
+
+## Version Information
+
+- **API Version**: 1.0.0
+- **OpenAPI Version**: 3.1.0
+- **Last Updated**: Current

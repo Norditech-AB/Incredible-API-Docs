@@ -1,0 +1,225 @@
+---
+title: 'Integrations API Guide'
+description: 'Complete guide to using the Integrations API'
+---
+
+# Integrations API Guide
+
+This guide will walk you through how to use the Integrations API to connect to and interact with third-party services.
+
+## Overview
+
+The Integrations API provides a unified interface for connecting to various third-party services and executing their features. It supports both API key and OAuth authentication methods.
+
+## Getting Started
+
+### 1. List Available Integrations
+
+First, discover what integrations are available:
+
+```bash
+curl -X GET "https://api.incredible.com/v1/integrations"
+```
+
+This returns a list of all available integrations with their details:
+
+```json
+[
+  {
+    "id": "gmail",
+    "name": "Gmail",
+    "description": "Gmail integration for sending and managing emails",
+    "logo_url": "https://example.com/gmail-logo.png",
+    "app_url": "https://gmail.com",
+    "functions": [
+      {
+        "name": "GMAIL_SEND_EMAIL",
+        "description": "Send an email via Gmail",
+        "parameters": {
+          "to": "string",
+          "subject": "string",
+          "body": "string"
+        }
+      }
+    ],
+    "auth_method": "OAUTH2"
+  }
+]
+```
+
+### 2. Connect to an Integration
+
+#### API Key Authentication
+
+For integrations that use API key authentication (like Perplexity):
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/perplexity/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "api_key": "your_perplexity_api_key"
+  }'
+```
+
+#### OAuth Authentication
+
+For integrations that use OAuth (like Gmail):
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "callback_url": "https://your-app.com/oauth/callback"
+  }'
+```
+
+This returns a redirect URL that you need to visit to complete OAuth:
+
+```json
+{
+  "redirect_url": "https://auth.composio.com/oauth/authorize?client_id=...",
+  "instructions": "Please visit the redirect URL to complete OAuth authentication"
+}
+```
+
+### 3. Execute Features
+
+Once connected, you can execute features:
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/execute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "feature_name": "GMAIL_SEND_EMAIL",
+    "inputs": {
+      "to": "recipient@example.com",
+      "subject": "Test Email",
+      "body": "This is a test email sent via the API"
+    }
+  }'
+```
+
+## Authentication Methods
+
+### API Key Authentication
+
+Used for services that provide simple API key authentication:
+
+- **Perplexity**: AI-powered search and research
+- **Other API key-based services**
+
+### OAuth Authentication
+
+Used for services that require OAuth 1.0 or OAuth 2.0:
+
+- **Gmail**: Email management
+- **Other OAuth-based services**
+
+## OAuth Flow
+
+1. **Initiate Connection**: Call the connect endpoint with your `user_id` and `callback_url`
+2. **Redirect User**: Redirect the user to the provided `redirect_url`
+3. **User Authorization**: User authorizes your application on the service's website
+4. **Callback Processing**: The service redirects back to your callback URL with status
+5. **Connection Complete**: The integration is now connected and ready to use
+
+## Error Handling
+
+The API returns appropriate HTTP status codes and detailed error messages:
+
+### Common Error Responses
+
+```json
+{
+  "error": "User ID required",
+  "instructions": "Please provide user_id in request body"
+}
+```
+
+```json
+{
+  "error": "API key required",
+  "instructions": "Please provide your Gmail API key in the request body"
+}
+```
+
+```json
+{
+  "error": "Feature not found",
+  "available_features": ["GMAIL_SEND_EMAIL", "GMAIL_READ_EMAILS"]
+}
+```
+
+## Best Practices
+
+1. **Always provide user_id**: Every request requires a valid user identifier
+2. **Handle OAuth callbacks**: Implement proper callback handling for OAuth flows
+3. **Check available features**: Verify features exist before attempting execution
+4. **Error handling**: Implement proper error handling for all API calls
+5. **Rate limiting**: Be mindful of rate limits for individual integrations
+
+## Integration Examples
+
+### Gmail Integration
+
+```javascript
+// Connect to Gmail
+const connectResponse = await fetch('/v1/integrations/gmail/connect', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user_id: 'user_123',
+    callback_url: 'https://myapp.com/oauth/callback'
+  })
+});
+
+// Execute Gmail feature
+const executeResponse = await fetch('/v1/integrations/gmail/execute', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user_id: 'user_123',
+    feature_name: 'GMAIL_SEND_EMAIL',
+    inputs: {
+      to: 'recipient@example.com',
+      subject: 'Hello from API',
+      body: 'This email was sent via the Integrations API'
+    }
+  })
+});
+```
+
+### Perplexity Integration
+
+```javascript
+// Connect to Perplexity
+const connectResponse = await fetch('/v1/integrations/perplexity/connect', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user_id: 'user_123',
+    api_key: 'your_perplexity_api_key'
+  })
+});
+
+// Execute Perplexity feature
+const executeResponse = await fetch('/v1/integrations/perplexity/execute', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user_id: 'user_123',
+    feature_name: 'PERPLEXITY_SEARCH',
+    inputs: {
+      query: 'What is artificial intelligence?',
+      focus: 'academic'
+    }
+  })
+});
+```
+
+## Support
+
+For questions or issues with the Integrations API, please refer to the individual endpoint documentation or contact our support team.

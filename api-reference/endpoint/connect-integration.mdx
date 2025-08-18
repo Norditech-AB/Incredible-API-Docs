@@ -1,0 +1,88 @@
+---
+title: 'Connect to Integration'
+openapi: 'POST /v1/integrations/{integration_id}/connect'
+---
+
+Connect to a specific integration using the appropriate authentication method.
+
+<ParamField header="integration_id" type="string" required>
+  The unique identifier of the integration to connect to
+</ParamField>
+
+## API Key Authentication
+
+For integrations that use API key authentication (like Perplexity):
+
+<RequestExample>
+
+```json
+{
+  "user_id": "user_123",
+  "api_key": "your_api_key_here"
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "success": true,
+  "message": "Successfully connected to Perplexity",
+  "integration_id": "perplexity",
+  "user_id": "user_123"
+}
+```
+
+</ResponseExample>
+
+## OAuth Authentication
+
+For integrations that use OAuth authentication (like Gmail):
+
+<RequestExample>
+
+```json
+{
+  "user_id": "user_123",
+  "callback_url": "https://your-app.com/oauth/callback"
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "redirect_url": "https://auth.composio.com/oauth/authorize?client_id=...",
+  "instructions": "Please visit the redirect URL to complete OAuth authentication"
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "User ID required",
+  "instructions": "Please provide user_id in request body"
+}
+```
+
+</ResponseExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "API key required",
+  "instructions": "Please provide your Gmail API key in the request body"
+}
+```
+
+</ResponseExample>

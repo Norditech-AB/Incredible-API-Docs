@@ -1,94 +1,303 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: 'Development Guide'
+description: 'Advanced configuration and development with Incredible API'
 ---
 
-<Info>
-  **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
-</Info>
+# Development Guide
 
-Follow these steps to install and run Mintlify on your operating system.
+Learn how to build advanced AI agents and optimize your automations with the Incredible API.
 
-<Steps>
-<Step title="Install the Mintlify CLI">
+## Local Development
+
+### Setting Up Your Development Environment
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/incredible-api-docs.git
+   cd incredible-api-docs
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:3000` to see your documentation.
+
+## Advanced Agent Configuration
+
+### Custom Scheduling
+
+Beyond basic schedules, you can create complex automation patterns:
+
+```json
+{
+  "schedule": {
+    "type": "custom",
+    "cron": "0 7 * * 1-5",  // Weekdays at 7 AM
+    "timezone": "America/New_York"
+  }
+}
+```
+
+### Conditional Logic
+
+Add conditional execution based on data:
+
+```json
+{
+  "conditions": [
+    {
+      "field": "email_count",
+      "operator": "greater_than",
+      "value": 10
+    }
+  ],
+  "actions": [
+    {
+      "type": "send_notification",
+      "channel": "slack",
+      "message": "High email volume detected"
+    }
+  ]
+}
+```
+
+### Error Handling
+
+Configure retry logic and error notifications:
+
+```json
+{
+  "error_handling": {
+    "max_retries": 3,
+    "retry_delay": 300,
+    "notify_on_failure": true,
+    "notification_channels": ["slack", "email"]
+  }
+}
+```
+
+## Integration Development
+
+### Creating Custom Integrations
+
+Build your own integrations using our SDK:
+
+```javascript
+import { Integration } from 'incredible-api';
+
+class CustomIntegration extends Integration {
+  constructor() {
+    super({
+      id: 'custom-app',
+      name: 'Custom App',
+      auth_scheme: 'API_KEY',
+      functions: ['CUSTOM_FUNCTION']
+    });
+  }
+
+  async executeFunction(functionName, inputs, user_id) {
+    switch (functionName) {
+      case 'CUSTOM_FUNCTION':
+        return await this.customFunction(inputs);
+      default:
+        throw new Error(`Unknown function: ${functionName}`);
+    }
+  }
+
+  async customFunction(inputs) {
+    // Your custom logic here
+    return { success: true, data: inputs };
+  }
+}
+```
+
+### Testing Integrations
 
 ```bash
-npm i -g mint
+# Test integration locally
+npm run test:integration
+
+# Run integration tests
+npm run test:integration:gmail
+npm run test:integration:slack
 ```
-</Step>
 
-<Step title="Preview locally">
+## Performance Optimization
 
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+### Agent Optimization
+
+1. **Batch Processing**: Group similar operations
+2. **Caching**: Cache frequently accessed data
+3. **Parallel Execution**: Run independent tasks concurrently
+
+```json
+{
+  "optimization": {
+    "batch_size": 100,
+    "parallel_execution": true,
+    "cache_ttl": 3600
+  }
+}
+```
+
+### Rate Limiting
+
+Handle API rate limits gracefully:
+
+```json
+{
+  "rate_limiting": {
+    "requests_per_minute": 60,
+    "backoff_strategy": "exponential",
+    "max_retries": 5
+  }
+}
+```
+
+## Monitoring and Analytics
+
+### Agent Metrics
+
+Track agent performance and usage:
 
 ```bash
-mint dev
+# Get agent metrics
+curl -X GET "https://api.incredible.com/v1/agents/metrics" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Get execution history
+curl -X GET "https://api.incredible.com/v1/agents/agent_123/executions" \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+### Webhook Monitoring
 
-</Step>
-</Steps>
-
-## Custom ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+Set up webhooks for real-time notifications:
 
 ```bash
-mint dev --port 3333
+curl -X POST "https://api.incredible.com/v1/webhooks" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://your-app.com/webhooks/incredible",
+    "events": ["agent.execution.completed", "agent.execution.failed"],
+    "secret": "your_webhook_secret"
+  }'
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+## Security Best Practices
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
+### API Key Management
 
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+- Rotate API keys regularly
+- Use environment variables
+- Implement proper access controls
 
 ```bash
-npm mint update
+# Set environment variables
+export INCREDIBLE_API_KEY="your_api_key"
+export INCREDIBLE_USER_ID="your_user_id"
 ```
 
-## Validating links
+### Data Privacy
 
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
-
-```bash
-mint broken-links
-```
+- Encrypt sensitive data
+- Implement data retention policies
+- Follow GDPR compliance guidelines
 
 ## Deployment
 
-If the deployment is successful, you should see the following:
+### Production Deployment
 
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
+1. **Environment Configuration**
+   ```bash
+   # Production environment
+   export NODE_ENV=production
+   export INCREDIBLE_API_URL="https://api.incredible.com"
+   ```
 
-## Code formatting
+2. **Health Checks**
+   ```bash
+   # Check API health
+   curl -X GET "https://api.incredible.com/v1/health"
+   ```
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+3. **Monitoring Setup**
+   - Set up logging
+   - Configure alerts
+   - Monitor performance metrics
 
 ## Troubleshooting
 
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
+### Common Issues
 
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
-  </Accordion>
+1. **Authentication Errors**
+   - Verify API key is valid
+   - Check user permissions
+   - Ensure proper authorization headers
 
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
-  </Accordion>
-</AccordionGroup>
+2. **Integration Failures**
+   - Verify integration credentials
+   - Check API rate limits
+   - Review error logs
 
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+3. **Agent Execution Issues**
+   - Validate agent configuration
+   - Check integration connectivity
+   - Review execution logs
+
+### Debug Mode
+
+Enable debug logging for troubleshooting:
+
+```bash
+export INCREDIBLE_DEBUG=true
+```
+
+## Resources
+
+<Card
+  title="API Reference"
+  icon="book"
+  href="/api-reference/integrations"
+>
+  Complete API documentation
+</Card>
+
+<Card
+  title="Community Forum"
+  icon="users"
+  href="https://community.incredible.one"
+>
+  Get help from the community
+</Card>
+
+<Card
+  title="GitHub Repository"
+  icon="github"
+  href="https://github.com/incredible-ai/api"
+>
+  View source code and contribute
+</Card>
+
+## Support
+
+Need help with development? Contact our developer support team:
+
+- **Email**: dev-support@incredible.one
+- **Slack**: Join our developer community
+- **Documentation**: Browse our comprehensive guides
+
+Happy coding! 🚀

@@ -1,0 +1,101 @@
+---
+title: 'Execute Integration Feature'
+openapi: 'POST /v1/integrations/{integration_id}/execute'
+---
+
+Execute a specific feature/function from an integration. This endpoint is typically used by the agentic model to perform actions through connected integrations.
+
+<ParamField header="integration_id" type="string" required>
+  The unique identifier of the integration to execute the feature from
+</ParamField>
+
+## Request Body
+
+<RequestExample>
+
+```json
+{
+  "user_id": "user_123",
+  "feature_name": "GMAIL_SEND_EMAIL",
+  "inputs": {
+    "to": "recipient@example.com",
+    "subject": "Test Email",
+    "body": "This is a test email sent via the API"
+  }
+}
+```
+
+</RequestExample>
+
+## Response
+
+<ResponseExample>
+
+```json Response
+{
+  "success": true,
+  "result": {
+    "message_id": "msg_123456",
+    "status": "sent"
+  },
+  "integration_id": "gmail",
+  "feature_name": "GMAIL_SEND_EMAIL",
+  "user_id": "user_123"
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+### Missing Parameters
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "User ID required",
+  "instructions": "Please provide user_id in request body"
+}
+```
+
+</ResponseExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Feature name required",
+  "instructions": "Please provide feature_name in request body"
+}
+```
+
+</ResponseExample>
+
+### Feature Not Found
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Feature not found",
+  "available_features": ["GMAIL_SEND_EMAIL", "GMAIL_READ_EMAILS"]
+}
+```
+
+</ResponseExample>
+
+### Execution Failed
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Feature execution failed",
+  "details": "Invalid email address format",
+  "integration_id": "gmail",
+  "feature_name": "GMAIL_SEND_EMAIL"
+}
+```
+
+</ResponseExample>

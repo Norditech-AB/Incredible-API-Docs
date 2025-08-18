@@ -1,0 +1,50 @@
+---
+title: 'List Integrations'
+openapi: 'GET /v1/integrations'
+---
+
+<ResponseExample>
+
+```json Response
+[
+  {
+    "id": "gmail",
+    "name": "Gmail",
+    "description": "Gmail integration for sending and managing emails",
+    "logo_url": "https://example.com/gmail-logo.png",
+    "app_url": "https://gmail.com",
+    "functions": [
+      {
+        "name": "GMAIL_SEND_EMAIL",
+        "description": "Send an email via Gmail",
+        "parameters": {
+          "to": "string",
+          "subject": "string",
+          "body": "string"
+        }
+      }
+    ],
+    "auth_method": "OAUTH2"
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "description": "AI-powered search and research tool",
+    "logo_url": "https://example.com/perplexity-logo.png",
+    "app_url": "https://perplexity.ai",
+    "functions": [
+      {
+        "name": "PERPLEXITY_SEARCH",
+        "description": "Perform a search query",
+        "parameters": {
+          "query": "string",
+          "focus": "string"
+        }
+      }
+    ],
+    "auth_method": "API_KEY"
+  }
+]
+```
+
+</ResponseExample>

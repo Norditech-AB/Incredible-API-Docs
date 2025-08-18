@@ -1,80 +1,207 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quick Start'
+description: 'Create your first AI agent in minutes'
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
+Get started with Incredible API and create your first AI agent in minutes. From idea to automation in 30 seconds.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Before you begin, make sure you have:
 
-### Step 2: Deploy your changes
+- An Incredible API account
+- Your API credentials
+- Basic knowledge of REST APIs
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Step 1: Set Up Your Environment
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+### Get Your API Credentials
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+1. Sign up at [incredible.one](https://www.incredible.one/)
+2. Navigate to your dashboard
+3. Generate your API key from the settings
 
-### Step 3: Go live
+### Install Dependencies
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```bash
+# Using npm
+npm install incredible-api
 
-## Next steps
+# Using pip
+pip install incredible-api
 
-Now that you have your docs running, explore these key features:
+# Or use curl for direct API calls
+```
 
-<CardGroup cols={2}>
+## Step 2: Create Your First Agent
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+Let's create a simple agent that summarizes daily emails.
+
+### Example: Daily Email Summarizer
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Daily Email Summarizer",
+    "description": "Compile overnight emails from Gmail and create a summary in Todoist",
+    "schedule": "everyday at 07:00",
+    "user_id": "your_user_id",
+    "integrations": ["gmail", "todoist"],
+    "prompt": "Read all unread emails from Gmail, summarize the key points, and create tasks in Todoist for any actionable items"
+  }'
+```
+
+### Response
+
+```json
+{
+  "agent_id": "agent_123456",
+  "name": "Daily Email Summarizer",
+  "status": "active",
+  "schedule": "everyday at 07:00",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+## Step 3: Connect Integrations
+
+Your agent needs access to the applications it will work with.
+
+### Connect Gmail
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "user_id": "your_user_id",
+    "callback_url": "https://your-app.com/oauth/callback"
+  }'
+```
+
+### Connect Todoist
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/todoist/connect" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "user_id": "your_user_id",
+    "api_key": "your_todoist_api_key"
+  }'
+```
+
+## Step 4: Test Your Agent
+
+### Manual Execution
+
+Test your agent immediately without waiting for the schedule:
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents/agent_123456/execute" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "user_id": "your_user_id"
+  }'
+```
+
+### Check Execution Status
+
+```bash
+curl -X GET "https://api.incredible.com/v1/agents/agent_123456/executions" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Step 5: Monitor and Optimize
+
+### View Agent Logs
+
+```bash
+curl -X GET "https://api.incredible.com/v1/agents/agent_123456/logs" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Update Agent Configuration
+
+```bash
+curl -X PUT "https://api.incredible.com/v1/agents/agent_123456" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "description": "Compile overnight emails from Gmail, summarize key points, and create prioritized tasks in Todoist",
+    "schedule": "everyday at 06:30"
+  }'
+```
+
+## Real-World Examples
+
+### Support Ticket Reporter
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Support Ticket Reporter",
+    "description": "Get unresolved support tickets from Intercom and send a report to #team-support in Slack",
+    "schedule": "every Saturday at 16:00",
+    "user_id": "your_user_id",
+    "integrations": ["intercom", "slack"],
+    "prompt": "Fetch all unresolved tickets from Intercom, analyze common issues, and send a detailed report to the #team-support Slack channel with critical tickets at the top"
+  }'
+```
+
+### Content Repurposer
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Content Repurposer",
+    "description": "Take our latest blog post and create platform-specific versions for LinkedIn & X",
+    "schedule": "everyday at 09:00",
+    "user_id": "your_user_id",
+    "integrations": ["notion", "linkedin", "twitter"],
+    "prompt": "Read the latest blog post from our Notion content calendar, create optimized versions for LinkedIn and Twitter, and save them as drafts in our content management system"
+  }'
+```
+
+## Next Steps
+
+<Card
+  title="Explore Integrations"
+  icon="plug"
+  href="/api-reference/integrations"
+>
+  See all available integrations and their capabilities
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
+<Card
+  title="Advanced Configuration"
+  icon="gear"
+  href="/development"
+>
+  Learn about advanced agent configuration and optimization
 </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
+<Card
+  title="API Reference"
+  icon="book"
+  href="/api-reference/integrations"
+>
+  Complete API documentation with examples
 </Card>
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+## Need Help?
 
-</CardGroup>
+- **Documentation**: Browse our comprehensive guides
+- **Community**: Join our community forum
+- **Support**: Contact our support team
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+Ready to build something incredible? Let's go!

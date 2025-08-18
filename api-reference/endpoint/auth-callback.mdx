@@ -1,0 +1,84 @@
+---
+title: 'OAuth Callback Handler'
+openapi: 'GET /v1/integrations/auth-callback'
+---
+
+Handle OAuth callback redirects from Composio. This endpoint processes authentication callbacks and redirects users back to their application with the authentication status.
+
+## Query Parameters
+
+<ParamField header="status" type="string">
+  The status of the authentication flow (success/error)
+</ParamField>
+
+<ParamField header="connectedAccountId" type="string" required>
+  The ID of the connected account from Composio
+</ParamField>
+
+<ParamField header="appName" type="string">
+  The name of the app being authenticated
+</ParamField>
+
+## Success Response
+
+When authentication is successful, the user is redirected to their callback URL with status information:
+
+```
+https://your-app.com/oauth/callback?status=success&integrationId=gmail&user_id=user_123
+```
+
+## Error Response
+
+If no custom callback URL is found, a simple success/error page is returned:
+
+<ResponseExample>
+
+```json Response
+{
+  "message": "Authentication successful!",
+  "status": "success",
+  "connected_account_id": "acc_123456",
+  "app_name": "gmail"
+}
+```
+
+</ResponseExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "message": "Authentication failed",
+  "status": "error",
+  "connected_account_id": "acc_123456",
+  "app_name": "gmail"
+}
+```
+
+</ResponseExample>
+
+## Error Handling
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Missing connected account ID",
+  "instructions": "OAuth callback must include connectedAccountId parameter"
+}
+```
+
+</ResponseExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Database error during callback processing",
+  "status": "success",
+  "connected_account_id": "acc_123456",
+  "app_name": "gmail"
+}
+```
+
+</ResponseExample>

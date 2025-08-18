@@ -1,0 +1,67 @@
+---
+title: 'Integrations API'
+description: 'Manage third-party integrations and execute their features'
+---
+
+# Integrations API
+
+The Integrations API allows you to connect to and interact with various third-party services like Gmail, Perplexity, and more. This API provides endpoints for listing available integrations, establishing connections, and executing features through those integrations.
+
+## Overview
+
+The Integrations API supports two main authentication methods:
+- **API Key**: For services that use simple API key authentication
+- **OAuth**: For services that require OAuth 1.0 or OAuth 2.0 authentication
+
+## Base URL
+
+```
+https://api.incredible.com/v1/integrations
+```
+
+## Authentication
+
+All endpoints require proper user identification via the `user_id` parameter in request bodies.
+
+## Available Integrations
+
+Currently supported integrations include:
+
+- **Gmail**: Send and manage emails
+- **Perplexity**: AI-powered search and research
+- More integrations coming soon...
+
+## Quick Start
+
+1. **List available integrations**:
+   ```bash
+   GET /v1/integrations
+   ```
+
+2. **Connect to an integration**:
+   ```bash
+   POST /v1/integrations/{integration_id}/connect
+   ```
+
+3. **Execute a feature**:
+   ```bash
+   POST /v1/integrations/{integration_id}/execute
+   ```
+
+## Error Handling
+
+All endpoints return appropriate HTTP status codes and error messages in JSON format:
+
+```json
+{
+  "error": "Error description",
+  "details": "Additional error details",
+  "instructions": "How to resolve the error"
+}
+```
+
+Common status codes:
+- `200`: Success
+- `400`: Bad request (missing parameters, invalid input)
+- `404`: Integration or feature not found
+- `500`: Internal server error

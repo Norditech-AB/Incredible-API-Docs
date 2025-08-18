@@ -1,97 +1,114 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: 'Incredible API Documentation'
+description: 'Build AI agents and automations with the Incredible API'
 ---
 
-## Setting up
+# Incredible API Documentation
 
-Get your documentation site up and running in minutes.
+Welcome to the Incredible API documentation. Build powerful AI agents and automations that can interact with hundreds of applications and services.
+
+## What is Incredible?
+
+Incredible is an AI automation platform that lets you create agents with just a sentence. Write a task description in plain English, set a schedule, and you've got a fully functioning Agent that can:
+
+- **Interact with external applications** like Gmail, Excel, CRMs, and more
+- **Search the web** and analyze information
+- **Generate content** and draw insights
+- **Take actions** in connected apps automatically
+
+## Quick Start
+
+### 1. Create Your First Agent
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Daily Email Summarizer",
+    "description": "Compile overnight emails from Gmail and create a summary in Todoist",
+    "schedule": "everyday at 07:00",
+    "user_id": "your_user_id"
+  }'
+```
+
+### 2. Connect Integrations
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "your_user_id",
+    "callback_url": "https://your-app.com/oauth/callback"
+  }'
+```
+
+### 3. Execute Actions
+
+```bash
+curl -X POST "https://api.incredible.com/v1/integrations/gmail/execute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "your_user_id",
+    "feature_name": "GMAIL_READ_EMAILS",
+    "inputs": {
+      "query": "is:unread",
+      "max_results": 10
+    }
+  }'
+```
+
+## Key Features
+
+### 🤖 **AI-Powered Agents**
+Create intelligent automations that understand natural language and can handle complex workflows.
+
+### 🔗 **Hundreds of Integrations**
+Connect to popular apps like Gmail, Slack, Notion, Excel, and many more through our unified API.
+
+### ⏰ **Scheduled Automation**
+Set up agents to run on schedules - daily, weekly, or custom intervals.
+
+### 🔍 **Web Search & Analysis**
+Agents can search the web, analyze data, and generate insights automatically.
+
+### 📊 **Data Processing**
+Transform, summarize, and categorize information using AI.
+
+## Popular Use Cases
+
+### **Finance & Analytics**
+- Daily stock market summaries
+- Expense tracking and reporting
+- Financial data analysis
+
+### **Sales & Marketing**
+- Lead qualification and follow-up
+- Content repurposing across platforms
+- Customer sentiment analysis
+
+### **Operations & Development**
+- Support ticket management
+- Meeting agenda creation
+- Project status reporting
+
+## Get Started
 
 <Card
-  title="Start here"
+  title="Quick Start Guide"
   icon="rocket"
   href="/quickstart"
-  horizontal
 >
-  Follow our three step quickstart guide.
+  Learn how to create your first agent in minutes
 </Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
 
 <Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+  title="API Reference"
+  icon="code"
+  href="/api-reference/integrations"
 >
-  Browse our showcase of exceptional documentation sites.
+  Explore all available endpoints and integrations
 </Card>
+
+## Trusted by Top Talent
+
+Build automations that scale with your business. From idea to automation in 30 seconds.
