@@ -3,8 +3,6 @@ title: 'Development Guide'
 description: 'Advanced configuration and development with Incredible API'
 ---
 
-# Development Guide
-
 Learn how to build advanced AI agents and optimize your automations with the Incredible API.
 
 ## Local Development
@@ -17,22 +15,23 @@ Learn how to build advanced AI agents and optimize your automations with the Inc
    cd Incredible-API-Docs
    ```
 
-2. **Install dependencies**
+2. **Install Mintlify CLI**
    ```bash
-   npm install
-   # or
-   yarn install
+   npm i -g mint
    ```
 
-3. **Start the development server**
+3. **Start the docs locally**
    ```bash
-   npm run dev
-   # or
-   yarn dev
+   mint dev
    ```
 
 4. **Open your browser**
    Navigate to `http://localhost:3000` to see your documentation.
+
+### Troubleshooting
+
+- If your dev environment isn't running, run `mint update` to ensure you have the most recent CLI.
+- If a page loads as a 404, make sure you're running in the folder that contains a valid `docs.json`.
 
 ## Advanced Agent Configuration
 

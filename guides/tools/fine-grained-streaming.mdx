@@ -1,0 +1,20 @@
+---
+title: "Fine‑Grained Tool Streaming"
+description: "Stream tokens while coordinating tool calls"
+---
+
+Use streaming responses with Server‑Sent Events (SSE) while allowing the assistant to interleave tool calls.
+
+## Pattern
+
+1. Start a streaming Chat Completion with `stream: true`
+2. Accumulate tokens from the stream
+3. Pause when a tool call is emitted
+4. Execute the tool and send result in a follow‑up request
+5. Resume the conversation or stream the final answer
+
+## Tips
+
+- Keep streamed chunks small for responsive UIs
+- Debounce updates in the client
+- Surface intermediate states ("thinking", "calling tool", etc.)

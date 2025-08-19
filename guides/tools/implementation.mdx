@@ -1,0 +1,29 @@
+---
+title: "How to Implement Tool Use"
+description: "Define tools, detect tool calls, execute them, and return results"
+---
+
+This guide shows the end‑to‑end flow for client‑executed tools.
+
+## 1) Define tools
+
+Provide a `name`, `description`, and `parameters` JSON schema for each tool in your Chat Completion request.
+
+## 2) Detect tool calls
+
+When the model wants to use a tool, it returns a tool call in the response content. Inspect the response and extract the tool name and inputs.
+
+## 3) Execute tool
+
+Run the tool code on your backend. Handle validation, errors, authentication, and rate limits as needed.
+
+## 4) Return results
+
+Post the result back in the next message (as part of the conversation) so the assistant can incorporate it into its final response.
+
+## Tips
+
+- Keep inputs minimal and typed via JSON schema
+- Fail fast with actionable error messages
+- Avoid long‑running tools; offload to background jobs when needed
+- Sanitize any user‑provided inputs
