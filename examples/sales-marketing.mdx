@@ -1,0 +1,204 @@
+---
+title: 'Sales & Marketing Examples'
+description: 'AI agents for sales automation and marketing optimization'
+---
+
+# Sales & Marketing Examples
+
+Discover how to build AI agents for sales automation, lead management, and marketing optimization.
+
+## Lead Management
+
+### CRM Health Checker
+
+**Agent**: Weekly CRM Health Checker @MKAct
+
+**Schedule**: Every Monday at 08:00
+
+**Description**: Find deals that have not been updated in 2 weeks in Hubspot and send recommendations for next actions in Slack.
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Weekly CRM Health Checker",
+    "description": "Find deals that have not been updated in 2 weeks in Hubspot and send recommendations for next actions in Slack",
+    "schedule": "every Monday at 08:00",
+    "user_id": "your_user_id",
+    "integrations": ["hubspot", "slack"],
+    "prompt": "Scan Hubspot for deals not updated in 2 weeks, analyze each deal stage, generate personalized next action recommendations, and send a detailed report to the sales team via Slack"
+  }'
+```
+
+## Content Marketing
+
+### Content Repurposer
+
+**Agent**: Content Repurposer @MKAct
+
+**Schedule**: Everyday at 09:00
+
+**Description**: Take our latest blog post from www.inc.one/blog, create platform-specific versions for LinkedIn & X and update these as drafts in our Content Calendar on Notion.
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Content Repurposer",
+    "description": "Take our latest blog post from www.inc.one/blog, create platform-specific versions for LinkedIn & X and update these as drafts in our Content Calendar on Notion",
+    "schedule": "everyday at 09:00",
+    "user_id": "your_user_id",
+    "integrations": ["notion", "linkedin", "twitter"],
+    "prompt": "Read the latest blog post from our website, create optimized versions for LinkedIn and Twitter with appropriate hashtags and formatting, and save them as drafts in our Notion content calendar"
+  }'
+```
+
+## Social Media Monitoring
+
+### Brand Mention Tracker
+
+**Agent**: Brand Monitor @MarketingTeam
+
+**Schedule**: Everyday at 08:00
+
+**Description**: Scan Reddit for any mentions of "Incredible.one". Compile a sentiment analysis with engagement opportunities and then send a detailed update to #team-marketing on Slack.
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Brand Mention Tracker",
+    "description": "Scan Reddit for any mentions of 'Incredible.one'. Compile a sentiment analysis with engagement opportunities and then send a detailed update to #team-marketing on Slack",
+    "schedule": "everyday at 08:00",
+    "user_id": "your_user_id",
+    "integrations": ["reddit", "slack"],
+    "prompt": "Search Reddit for mentions of our brand, analyze sentiment of each mention, identify engagement opportunities, and send a comprehensive report to the marketing team via Slack"
+  }'
+```
+
+## Customer Support
+
+### Support Ticket Reporter
+
+**Agent**: Support Ticket Reporter @NikoT
+
+**Schedule**: Every Saturday at 16:00
+
+**Description**: Get unresolved support tickets from Intercom and send a report to #team-support in Slack most common issues. Include the most critical tickets at the top of the message.
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Support Ticket Reporter",
+    "description": "Get unresolved support tickets from Intercom and send a report to #team-support in Slack most common issues. Include the most critical tickets at the top of the message",
+    "schedule": "every Saturday at 16:00",
+    "user_id": "your_user_id",
+    "integrations": ["intercom", "slack"],
+    "prompt": "Fetch all unresolved tickets from Intercom, categorize by priority and issue type, identify common problems, and send a detailed report to #team-support with critical tickets highlighted at the top"
+  }'
+```
+
+## Email Marketing
+
+### GDPR Compliance Manager
+
+**Agent**: Reconsent Data (GDPR Supervisor) @Anna
+
+**Schedule**: Everyday at 10:00
+
+**Description**: Scan the customer database on Wordpress identify all customers who haven't made a purchase in the past 22 months. Check whether they have "YES" to marketing content and ongoing tickets on Intercom. Draft an insights summary and if no valid legal ground exists, create a segment with these customer emails in Mailchimp named "Reconsent_<Current Month & Year>".
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "GDPR Compliance Manager",
+    "description": "Scan the customer database on Wordpress identify all customers who haven't made a purchase in the past 22 months. Check whether they have 'YES' to marketing content and ongoing tickets on Intercom. Draft an insights summary and if no valid legal ground exists, create a segment with these customer emails in Mailchimp named 'Reconsent_<Current Month & Year>'",
+    "schedule": "everyday at 10:00",
+    "user_id": "your_user_id",
+    "integrations": ["wordpress", "intercom", "mailchimp"],
+    "prompt": "Analyze customer database for inactive customers (no purchase in 22 months), check marketing consent status and active support tickets, create GDPR-compliant reconsent segment in Mailchimp for customers without valid legal grounds"
+  }'
+```
+
+## Analytics & Reporting
+
+### Blog Traffic Reporter
+
+**Agent**: Blog Traffic Reporting @SEO360
+
+**Schedule**: Every 29th at 08:00
+
+**Description**: Fetch all pages with prefix /blog from Google Analytics. Write out a comprehensive monthly summary and add it to the database "Monthly Web Report" in Notion. Make sure to input the date and number of articles in each entry.
+
+```bash
+curl -X POST "https://api.incredible.com/v1/agents" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Blog Traffic Reporter",
+    "description": "Fetch all pages with prefix /blog from Google Analytics. Write out a comprehensive monthly summary and add it to the database 'Monthly Web Report' in Notion. Make sure to input the date and number of articles in each entry",
+    "schedule": "every 29th at 08:00",
+    "user_id": "your_user_id",
+    "integrations": ["google_analytics", "notion"],
+    "prompt": "Pull blog traffic data from Google Analytics, analyze performance metrics, create comprehensive monthly report with article counts and dates, and store in Notion database for tracking"
+  }'
+```
+
+## Key Benefits
+
+### 🎯 **Lead Qualification**
+- Automate lead scoring and qualification
+- Track deal progression
+- Generate personalized follow-up recommendations
+
+### 📝 **Content Optimization**
+- Repurpose content across platforms
+- Optimize for different social media formats
+- Maintain consistent brand voice
+
+### 📊 **Performance Tracking**
+- Monitor brand mentions and sentiment
+- Track content performance
+- Generate automated reports
+
+### 📧 **Email Compliance**
+- Ensure GDPR compliance
+- Manage marketing consent
+- Automate reconsent campaigns
+
+### 🎪 **Social Media Management**
+- Monitor brand mentions
+- Identify engagement opportunities
+- Track social media performance
+
+## Integration Requirements
+
+To use these examples, you'll need to connect the following integrations:
+
+- **Hubspot** - For CRM and lead management
+- **Slack** - For team communications
+- **Notion** - For content calendar and reporting
+- **LinkedIn** - For social media posting
+- **Twitter** - For social media posting
+- **Reddit** - For brand monitoring
+- **Intercom** - For customer support
+- **Wordpress** - For customer database
+- **Mailchimp** - For email marketing
+- **Google Analytics** - For website analytics
+
+## Next Steps
+
+<Card
+  title="API Reference"
+  icon="code"
+  href="/api-reference/integrations"
+>
+  Learn about available integrations
+</Card>
