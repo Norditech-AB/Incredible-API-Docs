@@ -7,7 +7,7 @@
     "light": "#FF6200",
     "dark": "#FF6200"
   },
-  "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; }",
+  "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
@@ -33,12 +33,7 @@
               "guides/tools/overview",
               "guides/tools/implementation",
               "guides/tools/token-efficient",
-              "guides/tools/fine-grained-streaming",
-              "guides/tools/bash",
-              "guides/tools/code-execution",
-              "guides/tools/computer-use",
-              "guides/tools/text-editor",
-              "guides/tools/web-search"
+              "guides/tools/fine-grained-streaming"
             ]
           },
           {
@@ -47,6 +42,18 @@
               "examples/finance-analytics",
               "examples/sales-marketing",
               "examples/operations-development"
+            ]
+          },
+          {
+            "group": "Policies",
+            "pages": [
+              "guides/privacy-policy"
+            ]
+          },
+          {
+            "group": "Help & Resources",
+            "pages": [
+              "guides/faq"
             ]
           }
         ]
@@ -130,9 +137,12 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/incredible_ai",
+      "x": "https://x.com/incredible_one_",
       "github": "https://github.com/incredible-ai",
-      "linkedin": "https://linkedin.com/company/incredible-ai"
+      "linkedin": "https://www.linkedin.com/company/incredible-linkedin/",
+      "youtube": "https://www.youtube.com/@become_incredible",
+      "instagram": "https://www.instagram.com/",
+      "discord": "https://discord.com/invite/pNmdkxgBe2"
     }
   }
 }
