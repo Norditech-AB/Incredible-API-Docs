@@ -18,7 +18,7 @@ The Integrations API provides a unified interface for connecting to various thir
 First, discover what integrations are available:
 
 ```bash
-curl -X GET "https://api.incredible.com/v1/integrations"
+curl -X GET "https://api.incredible.one/v1/integrations"
 ```
 
 This returns a list of all available integrations with their details:
@@ -54,7 +54,7 @@ This returns a list of all available integrations with their details:
 For integrations that use API key authentication (like Perplexity):
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/integrations/perplexity/connect" \
+curl -X POST "https://api.incredible.one/v1/integrations/perplexity/connect" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user_123",
@@ -67,7 +67,7 @@ curl -X POST "https://api.incredible.com/v1/integrations/perplexity/connect" \
 For integrations that use OAuth (like Gmail):
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user_123",
@@ -89,7 +89,7 @@ This returns a redirect URL that you need to visit to complete OAuth:
 Once connected, you can execute features:
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/integrations/gmail/execute" \
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user_123",

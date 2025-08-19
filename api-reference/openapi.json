@@ -12,6 +12,10 @@
     {
       "url": "https://api.incredible.one/",
       "description": "Production server"
+    },
+    {
+      "url": "https://dev-api.incredible.one/",
+      "description": "Development server"
     }
   ],
   "paths": {

@@ -174,11 +174,11 @@ Track agent performance and usage:
 
 ```bash
 # Get agent metrics
-curl -X GET "https://api.incredible.com/v1/agents/metrics" \
+curl -X GET "https://api.incredible.one/v1/agents/metrics" \
   -H "Authorization: Bearer YOUR_API_KEY"
 
 # Get execution history
-curl -X GET "https://api.incredible.com/v1/agents/agent_123/executions" \
+curl -X GET "https://api.incredible.one/v1/agents/agent_123/executions" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -187,7 +187,7 @@ curl -X GET "https://api.incredible.com/v1/agents/agent_123/executions" \
 Set up webhooks for real-time notifications:
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/webhooks" \
+curl -X POST "https://api.incredible.one/v1/webhooks" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -225,13 +225,13 @@ export INCREDIBLE_USER_ID="your_user_id"
    ```bash
    # Production environment
    export NODE_ENV=production
-   export INCREDIBLE_API_URL="https://api.incredible.com"
+   export INCREDIBLE_API_URL="https://api.incredible.one"
    ```
 
 2. **Health Checks**
    ```bash
    # Check API health
-   curl -X GET "https://api.incredible.com/v1/health"
+   curl -X GET "https://api.incredible.one/v1/health"
    ```
 
 3. **Monitoring Setup**

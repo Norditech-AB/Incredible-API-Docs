@@ -21,7 +21,7 @@ Incredible is an AI automation platform that lets you create agents with just a 
 ### 1. Create Your First Agent
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/agents" \
+curl -X POST "https://api.incredible.one/v1/agents" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Daily Email Summarizer",
@@ -34,7 +34,7 @@ curl -X POST "https://api.incredible.com/v1/agents" \
 ### 2. Connect Integrations
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_user_id",
@@ -45,7 +45,7 @@ curl -X POST "https://api.incredible.com/v1/integrations/gmail/connect" \
 ### 3. Execute Actions
 
 ```bash
-curl -X POST "https://api.incredible.com/v1/integrations/gmail/execute" \
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_user_id",
