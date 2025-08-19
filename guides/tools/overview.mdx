@@ -1,0 +1,64 @@
+---
+title: "Tools Overview"
+description: "How to use function calling (tools) with the Incredible API"
+---
+
+Function calling ("tools") lets your assistant request that your application perform specific operations and return structured results. Use tools for actions like fetching data, calling third‑party APIs, or performing local computations.
+
+## How it works
+
+1. Define tools (name, description, JSON schema for inputs)
+2. Send tools with your chat request
+3. The model decides if/when to use a tool and returns a tool call
+4. Your app executes the tool and returns a tool result
+5. The model uses the result to produce the final answer
+
+## Example (messages API)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "What is the weather in Stockholm?"}],
+    "functions": [
+      {
+        "name": "get_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City and country, e.g. Stockholm, SE"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"]
+            }
+          },
+          "required": ["location"]
+        }
+      }
+    ]
+  }'
+```
+
+## Tool result round‑trip
+
+When a tool call is returned, execute it and send the result back in a new request as part of the conversation, so the assistant can incorporate it in the final answer.
+
+## Best practices
+
+- Keep tool names and descriptions clear and action‑oriented
+- Use precise JSON schemas for inputs
+- Return compact, structured outputs
+- Validate inputs before execution
+- Log tool invocations for observability
+
+## Next steps
+
+- Implement your first tool in your app
+- Explore streaming vs non‑streaming in Chat Completion
+- See more patterns in the pages below

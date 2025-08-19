@@ -1,10 +1,10 @@
 ---
-title: "Chat Completion"
-description: "Generate AI responses with support for function calling and integrations"
+title: "Chat Completion (Non-Streaming)"
+description: "Generate complete AI responses (non-streaming) with support for function calling and integrations"
 openapi: "POST /v1/chat-completion"
 ---
 
-Generate AI responses using various models with support for function calling, integrations, and both streaming and non-streaming responses.
+Generate AI responses using various models with support for function calling and integrations. This page covers non-streaming responses.
 
 <CodeGroup>
 ```bash cURL
@@ -19,7 +19,7 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
         "content": "Hello, how are you?"
       }
     ],
-    "stream": true
+    "stream": false
   }'
 ```
 
@@ -96,8 +96,8 @@ console.log(data);
   The system prompt that defines the AI's behavior and personality.
 </ParamField>
 
-<ParamField body="stream" type="boolean" default="true">
-  Whether to return a streaming response or a complete response.
+<ParamField body="stream" type="boolean" default="false">
+  Whether to return a streaming response or a complete response. For this endpoint variant, set to `false`.
 </ParamField>
 
 <ParamField body="functions" type="array">
@@ -132,27 +132,7 @@ console.log(data);
   </Expandable>
 </ParamField>
 
-## Response
-
-### Streaming Response (stream: true)
-
-When streaming is enabled, the response is returned as Server-Sent Events (SSE):
-
-```
-Content-Type: text/event-stream
-Cache-Control: no-cache
-Transfer-Encoding: chunked
-
-data: {"content": "Hello"}
-
-data: {"content": " there"}
-
-data: {"content": "!"}
-
-data: {"content": "[DONE]"}
-```
-
-### Non-Streaming Response (stream: false)
+## Response (Non-Streaming)
 
 ```json
 {
@@ -267,52 +247,7 @@ print(response.json())
 }
 ```
 
-### Streaming with JavaScript
 
-```javascript
-const response = await fetch("https://api.incredible.one/v1/chat-completion", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer YOUR_API_KEY",
-  },
-  body: JSON.stringify({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "user",
-        content: "Tell me a story about AI",
-      },
-    ],
-    stream: true,
-  }),
-});
-
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-  const { done, value } = await reader.read();
-
-  if (done) break;
-
-  const chunk = decoder.decode(value);
-  const lines = chunk.split("\n");
-
-  for (const line of lines) {
-    if (line.startsWith("data: ")) {
-      const data = JSON.parse(line.slice(6));
-
-      if (data.content === "[DONE]") {
-        console.log("Stream completed");
-        break;
-      }
-
-      console.log("Chunk:", data.content);
-    }
-  }
-}
-```
 
 ## Error Responses
 
@@ -421,13 +356,9 @@ Use the integrations parameter to give the AI access to external services and AP
     Learn how to define and use custom functions
   </Card>
 
-{" "}
-
 <Card title="Integrations" icon="plug" href="/api-reference/integrations">
   Explore available integrations and features
 </Card>
-
-{" "}
 
 <Card title="Streaming Guide" icon="stream" href="/guides/streaming">
   Best practices for handling streaming responses

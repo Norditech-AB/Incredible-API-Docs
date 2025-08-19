@@ -28,6 +28,20 @@
             ]
           },
           {
+            "group": "Tools",
+            "pages": [
+              "guides/tools/overview",
+              "guides/tools/implementation",
+              "guides/tools/token-efficient",
+              "guides/tools/fine-grained-streaming",
+              "guides/tools/bash",
+              "guides/tools/code-execution",
+              "guides/tools/computer-use",
+              "guides/tools/text-editor",
+              "guides/tools/web-search"
+            ]
+          },
+          {
             "group": "Examples",
             "pages": [
               "examples/finance-analytics",
@@ -47,9 +61,10 @@
             ]
           },
           {
-            "group": "Chat Completion",
+            "group": "Chat",
             "pages": [
-              "api-reference/chat/completion"
+              "api-reference/chat/completion",
+              "api-reference/chat/completion-streaming"
             ]
           },
           {
