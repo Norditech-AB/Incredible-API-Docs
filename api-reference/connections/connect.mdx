@@ -31,7 +31,7 @@ For OAuth-based integrations, you'll receive a redirect URL:
 ```json
 {
   "user_id": "user123",
-  "callback_url": "https://yourapp.com/oauth-success" // optional
+  "callback_url": "https://backend.viss.ai/app-auth/oauth2-callback" // optional
 }
 ```
 
@@ -74,7 +74,7 @@ curl -X POST "https://api.example.com/v1/integrations/github/connect" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user123",
-    "callback_url": "https://myapp.com/github-connected"
+    "callback_url": "https://backend.viss.ai/app-auth/oauth2-callback"
   }'
 ```
 
