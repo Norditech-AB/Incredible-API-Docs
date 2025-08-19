@@ -46,12 +46,7 @@
               "api-reference/introduction"
             ]
           },
-          {
-            "group": "Authentication",
-            "pages": [
-              "api-reference/authentication/auth-callback"
-            ]
-          },
+
           {
             "group": "Integrations",
             "pages": [

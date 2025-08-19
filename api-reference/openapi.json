@@ -232,77 +232,6 @@
           }
         }
       }
-    },
-    "/v1/integrations/auth-callback": {
-      "get": {
-        "summary": "OAuth authentication callback",
-        "description": "Handles OAuth callback redirects from integration providers. This endpoint processes the authentication result and redirects users to their specified callback URL",
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "required": true,
-            "description": "The status of the authentication flow (success or error)",
-            "schema": {
-              "type": "string",
-              "enum": ["success", "error"]
-            }
-          },
-          {
-            "name": "connectedAccountId",
-            "in": "query",
-            "required": true,
-            "description": "The ID of the connected account provided by the integration provider",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "appName",
-            "in": "query",
-            "required": false,
-            "description": "The name of the connected application",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Authentication callback processed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthCallbackResponse"
-                }
-              }
-            }
-          },
-          "302": {
-            "description": "Redirect to user's callback URL with status parameters"
-          },
-          "400": {
-            "description": "Bad request - missing required parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Callback processing failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -443,28 +372,7 @@
           }
         }
       },
-      "AuthCallbackResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "description": "Success or error message about the authentication",
-            "type": "string"
-          },
-          "status": {
-            "description": "The status of the authentication callback",
-            "type": "string",
-            "enum": ["success", "error"]
-          },
-          "connected_account_id": {
-            "description": "The ID of the connected account",
-            "type": "string"
-          },
-          "app_name": {
-            "description": "The name of the connected application",
-            "type": "string"
-          }
-        }
-      },
+
       "Error": {
         "type": "object",
         "properties": {
