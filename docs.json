@@ -46,7 +46,12 @@
               "api-reference/introduction"
             ]
           },
-
+          {
+            "group": "Chat Completion",
+            "pages": [
+              "api-reference/chat/completion"
+            ]
+          },
           {
             "group": "Integrations",
             "pages": [

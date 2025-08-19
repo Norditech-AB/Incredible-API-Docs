@@ -1,0 +1,440 @@
+---
+title: "Chat Completion"
+description: "Generate AI responses with support for function calling and integrations"
+---
+
+# Chat Completion
+
+The Chat Completion API allows you to generate AI responses using various models with support for function calling, integrations, and both streaming and non-streaming responses.
+
+## Endpoint
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello, how are you?"
+      }
+    ],
+    "stream": true
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.incredible.one/v1/chat-completion"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer YOUR_API_KEY"
+}
+
+data = {
+    "model": "gpt-4",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello, how are you?"
+        }
+    ],
+    "stream": False
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+  body: JSON.stringify({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "user",
+        content: "Hello, how are you?",
+      },
+    ],
+    stream: false,
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Request Body
+
+<ParamField body="model" type="string" required>
+  The model to use for chat completion. Must be one of the supported models.
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Array of message objects that make up the conversation.
+  <Expandable title="Message Object">
+    <ParamField body="role" type="string" required>
+      The role of the message author. Can be `system`, `user`, or `assistant`.
+    </ParamField>
+
+    <ParamField body="content" type="string" required>
+      The content of the message.
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+<ParamField body="system" type="string" default="You are a helpful assistant.">
+  The system prompt that defines the AI's behavior and personality.
+</ParamField>
+
+<ParamField body="stream" type="boolean" default="true">
+  Whether to return a streaming response or a complete response.
+</ParamField>
+
+<ParamField body="functions" type="array">
+  Array of custom function definitions that the AI can call.
+  <Expandable title="Function Object">
+    <ParamField body="name" type="string" required>
+      The name of the function.
+    </ParamField>
+
+    <ParamField body="description" type="string" required>
+      A description of what the function does.
+    </ParamField>
+
+    <ParamField body="parameters" type="object">
+      The parameters the function accepts, defined as a JSON schema.
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+<ParamField body="integrations" type="array">
+  Array of integration configurations to enable specific features.
+  <Expandable title="Integration Object">
+    <ParamField body="id" type="string" required>
+      The unique identifier of the integration.
+    </ParamField>
+
+    <ParamField body="features" type="array">
+      Array of feature names to enable from this integration.
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+## Response
+
+### Streaming Response (stream: true)
+
+When streaming is enabled, the response is returned as Server-Sent Events (SSE):
+
+```
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Transfer-Encoding: chunked
+
+data: {"content": "Hello"}
+
+data: {"content": " there"}
+
+data: {"content": "!"}
+
+data: {"content": "[DONE]"}
+```
+
+### Non-Streaming Response (stream: false)
+
+```json
+{
+  "result": "Hello there! I'm doing well, thank you for asking. How can I assist you today?"
+}
+```
+
+## Examples
+
+### Basic Chat Completion
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful coding assistant."
+      },
+      {
+        "role": "user",
+        "content": "How do I create a REST API in Python?"
+      }
+    ],
+    "stream": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "gpt-4",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful coding assistant."
+            },
+            {
+                "role": "user",
+                "content": "How do I create a REST API in Python?"
+            }
+        ],
+        "stream": False
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### With Custom Functions
+
+```json
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the weather like in New York?"
+    }
+  ],
+  "functions": [
+    {
+      "name": "get_weather",
+      "description": "Get current weather for a location",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "The city name"
+          }
+        },
+        "required": ["location"]
+      }
+    }
+  ],
+  "stream": false
+}
+```
+
+### With Integrations
+
+```json
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Send an email to john@example.com with the subject 'Meeting Tomorrow'"
+    }
+  ],
+  "integrations": [
+    {
+      "id": "gmail",
+      "features": ["GMAIL_SEND_EMAIL"]
+    }
+  ],
+  "stream": false
+}
+```
+
+### Streaming with JavaScript
+
+```javascript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+  body: JSON.stringify({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "user",
+        content: "Tell me a story about AI",
+      },
+    ],
+    stream: true,
+  }),
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+
+  if (done) break;
+
+  const chunk = decoder.decode(value);
+  const lines = chunk.split("\n");
+
+  for (const line of lines) {
+    if (line.startsWith("data: ")) {
+      const data = JSON.parse(line.slice(6));
+
+      if (data.content === "[DONE]") {
+        console.log("Stream completed");
+        break;
+      }
+
+      console.log("Chunk:", data.content);
+    }
+  }
+}
+```
+
+## Error Responses
+
+### Model Required (400)
+
+```json
+{
+  "error": "Model is required"
+}
+```
+
+### Model Not Found (400)
+
+```json
+{
+  "error": "Model not found"
+}
+```
+
+### Messages Required (400)
+
+```json
+{
+  "error": "Messages are required"
+}
+```
+
+### Integration Not Found (400)
+
+```json
+{
+  "error": "Integration gmail not found"
+}
+```
+
+## Supported Models
+
+The API supports various language models. Common models include:
+
+- `gpt-4` - OpenAI GPT-4
+- `gpt-3.5-turbo` - OpenAI GPT-3.5 Turbo
+- `claude-3-sonnet` - Anthropic Claude 3 Sonnet
+- `claude-3-haiku` - Anthropic Claude 3 Haiku
+
+<Note>
+  Available models may vary. Contact support for the most up-to-date list of
+  supported models.
+</Note>
+
+## Rate Limits
+
+- **Requests per minute**: 60 requests per API key
+- **Tokens per minute**: 100,000 tokens per API key
+- **Concurrent streams**: 5 streaming connections per API key
+
+## Best Practices
+
+### 1. Choose the Right Response Type
+
+- Use **streaming** for real-time applications and long responses
+- Use **non-streaming** for simple requests and batch processing
+
+### 2. Optimize System Prompts
+
+```json
+{
+  "system": "You are a helpful assistant specialized in [DOMAIN]. Always provide concise, accurate answers with examples when helpful."
+}
+```
+
+### 3. Handle Errors Gracefully
+
+```python
+try:
+    response = requests.post(url, json=data, headers=headers)
+    response.raise_for_status()
+    result = response.json()
+except requests.exceptions.RequestException as e:
+    print(f"API request failed: {e}")
+```
+
+### 4. Use Functions for Structured Outputs
+
+When you need the AI to perform specific actions or return structured data, define custom functions instead of relying on text parsing.
+
+### 5. Leverage Integrations
+
+Use the integrations parameter to give the AI access to external services and APIs without handling authentication yourself.
+
+## Security Notes
+
+- Always use HTTPS when making requests
+- Keep your API keys secure and rotate them regularly
+- Validate and sanitize user inputs before sending to the API
+- Implement proper error handling and logging
+- Use environment variables for API keys, never hardcode them
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Function Calling"
+    icon="code"
+    href="/api-reference/chat/functions"
+  >
+    Learn how to define and use custom functions
+  </Card>
+
+{" "}
+<Card title="Integrations" icon="plug" href="/api-reference/integrations">
+  Explore available integrations and features
+</Card>
+
+{" "}
+<Card title="Streaming Guide" icon="stream" href="/guides/streaming">
+  Best practices for handling streaming responses
+</Card>
+
+  <Card title="Examples" icon="lightbulb" href="/examples">
+    See real-world implementation examples
+  </Card>
+</CardGroup>
