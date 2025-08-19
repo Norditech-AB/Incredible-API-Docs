@@ -1,13 +1,10 @@
 ---
 title: "Chat Completion"
 description: "Generate AI responses with support for function calling and integrations"
+openapi: "POST /v1/chat-completion"
 ---
 
-# Chat Completion
-
-The Chat Completion API allows you to generate AI responses using various models with support for function calling, integrations, and both streaming and non-streaming responses.
-
-## Endpoint
+Generate AI responses using various models with support for function calling, integrations, and both streaming and non-streaming responses.
 
 <CodeGroup>
 ```bash cURL
@@ -425,11 +422,13 @@ Use the integrations parameter to give the AI access to external services and AP
   </Card>
 
 {" "}
+
 <Card title="Integrations" icon="plug" href="/api-reference/integrations">
   Explore available integrations and features
 </Card>
 
 {" "}
+
 <Card title="Streaming Guide" icon="stream" href="/guides/streaming">
   Best practices for handling streaming responses
 </Card>
