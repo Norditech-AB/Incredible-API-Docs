@@ -23,9 +23,7 @@
           },
           {
             "group": "Development",
-            "pages": [
-              "development"
-            ]
+            "pages": []
           },
           {
             "group": "Tools",
@@ -62,13 +60,7 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Chat",
+            "group": "Messages",
             "pages": [
               "api-reference/chat/completion",
               "api-reference/chat/completion-streaming"
@@ -77,33 +69,17 @@
           {
             "group": "Integrations",
             "pages": [
-              "api-reference/integrations/list",
-              "api-reference/integrations/get-details",
-              "api-reference/integrations/connect",
-              "api-reference/integrations/execute"
+              "api-reference/endpoint/list-integrations",
+              "api-reference/endpoint/get-integration",
+              "api-reference/endpoint/connect-integration",
+              "api-reference/endpoint/execute-feature"
             ]
           }
         ]
       }
     ],
     "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://www.incredible.one/learning-center",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://discord.com/invite/pNmdkxgBe2",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://www.incredible.one/blog",
-          "icon": "newspaper"
-        }
-      ]
+      "anchors": []
     }
   },
   "logo": {
@@ -111,16 +87,7 @@
     "dark": "/images/Incredible — Logomark White Orange.svg"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:support@viss.ai"
-      },
-      {
-        "label": "Sales",
-        "href": "mailto:david@incredible.one"
-      }
-    ],
+    "links": [],
     "primary": {
       "type": "button",
       "label": "Get Started",
