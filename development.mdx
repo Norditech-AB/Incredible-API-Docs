@@ -1,302 +1,226 @@
 ---
 title: 'Development Guide'
-description: 'Advanced configuration and development with Incredible API'
+description: 'Practical, executable examples for building AI agents with the Incredible API'
 ---
 
-Learn how to build advanced AI agents and optimize your automations with the Incredible API.
+# Incredible API Cookbook 🧪
 
-## Local Development
+Practical, executable examples for building AI agents with the Incredible API.
 
-### Setting Up Your Development Environment
+Clone any folder and run immediately - no complex setup required!
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Norditech-AB/Incredible-API-Docs.git
-   cd Incredible-API-Docs
-   ```
-
-2. **Install Mintlify CLI**
-   ```bash
-   npm i -g mint
-   ```
-
-3. **Start the docs locally**
-   ```bash
-   mint dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:3000` to see your documentation.
-
-### Troubleshooting
-
-- If your dev environment isn't running, run `mint update` to ensure you have the most recent CLI.
-- If a page loads as a 404, make sure you're running in the folder that contains a valid `docs.json`.
-
-## Advanced Agent Configuration
-
-### Custom Scheduling
-
-Beyond basic schedules, you can create complex automation patterns:
-
-```json
-{
-  "schedule": {
-    "type": "custom",
-    "cron": "0 7 * * 1-5",  // Weekdays at 7 AM
-    "timezone": "America/New_York"
-  }
-}
-```
-
-### Conditional Logic
-
-Add conditional execution based on data:
-
-```json
-{
-  "conditions": [
-    {
-      "field": "email_count",
-      "operator": "greater_than",
-      "value": 10
-    }
-  ],
-  "actions": [
-    {
-      "type": "send_notification",
-      "channel": "slack",
-      "message": "High email volume detected"
-    }
-  ]
-}
-```
-
-### Error Handling
-
-Configure retry logic and error notifications:
-
-```json
-{
-  "error_handling": {
-    "max_retries": 3,
-    "retry_delay": 300,
-    "notify_on_failure": true,
-    "notification_channels": ["slack", "email"]
-  }
-}
-```
-
-## Integration Development
-
-### Creating Custom Integrations
-
-Build your own integrations using our SDK:
-
-```javascript
-import { Integration } from 'incredible-api';
-
-class CustomIntegration extends Integration {
-  constructor() {
-    super({
-      id: 'custom-app',
-      name: 'Custom App',
-      auth_scheme: 'API_KEY',
-      functions: ['CUSTOM_FUNCTION']
-    });
-  }
-
-  async executeFunction(functionName, inputs, user_id) {
-    switch (functionName) {
-      case 'CUSTOM_FUNCTION':
-        return await this.customFunction(inputs);
-      default:
-        throw new Error(`Unknown function: ${functionName}`);
-    }
-  }
-
-  async customFunction(inputs) {
-    // Your custom logic here
-    return { success: true, data: inputs };
-  }
-}
-```
-
-### Testing Integrations
+Clone URL:
 
 ```bash
-# Test integration locally
-npm run test:integration
-
-# Run integration tests
-npm run test:integration:gmail
-npm run test:integration:slack
+git clone https://github.com/Norditech-AB/Incredible-API-Cookbook.git
 ```
 
-## Performance Optimization
+## 🎯 What is Incredible API?
 
-### Agent Optimization
+Create AI agents that integrate with up to 3 applications to automate complex workflows:
 
-1. **Batch Processing**: Group similar operations
-2. **Caching**: Cache frequently accessed data
-3. **Parallel Execution**: Run independent tasks concurrently
+- Email automation with Gmail + Sheets + Slack
+- Lead management with smart scoring and follow-ups
+- Research automation using Perplexity AI + data storage
+- Financial dashboards with real-time monitoring
 
-```json
-{
-  "optimization": {
-    "batch_size": 100,
-    "parallel_execution": true,
-    "cache_ttl": 3600
-  }
-}
-```
+## 🎓 Start Here: Getting Started
 
-### Rate Limiting
+New to Incredible API? Begin with our step-by-step tutorial:
 
-Handle API rate limits gracefully:
+### 📚 Getting Started Guide
 
-```json
-{
-  "rate_limiting": {
-    "requests_per_minute": 60,
-    "backoff_strategy": "exponential",
-    "max_retries": 5
-  }
-}
-```
-
-## Monitoring and Analytics
-
-### Agent Metrics
-
-Track agent performance and usage:
+Learn the chat completion API fundamentals
 
 ```bash
-# Get agent metrics
-curl -X GET "https://api.incredible.one/v1/agents/metrics" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-
-# Get execution history
-curl -X GET "https://api.incredible.one/v1/agents/agent_123/executions" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+cd getting-started && python 1_basic_chat.py
 ```
 
-### Webhook Monitoring
+Progressive tutorial covering:
 
-Set up webhooks for real-time notifications:
+- Basic Chat - Simple requests and responses
+- Streaming - Real-time response generation
+- Function Calling - Extend AI with custom functions
+- Integrations - Use pre-built service connections
+
+Start here before trying the advanced examples below!
+
+## 🚀 Advanced Examples
+
+Each folder is a complete, runnable project:
+
+### 📧 Email Automation
+
+Auto-respond to Gmail inquiries and log to Google Sheets
 
 ```bash
-curl -X POST "https://api.incredible.one/v1/webhooks" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "url": "https://your-app.com/webhooks/incredible",
-    "events": ["agent.execution.completed", "agent.execution.failed"],
-    "secret": "your_webhook_secret"
-  }'
+cd email-automation && python main.py
 ```
 
-## Security Best Practices
+- Monitors Gmail for support/sales emails
+- Sends intelligent auto-responses
+- Logs all interactions to spreadsheet
+- Apps: Gmail + Google Sheets
 
-### API Key Management
+### 🎯 Lead Management
 
-- Rotate API keys regularly
-- Use environment variables
-- Implement proper access controls
+Capture leads from email, score them, and send follow-ups
 
 ```bash
-# Set environment variables
-export INCREDIBLE_API_KEY="your_api_key"
-export INCREDIBLE_USER_ID="your_user_id"
+cd lead-management && python main.py
 ```
 
-### Data Privacy
+- Scans emails for potential leads
+- Scores leads 0-100 based on content
+- Stores in Google Sheets CRM
+- Sends personalized follow-up emails
+- Apps: Gmail + Google Sheets
 
-- Encrypt sensitive data
-- Implement data retention policies
-- Follow GDPR compliance guidelines
+### 🔍 Research Reporter
 
-## Deployment
-
-### Production Deployment
-
-1. **Environment Configuration**
-   ```bash
-   # Production environment
-   export NODE_ENV=production
-   export INCREDIBLE_API_URL="https://api.incredible.one"
-   ```
-
-2. **Health Checks**
-   ```bash
-   # Check API health
-   curl -X GET "https://api.incredible.one/v1/health"
-   ```
-
-3. **Monitoring Setup**
-   - Set up logging
-   - Configure alerts
-   - Monitor performance metrics
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify API key is valid
-   - Check user permissions
-   - Ensure proper authorization headers
-
-2. **Integration Failures**
-   - Verify integration credentials
-   - Check API rate limits
-   - Review error logs
-
-3. **Agent Execution Issues**
-   - Validate agent configuration
-   - Check integration connectivity
-   - Review execution logs
-
-### Debug Mode
-
-Enable debug logging for troubleshooting:
+AI-powered research with comprehensive reports
 
 ```bash
-export INCREDIBLE_DEBUG=true
+cd research-reporter && python main.py "AI in Healthcare 2024"
 ```
 
-## Resources
+- Multi-query research using Perplexity AI
+- Analyzes findings for themes and opportunities
+- Stores research data in Google Sheets
+- Emails executive reports to stakeholders
+- Apps: Perplexity + Google Sheets + Gmail
 
-<Card
-  title="API Reference"
-  icon="book"
-  href="/api-reference/integrations"
->
-  Complete API documentation
-</Card>
+### 📅 Meeting Organizer
 
-<Card
-  title="Community Forum"
-  icon="users"
-  href="https://community.incredible.one"
->
-  Get help from the community
-</Card>
+Extract meetings from Gmail and create organized workflows
 
-<Card
-  title="GitHub Repository"
-  icon="github"
-  href="https://github.com/incredible-ai/api"
->
-  View source code and contribute
-</Card>
+```bash
+cd meeting-organizer && python main.py
+```
 
-## Support
+- Scans Gmail for meeting invitations
+- Creates calendar events automatically
+- Generates prep and follow-up tasks in Asana
+- Apps: Gmail + Google Calendar + Asana
 
-Need help with development? Contact our developer support team:
+### 📊 Financial Dashboard
 
-- **Email**: dev-support@incredible.one
-- **Slack**: Join our developer community
-- **Documentation**: Browse our comprehensive guides
+Real-time financial intelligence and reporting
 
-Happy coding! 🚀
+```bash
+cd financial-dashboard && python main.py
+```
+
+- Researches market data and trends
+- Analyzes portfolio performance
+- Creates automated dashboards
+- Sends executive financial reports
+- Apps: Perplexity + Google Sheets + Gmail
+
+### ✍️ Content Generator
+
+Research topics and create multi-format content
+
+```bash
+cd content-generator && python main.py "AI trends"
+```
+
+- Researches trending topics
+- Generates blog posts, social media content
+- Stores content in Google Docs
+- Distributes to team via email
+- Apps: Perplexity + Google Docs + Gmail
+
+## 🚀 Quick Start - 2 Minutes to Running
+
+### 1. Choose Your Starting Point
+
+New to Incredible API? Start with the fundamentals:
+
+```bash
+git clone https://github.com/Norditech-AB/Incredible-API-Cookbook.git
+cd Incredible-API-Cookbook/getting-started
+```
+
+Ready for advanced examples? Pick any cookbook folder:
+
+```bash
+cd Incredible-API-Cookbook/email-automation  # or any other folder
+```
+
+### 2. Install & Configure
+
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Set up your credentials
+cp env.example .env
+# Edit .env with your API keys
+```
+
+### 3. Run It
+
+```bash
+python main.py
+```
+
+That's it! Each example is self-contained and ready to run.
+
+## ⚙️ Setup Requirements
+
+### Incredible API Account
+
+1. Sign up: https://incredible.one
+2. Get API key from dashboard
+3. Connect integrations (Gmail, Google Sheets, Perplexity, etc.)
+
+### Common Environment Variables
+
+```
+INCREDIBLE_API_KEY=your_api_key_here
+USER_ID=your_user_id_here
+```
+
+Each example includes specific setup instructions in its README.
+
+## 📖 How Each Example Works
+
+Every folder follows the Modal Labs pattern:
+
+```
+email-automation/
+├── main.py           # Complete working script
+├── requirements.txt  # Python dependencies
+├── env.example       # Configuration template
+└── README.md         # Usage instructions
+```
+
+1. Clone the folder you want to try
+2. Install dependencies with `pip install -r requirements.txt`
+3. Configure your credentials in `.env`
+4. Run with `python main.py`
+
+## 🤝 Contributing
+
+We welcome contributions! Whether it's:
+
+- New use case examples
+- Bug fixes or improvements
+- Integration guides
+- Documentation enhancements
+
+Please read our Contributing Guide to get started.
+
+## 📖 Additional Resources
+
+- Official API Documentation
+- Integration Reference
+- Community Forum
+- Support
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+Ready to automate your workflows? Pick an example folder and start building in 2 minutes! 🚀
