@@ -114,7 +114,11 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:support@incredible.one"
+        "href": "mailto:support@viss.ai"
+      },
+      {
+        "label": "Sales",
+        "href": "mailto:david@incredible.one"
       }
     ],
     "primary": {
