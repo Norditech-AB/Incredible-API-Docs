@@ -18,36 +18,6 @@ This endpoint is useful when you need to:
 
 The `integration_id` should be the unique identifier of the integration you want to retrieve details for.
 
-## Response
+## Usage
 
-Returns the same integration object format as the list endpoint, but for a single integration:
-
-- **name** - The display name of the integration
-- **description** - What the integration does and its capabilities
-- **logo_url** - URL to the integration's logo image
-- **app_url** - Link to the integration's main website or application
-- **functions** - Array of available functions you can execute
-- **auth_method** - The authentication method (oauth, api_key, basic_auth, or none)
-
-## Example Response
-
-```json
-{
-  "name": "GitHub",
-  "description": "Access GitHub repositories, issues, and pull requests",
-  "logo_url": "https://github.com/favicon.ico",
-  "app_url": "https://github.com",
-  "functions": [
-    "create_issue",
-    "list_repositories",
-    "create_pull_request",
-    "get_repository_content"
-  ],
-  "auth_method": "oauth"
-}
-```
-
-## Error Responses
-
-- **404 Not Found** - The integration with the specified ID does not exist
-- **401 Unauthorized** - Invalid or missing authentication token
+Use this endpoint to inspect an integration's capabilities, branding, and authentication method before connecting or executing features.
