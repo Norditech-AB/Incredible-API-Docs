@@ -10,6 +10,19 @@ Get a complete answer in one shot. Ideal for UI buttons, background jobs, and an
 - Works with tools/functions for structured actions
 - Predictable UX — no stream handling required
 
+#### Response Formats
+
+**Non-streaming response** (`"stream": false`):
+```json
+{
+  "result": {
+    "thinking": "AI's internal reasoning process",
+    "response": [
+      {"role": "assistant", "content": "Text response"},
+      {"type": "function_call", "function_call_id": "...", "function_calls": []}
+    ]
+  }
+}
+```
+
  
-
-

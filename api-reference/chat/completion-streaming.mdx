@@ -1,11 +1,15 @@
 ---
 title: "Chat Completion (Streaming)"
 description: "Generate answers as a live Server‑Sent Events (SSE) stream — ideal for long replies and realtime UIs"
-openapi: "POST /v1/chat-completion"
+openapi: "POST /v1/chat-completion/stream"
 ---
 
 Show text as it’s produced. Great for chat UIs that display typing and for long answers where users shouldn’t wait for the full result.
 
- 
+#### Response (Streaming)
 
-
+```text
+data: {"content": {"type": "text_chunk", "content": "Hello"}}
+data: {"content": {"type": "function_call", "function_call_id": "...", "function_calls": []}}
+data: {"content": "[DONE]"}
+```

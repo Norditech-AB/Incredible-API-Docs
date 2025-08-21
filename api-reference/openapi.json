@@ -102,7 +102,7 @@
                   "type": "string",
                   "description": "Server-sent events stream for streaming responses"
                 },
-                "example": "data: {\"content\": {\"type\": \"thinking_chunk\", \"content\": \"The\"}}\n...\ndata: {\"content\": {\"type\": \"text_chunk\", \"content\": \"I'll get the current weather in Stockholm for you.\"}}\ndata: {\"content\": \"[DONE]\"}"
+                "example": "data: {\"content\": {\"type\": \"text_chunk\", \"content\": \"Hello\"}}\ndata: {\"content\": {\"type\": \"function_call\", \"function_call_id\": \"...\", \"function_calls\": []}}\ndata: {\"content\": \"[DONE]\"}"
               },
               "application/json": {
                 "schema": {
