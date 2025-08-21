@@ -3,126 +3,77 @@ title: "Tools Overview"
 description: "How to use function calling (tools) with the Incredible API"
 ---
 
-Function calling ("tools") lets your assistant request that your application perform specific operations and return structured results. Use tools for actions like fetching data, calling third‑party APIs, or performing local computations.
-
-### Two types of tools
-
-- **Client tools**: Run on your systems. You define the tool name, description, and input schema; your backend executes it and posts back results.
-- **Server tools**: Built‑ins that we may execute on our side (when available). You enable them; results are incorporated automatically.
+Function calling ("tools") lets your assistant request that your application perform actions and return structured results.
 
 ### Two types of functions
 
-- **User‑defined functions**: The ones you provide in the API request (name, description, JSON schema). These map to capabilities in your backend.
-- **System functions**: Built‑ins that ship with Incredible (right now the primary one is the "analysis" function).
-
-### Flow (client tools)
-1. Provide tools (name, description, JSON schema) and a user prompt
-2. Model returns a tool call (intent to use a tool)
-3. You execute the tool and return results
-4. Model uses results to finalize the answer
-
-### Live‑code function calling (our approach)
-
-- **Code as reasoning**: The model can write and run small snippets to analyze data
-- **Code as action**: The model can write code to take actions and call APIs via your tools
-- **Intelligent truncation**: Summaries + structure let tools work over large datasets efficiently
-
-### Integrations
-
-- **We**: built‑in integrations to 500+ apps; our agentic models are tuned to do real work over those features.
-- **Others**: rely on MCPs you must build, host, and maintain.
+- **User defined functions**: The ones you can enter into the API.
+- **System functions**: Right now it's only the "analysis" function.
 
 <Expandable title="Single tool example">
+  A single tool is invoked to answer the user's request.
 
-```bash
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
-  -d '{
-    "model": "small-1",
-    "stream": false,
-    "functions": [{
-      "name": "get_weather",
-      "description": "Get the current weather in a given location",
-      "parameters": {
-        "type": "object",
-        "properties": {"location": {"type": "string", "description": "City, e.g. San Francisco, CA"}},
-        "required": ["location"]
-      }
-    }],
-    "messages": [{"role": "user", "content": "What is the weather like in San Francisco?"}]
-  }'
-```
-
-</Expandable>
-
-<Expandable title="Sequential tools">
-
-Use multiple tools in sequence, passing outputs from one call to the next.
-
-1) First request asks the question and enables two tools (`get_location`, `get_weather`).
-2) The model may call `get_location` first; your backend executes it and posts the result in a follow‑up turn.
-3) The model then calls `get_weather` with the discovered location and finalizes the answer.
-
-Tip: keep tools small and composable so sequences remain reliable and easy to test.
-
-</Expandable>
-
-
-## How it works
-
-1. Define tools (name, description, JSON schema for inputs)
-2. Send tools with your chat request
-3. The model decides if/when to use a tool and returns a tool call
-4. Your app executes the tool and returns a tool result
-5. The model uses the result to produce the final answer
-
-## Example (messages API)
-
-```bash
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "What is the weather in Stockholm?"}],
-    "functions": [
-      {
+  ```bash
+  curl -X POST "https://api.incredible.one/v1/chat-completion" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+    -d '{
+      "model": "small-1",
+      "messages": [{"role": "user", "content": "What is the weather in San Francisco?"}],
+      "functions": [{
         "name": "get_weather",
         "description": "Get the current weather in a given location",
         "parameters": {
           "type": "object",
           "properties": {
-            "location": {
-              "type": "string",
-              "description": "City and country, e.g. Stockholm, SE"
-            },
-            "unit": {
-              "type": "string",
-              "enum": ["celsius", "fahrenheit"]
-            }
+            "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}
           },
           "required": ["location"]
         }
-      }
-    ]
-  }'
-```
+      }]
+    }'
+  ```
+</Expandable>
 
-## Tool result round‑trip
+<Expandable title="Sequential tools">
+  Multiple tools are available; the model can call them in sequence.
 
-When a tool call is returned, execute it and send the result back in a new request as part of the conversation, so the assistant can incorporate it in the final answer.
+  ```bash
+  curl -X POST "https://api.incredible.one/v1/chat-completion" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+    -d '{
+      "model": "small-1",
+      "messages": [{"role": "user", "content": "What\'s the weather right now where I am?"}],
+      "functions": [
+        {
+          "name": "get_location",
+          "description": "Resolve the user\'s current city from IP",
+          "parameters": {
+            "type": "object",
+            "properties": {"ip": {"type": "string", "description": "User IP address"}}
+          }
+        },
+        {
+          "name": "get_weather",
+          "description": "Get the current weather in a given location",
+          "parameters": {
+            "type": "object",
+            "properties": {"location": {"type": "string"}},
+            "required": ["location"]
+          }
+        }
+      ]
+    }'
+  ```
+</Expandable>
 
-## Best practices
+### Live‑code function calling
 
-- Keep tool names and descriptions clear and action‑oriented
-- Use precise JSON schemas for inputs
-- Return compact, structured outputs
-- Validate inputs before execution
-- Log tool invocations for observability
+- **We**: write code to take actions. We can take very complex actions, reference data, and more. Basically anything you can do with code is now possible.
+- **Others**: write JSON to take actions. The LLM must copy and write out everything manually. It messes up, it's slow, and it can't make complex actions (for example, creating a huge spreadsheet with analysis is not possible).
 
-## Next steps
+### Integrations
 
-- Implement your first tool in your app
-- Explore streaming vs non‑streaming in Chat Completion
-- See more patterns in the pages below
+- **We**: have built‑in integrations to 500+ apps, and optimized our agentic models that do real work.
+- **Others**: have MCPs, which means you have to build it and set it up, host it, etc.
