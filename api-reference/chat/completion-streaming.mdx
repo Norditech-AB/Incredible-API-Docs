@@ -1,71 +1,11 @@
 ---
 title: "Chat Completion (Streaming)"
-description: "Example streaming request and response (using the same schema)"
-openapi: "POST /v1/chat-completion"
+description: "Generate answers as a live Server‑Sent Events (SSE) stream — ideal for long replies and realtime UIs"
+openapi: "POST /v1/chat-completion/stream"
 ---
 
-## Request Body
-
-```bash
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "small-1",
-    "messages": [{"role": "user", "content": "What is the weather in Stockholm?"}],
-    "functions": [
-      {
-        "name": "get_weather",
-        "description": "Get the current weather in a given location",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "location": {
-              "type": "string",
-              "description": "City and country, e.g. Stockholm, SE"
-            },
-            "unit": {
-              "type": "string",
-              "enum": ["celsius", "fahrenheit"]
-            }
-          },
-          "required": ["location"]
-        }
-      }
-    ]
-  }'
-```
-
-## Response (streaming chunks)
-
-```text
-data: {"content": {"type": "thinking_chunk", "content": "The"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " user"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " is"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " asking"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " for"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " the"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " weather"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " in"}}
-
-data: {"content": {"type": "thinking_chunk", "content": " Stockholm"}}
-
-data: {"content": {"type": "thinking_chunk", "content": "."}}
-
-...
-
-data: {"content": {"type": "text_chunk", "content": "I'll get the current weather in Stockholm for you."}}
-
-data: {"content": {"type": "function_call", "function_call_id": "73667411-5c3f-484d-865e-c9c8ce1b6d39", "function_calls": [{"name": "get_weather", "input": {"location": "Stockholm, SE"}}]}}
-
-data: {"content": "[DONE]"}
-```
+Show text as it’s produced. Great for chat UIs that display typing and for long answers where users shouldn’t wait for the full result.
 
  
+
+

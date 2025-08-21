@@ -17,8 +17,8 @@
   "paths": {
     "/v1/chat-completion": {
       "post": {
-        "summary": "Chat Completion",
-        "description": "Generate AI responses with support for function calling and integrations",
+        "summary": "Chat Completion (Non-Streaming)",
+        "description": "Return a complete response in one shot",
         "requestBody": {
           "required": true,
           "content": {
@@ -28,29 +28,9 @@
               },
               "example": {
                 "model": "small-1",
-                "stream": true,
+                "stream": false,
                 "messages": [
-                  {"role": "user", "content": "What is the weather in Stockholm?"}
-                ],
-                "functions": [
-                  {
-                    "name": "get_weather",
-                    "description": "Get the current weather in a given location",
-                    "parameters": {
-                      "type": "object",
-                      "properties": {
-                        "location": {
-                          "type": "string",
-                          "description": "City and country, e.g. Stockholm, SE"
-                        },
-                        "unit": {
-                          "type": "string",
-                          "enum": ["celsius", "fahrenheit"]
-                        }
-                      },
-                      "required": ["location"]
-                    }
-                  }
+                  {"role": "user", "content": "Hello, Incredible!"}
                 ]
               }
             }
@@ -63,12 +43,14 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChatCompletionResponse"
-                }
-              },
-              "text/event-stream": {
-                "schema": {
-                  "type": "string",
-                  "description": "Server-sent events stream for streaming responses"
+                },
+                "example": {
+                  "result": {
+                    "response": [
+                      { "content": "Hello! \ud83d\udc4b", "role": "assistant" }
+                    ],
+                    "thinking": "Greet the user briefly."
+                  }
                 }
               }
             }
@@ -93,13 +75,20 @@
     "/v1/chat-completion/stream": {
       "post": {
         "summary": "Chat Completion (Streaming)",
-        "description": "Generate AI responses as a stream (SSE)",
+        "description": "Generate AI responses as a live stream (SSE)",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChatCompletionRequestStreaming"
+              },
+              "example": {
+                "model": "small-1",
+                "stream": true,
+                "messages": [
+                  {"role": "user", "content": "What is the weather in Stockholm?"}
+                ]
               }
             }
           }
@@ -112,7 +101,8 @@
                 "schema": {
                   "type": "string",
                   "description": "Server-sent events stream for streaming responses"
-                }
+                },
+                "example": "data: {\"content\": {\"type\": \"thinking_chunk\", \"content\": \"The\"}}\n...\ndata: {\"content\": {\"type\": \"text_chunk\", \"content\": \"I'll get the current weather in Stockholm for you.\"}}\ndata: {\"content\": \"[DONE]\"}"
               },
               "application/json": {
                 "schema": {
