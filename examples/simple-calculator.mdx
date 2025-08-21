@@ -1,0 +1,38 @@
+---
+title: "Simple Calculator Tool"
+description: "Function calling with a calculator tool"
+---
+
+ 
+
+Shows defining a `calculate_product` tool and returning results to the assistant.
+
+### 1) Request with tool
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "functions": [{
+      "name": "calculate_product",
+      "description": "Multiply two numbers",
+      "parameters": {
+        "type": "object",
+        "properties": {"a": {"type": "number"}, "b": {"type": "number"}},
+        "required": ["a", "b"]
+      }
+    }],
+    "messages": [{"role": "user", "content": "What is 15 * 23?"}]
+  }'
+```
+
+When the model returns a `function_call`, execute the function locally and send back a `function_call_result` in a follow‑up request.
+
+<Note>
+View source on GitHub → [1_simple_calculator.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/1_simple_calculator.py)
+</Note>
+
+ 
+

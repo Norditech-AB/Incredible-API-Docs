@@ -1,0 +1,32 @@
+---
+title: "Multiple Tools"
+description: "Chain multiple tools in one session"
+---
+
+ 
+
+Shows sequential tool calls and passing outputs between tools.
+
+### 1) Enable two tools
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [{"role": "user", "content": "What\'s the weather where I am?"}],
+    "functions": [
+      {"name": "get_location", "description": "Infer city from IP", "parameters": {"type": "object", "properties": {"ip": {"type": "string"}}}},
+      {"name": "get_weather", "description": "Weather by city", "parameters": {"type": "object", "properties": {"location": {"type": "string"}}, "required": ["location"]}}
+    ]
+  }'
+```
+
+Execute `get_location`, then call back with its result, allowing the model to invoke `get_weather` next.
+
+<Note>
+View source on GitHub → [2_multiple_tools.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/2_multiple_tools.py)
+</Note>
+
+ 
+

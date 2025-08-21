@@ -1,0 +1,35 @@
+---
+title: "Advanced Workflow"
+description: "A complex multi-tool agent workflow from the Cookbook"
+---
+
+This example mirrors the advanced workflow in our Cookbook.
+
+Steps covered:
+- Tool planning and selection
+- Multi-step execution with intermediate state
+- Error handling and retries
+
+Open the linked file for the full runnable script.
+
+### Kickoff request (pattern)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [{"role": "user", "content": "Research and draft a brief report; use tools as needed."}],
+    "functions": [/* planner, fetch, analyze, format tools */]
+  }'
+```
+
+The assistant will orchestrate multiple tools in sequence; send back `function_call_result` blocks as each step completes.
+
+<Note>
+View source on GitHub → [4_advanced_workflow.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/4_advanced_workflow.py)
+</Note>
+
+ 
+
+

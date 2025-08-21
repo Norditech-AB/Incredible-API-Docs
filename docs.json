@@ -30,7 +30,8 @@
               "guides/working-with-integrations",
               "guides/function-calling",
               "guides/streaming-responses",
-              "guides/error-handling"
+              "guides/error-handling",
+              "guides/testing"
             ]
           },
           {
@@ -45,11 +46,18 @@
           {
             "group": "Examples",
             "pages": [
+              "examples/hello-incredible",
               "examples/basic-chat",
               "examples/multiple-models",
               "examples/conversation",
               "examples/streaming-chat",
-              "examples/function-calling"
+              "examples/function-calling",
+              "examples/gmail-integration",
+              "examples/perplexity-integration",
+              "examples/simple-calculator",
+              "examples/multiple-tools",
+              "examples/json-extraction",
+              "examples/advanced-workflow"
             ]
           },
           {
@@ -120,7 +128,7 @@
   "footer": {
     "socials": {
       "x": "https://x.com/incredible_one_",
-      "github": "https://github.com/incredible-ai",
+      "github": "https://github.com/Norditech-AB/Incredible-API-Cookbook",
       "linkedin": "https://www.linkedin.com/company/incredible-linkedin/",
       "youtube": "https://www.youtube.com/@become_incredible",
       "instagram": "https://www.instagram.com/",
