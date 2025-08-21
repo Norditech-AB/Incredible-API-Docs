@@ -1,0 +1,21 @@
+---
+title: "Basic Chat (Non-Streaming)"
+description: "Your first API call with a simple non-streaming chat request"
+---
+
+Use this to send a simple message and get a complete response.
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      { "role": "user", "content": "Hello! Can you say hi back to me?" }
+    ]
+  }'
+```
+
+

@@ -1,0 +1,19 @@
+---
+title: "Error Handling"
+description: "Best practices and troubleshooting"
+---
+
+- Validate input before requests
+- Check HTTP status codes and error bodies
+- Retry transient errors with backoff
+- Log request IDs and timestamps for support
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{"model":"small-1","stream":false,"messages":[{"role":"user","content":"Ping"}]}'
+```
+
+

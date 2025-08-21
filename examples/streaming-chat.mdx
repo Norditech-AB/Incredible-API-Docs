@@ -1,0 +1,17 @@
+---
+title: "Streaming Chat"
+description: "See responses arrive in real time using stream=true"
+---
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": true,
+    "messages": [{"role": "user", "content": "Explain computers in ~30 words."}]
+  }'
+```
+
+

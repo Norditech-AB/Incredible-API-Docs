@@ -25,6 +25,33 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChatCompletionRequest"
+              },
+              "example": {
+                "model": "small-1",
+                "stream": true,
+                "messages": [
+                  {"role": "user", "content": "What is the weather in Stockholm?"}
+                ],
+                "functions": [
+                  {
+                    "name": "get_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "location": {
+                          "type": "string",
+                          "description": "City and country, e.g. Stockholm, SE"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": ["celsius", "fahrenheit"]
+                        }
+                      },
+                      "required": ["location"]
+                    }
+                  }
+                ]
               }
             }
           }
@@ -52,6 +79,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Messages are required",
+                  "instructions": "Provide a messages array with at least one user message"
                 }
               }
             }

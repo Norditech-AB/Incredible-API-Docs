@@ -18,12 +18,20 @@
             "group": "Getting Started",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "guides/authentication",
+              "guides/core-concepts"
             ]
           },
           {
-            "group": "Development",
-            "pages": []
+            "group": "Guides",
+            "pages": [
+              "guides/build-first-agent",
+              "guides/working-with-integrations",
+              "guides/function-calling",
+              "guides/streaming-responses",
+              "guides/error-handling"
+            ]
           },
           {
             "group": "Tools",
@@ -37,9 +45,11 @@
           {
             "group": "Examples",
             "pages": [
-              "examples/finance-analytics",
-              "examples/sales-marketing",
-              "examples/operations-development"
+              "examples/basic-chat",
+              "examples/multiple-models",
+              "examples/conversation",
+              "examples/streaming-chat",
+              "examples/function-calling"
             ]
           },
           {
@@ -56,11 +66,12 @@
           }
         ]
       },
+      
       {
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Messages",
+            "group": "Chat Completion",
             "pages": [
               "api-reference/chat/completion",
               "api-reference/chat/completion-streaming"

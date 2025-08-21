@@ -3,7 +3,7 @@ title: "How to Implement Tool Use"
 description: "Define tools, detect tool calls, execute them, and return results"
 ---
 
-This guide shows the end‑to‑end flow for client‑executed tools.
+This guide shows the end‑to‑end flow for client‑executed tools and mirrors the flow described in Anthropic’s overview, adapted to Incredible’s chat API.
 
 ## 1) Define tools
 
@@ -20,6 +20,29 @@ Run the tool code on your backend. Handle validation, errors, authentication, an
 ## 4) Return results
 
 Post the result back in the next message (as part of the conversation) so the assistant can incorporate it into its final response.
+
+### Single tool example (cURL)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "functions": [{
+      "name": "get_weather",
+      "description": "Get the current weather in a given location",
+      "parameters": {
+        "type": "object",
+        "properties": {"location": {"type": "string"}},
+        "required": ["location"]
+      }
+    }],
+    "messages": [{"role": "user", "content": "What is the weather in San Francisco?"}]
+  }'
+```
+
 
 ## Tips
 

@@ -1,112 +1,68 @@
 ---
 title: 'Incredible API Documentation'
-description: 'Build AI agents and automations with the Incredible API'
+description: 'AI that can work — Agentic Automation, models, and integrations'
 ---
 
-Welcome to the Incredible API documentation. Build powerful AI agents and automations that can interact with hundreds of applications and services.
+Welcome to Incredible — where we build AI that can work, not just talk.
 
-## What is Incredible?
+## Let’s break down Incredible
 
-Incredible is an AI automation platform that lets you create agents with just a sentence. Write a task description in plain English, set a schedule, and you've got a fully functioning Agent that can:
+- **Category dominance**: We focus on “AI that can work.” Others optimize for chatting; we optimize for task completion.
+- **The company**: Incredible is a Swedish applied AI lab building Agentic Automation.
+- **The value**: AI Agents are the holy grail of automation — potentially allowing anyone to automate complex work.
 
-- **Interact with external applications** like Gmail, Excel, CRMs, and more
-- **Search the web** and analyze information
-- **Generate content** and draw insights
-- **Take actions** in connected apps automatically
+## The story
 
-## Quick Start
+While building agentic automation, we innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming typical stacks (tool frameworks, MCPs, etc.) in the metric that matters: task completion rate. We’re releasing these agentic models in the Incredible API.
 
-### 1. Create Your First Agent
+### Agentic models
 
-```bash
-curl -X POST "https://api.incredible.one/v1/agents" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Daily Email Summarizer",
-    "description": "Compile overnight emails from Gmail and create a summary in Todoist",
-    "schedule": "everyday at 07:00",
-    "user_id": "your_user_id"
-  }'
-```
+- **Incredible Tiny** — Matches Gemini 2.5 Flash intelligence. Outperforms in agentic benchmarks. (internally powered by GPT‑5 Nano)
+- **Incredible Small** — Matches Gemini 2.5 Pro intelligence. Outperforms in agentic benchmarks. (internally powered by GLM)
+- **Incredible Big** — Matches Claude 4.0 Sonnet intelligence. Outperforms in agentic benchmarks. (internally powered by Claude 4.0 Sonnet)
+- **Incredible Huge** — Exceeds Claude 4.1 Opus and GPT‑5 in agentic benchmarks. (internally powered by GPT‑5)
 
-### 2. Connect Integrations
+> We optimize for task completion — solving real‑world problems — not classroom tests.
 
-```bash
-curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_user_id",
-    "callback_url": "https://backend.viss.ai/app-auth/oauth2-callback"
-  }'
-```
+## What makes it work (differentiators)
 
-### 3. Execute Actions
+**Others**
+- Text as reasoning: produce more tokens before acting
+- Text as action: single function calls via tool bridges
+- Raw text inputs: emails/transactions as unstructured blobs
+- Heavy truncation: context limits block real work
 
-```bash
-curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_user_id",
-    "feature_name": "GMAIL_READ_EMAILS",
-    "inputs": {
-      "query": "is:unread",
-      "max_results": 10
-    }
-  }'
-```
+**Us**
+- **Code as reasoning**: the model mixes foundational text reasoning with on‑demand live code analysis
+- **Code as action**: the model writes code to take action, call APIs, and reference data
+- **Intelligent truncation**: abstract representations (summaries, structure, snippets) to preserve breadth
+- **Self‑maintaining memory**: the model manages its own memory via code to deep‑dive large datasets
 
-## Key Features
+## What this changes
 
-### 🤖 **AI-Powered Agents**
-Create intelligent automations that understand natural language and can handle complex workflows.
+- From single actions to thousands in parallel (e.g., add 1 row vs 1,000 rows)
+- Data‑driven work without hallucination (use data, don’t invent it)
+- Effective 1B+ context via structured retrieval and memory
+- Long tasks stay on track; the agent retains objectives and state
 
-### 🔗 **Hundreds of Integrations**
-Connect to popular apps like Gmail, Slack, Notion, Excel, and many more through our unified API.
+Additional value:
+- Lower cost for data‑heavy tasks
+- Direct API connections
+- Drop‑in replacement for OpenAI/Anthropic APIs (switch in a few lines)
+- Price + tool‑use performance advantage → rapid adoption
 
-### ⏰ **Scheduled Automation**
-Set up agents to run on schedules - daily, weekly, or custom intervals.
+> Incredible models are optimized for tool use and function calling. For pure chat or creative writing, use traditional LLMs. For getting actual work done with tools and APIs, we’re 10× better.
 
-### 🔍 **Web Search & Analysis**
-Agents can search the web, analyze data, and generate insights automatically.
+## Get started
 
-### 📊 **Data Processing**
-Transform, summarize, and categorize information using AI.
-
-## Popular Use Cases
-
-### **Finance & Analytics**
-- Daily stock market summaries
-- Expense tracking and reporting
-- Financial data analysis
-
-### **Sales & Marketing**
-- Lead qualification and follow-up
-- Content repurposing across platforms
-- Customer sentiment analysis
-
-### **Operations & Development**
-- Support ticket management
-- Meeting agenda creation
-- Project status reporting
-
-## Get Started
-
-<Card
-  title="Quick Start Guide"
-  icon="rocket"
-  href="/quickstart"
->
-  Learn how to create your first agent in minutes
+<Card title="Quickstart" icon="rocket" href="/quickstart">
+  Create your first agent or call the chat API in minutes.
 </Card>
 
-<Card
-  title="API Reference"
-  icon="code"
-  href="/api-reference/integrations"
->
-  Explore all available endpoints and integrations
+<Card title="Chat Completion" icon="comment" href="/api-reference/chat/completion">
+  Core endpoint — non‑streaming and streaming.
 </Card>
 
-## Trusted by Top Talent
-
-Build automations that scale with your business. From idea to automation in 30 seconds.
+<Card title="Integrations" icon="plug" href="/api-reference/endpoint/list-integrations">
+  Available services and features.
+</Card>

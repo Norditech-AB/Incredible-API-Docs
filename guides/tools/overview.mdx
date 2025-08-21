@@ -5,6 +5,70 @@ description: "How to use function calling (tools) with the Incredible API"
 
 Function calling ("tools") lets your assistant request that your application perform specific operations and return structured results. Use tools for actions like fetching data, calling third‑party APIs, or performing local computations.
 
+### Two types of tools
+
+- **Client tools**: Run on your systems. You define the tool name, description, and input schema; your backend executes it and posts back results.
+- **Server tools**: Built‑ins that we may execute on our side (when available). You enable them; results are incorporated automatically.
+
+### Two types of functions
+
+- **User‑defined functions**: The ones you provide in the API request (name, description, JSON schema). These map to capabilities in your backend.
+- **System functions**: Built‑ins that ship with Incredible (right now the primary one is the "analysis" function).
+
+### Flow (client tools)
+1. Provide tools (name, description, JSON schema) and a user prompt
+2. Model returns a tool call (intent to use a tool)
+3. You execute the tool and return results
+4. Model uses results to finalize the answer
+
+### Live‑code function calling (our approach)
+
+- **Code as reasoning**: The model can write and run small snippets to analyze data
+- **Code as action**: The model can write code to take actions and call APIs via your tools
+- **Intelligent truncation**: Summaries + structure let tools work over large datasets efficiently
+
+### Integrations
+
+- **We**: built‑in integrations to 500+ apps; our agentic models are tuned to do real work over those features.
+- **Others**: rely on MCPs you must build, host, and maintain.
+
+<Expandable title="Single tool example">
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "functions": [{
+      "name": "get_weather",
+      "description": "Get the current weather in a given location",
+      "parameters": {
+        "type": "object",
+        "properties": {"location": {"type": "string", "description": "City, e.g. San Francisco, CA"}},
+        "required": ["location"]
+      }
+    }],
+    "messages": [{"role": "user", "content": "What is the weather like in San Francisco?"}]
+  }'
+```
+
+</Expandable>
+
+<Expandable title="Sequential tools">
+
+Use multiple tools in sequence, passing outputs from one call to the next.
+
+1) First request asks the question and enables two tools (`get_location`, `get_weather`).
+2) The model may call `get_location` first; your backend executes it and posts the result in a follow‑up turn.
+3) The model then calls `get_weather` with the discovered location and finalizes the answer.
+
+Tip: keep tools small and composable so sequences remain reliable and easy to test.
+
+</Expandable>
+
+
 ## How it works
 
 1. Define tools (name, description, JSON schema for inputs)

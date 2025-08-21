@@ -1,0 +1,38 @@
+---
+title: "Multiple Models"
+description: "Try different AI models and compare responses"
+---
+
+```bash
+# Small model
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "What's 5 + 3? Just give me the number."}]
+  }'
+
+# Tiny (example; may not be available)
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "tiny-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "What's 5 + 3? Just give me the number."}]
+  }'
+
+# Big (example)
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "big-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "What's 5 + 3? Just give me the number."}]
+  }'
+```
+
+

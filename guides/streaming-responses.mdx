@@ -1,0 +1,19 @@
+---
+title: "Streaming Responses"
+description: "Real-time data handling"
+---
+
+Enable streaming with `stream: true` and handle SSE on the client.
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": true,
+    "messages": [{"role": "user", "content": "Explain streaming in one sentence"}]
+  }'
+```
+
+

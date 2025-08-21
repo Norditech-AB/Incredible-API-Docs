@@ -1,0 +1,26 @@
+---
+title: "Function Calling"
+description: "Let the AI call your functions and use the results"
+---
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "What is 25 + 17?"}],
+    "functions": [{
+      "name": "add_numbers",
+      "description": "Add two numbers",
+      "parameters": {
+        "type": "object",
+        "properties": {"a": {"type": "number"}, "b": {"type": "number"}},
+        "required": ["a", "b"]
+      }
+    }]
+  }'
+```
+
+

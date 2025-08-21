@@ -1,0 +1,72 @@
+---
+title: "Hello, Incredible!"
+description: "Your first cURL request with the Incredible Chat API (step‑by‑step)"
+---
+
+Kick the tires of the Incredible API in under a minute. This page walks you through a minimal, copy‑paste cURL flow, plus a streaming variant, and where to go next.
+
+## 1) Prerequisites
+
+- An Incredible API key
+- curl installed
+
+Set your key as an environment variable:
+
+```bash
+export INCREDIBLE_API_KEY=your_api_key_here
+```
+
+<Note>
+Replace the value with your real key from the dashboard. Keep it secret; don’t commit it to source control.
+</Note>
+
+## 2) Say hello (non‑streaming)
+
+Send your first request with model `small-1` and get a complete response:
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      { "role": "user", "content": "Hello, Incredible!" }
+    ]
+  }'
+```
+
+You’ll receive a JSON body where the assistant’s reply is in `result.response[0].content`.
+
+## 3) See it live (streaming)
+
+Switch to streaming to see the answer arrive as it’s generated.
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": true,
+    "messages": [
+      { "role": "user", "content": "Say hello in one short sentence." }
+    ]
+  }'
+```
+
+When streaming, responses are returned as Server‑Sent Events; chunks terminate with a final `[DONE]` marker.
+
+## 4) Next steps
+
+- Basic Chat: `examples/basic-chat`
+- Multiple Models: `examples/multiple-models`
+- Streaming Chat: `examples/streaming-chat`
+- Function Calling: `examples/function-calling`
+
+<Note>
+Prefer scripts? Check the Cookbook’s getting‑started folder for ready‑to‑run Python examples. For docs-first users, stick to these cURL snippets.
+</Note>
+
+

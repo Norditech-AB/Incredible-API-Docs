@@ -6,34 +6,66 @@ openapi: "POST /v1/chat-completion"
 
 ## Request Body
 
-```json
-{
-  "model": "small-1",
-  "stream": true,
-  "system": "You are a helpful AI assistant.",
-  "messages": [
-    {
-      "role": "user",
-      "content": "Hello! Can you explain what APIs are in simple terms?"
-    }
-  ]
-}
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "messages": [{"role": "user", "content": "What is the weather in Stockholm?"}],
+    "functions": [
+      {
+        "name": "get_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City and country, e.g. Stockholm, SE"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"]
+            }
+          },
+          "required": ["location"]
+        }
+      }
+    ]
+  }'
 ```
 
-## Response
+## Response (streaming chunks)
 
-```json
-{
-  "result": {
-    "response": [
-      {
-        "content": "\nOf course! Let me explain APIs in simple terms.\n\n**API** stands for **Application Programming Interface**. Think of it as a **messenger** or **bridge** that allows different software programs to talk to each other.\n\nHere's a simple analogy:\n\n**Imagine you're at a restaurant:**\n- You (the customer) = one software program\n- The kitchen (with chefs) = another software program  \n- The **waiter** = the API\n\nYou don't go into the kitchen yourself to cook your food. Instead, you tell the waiter what you want (a \"request\"). The waiter takes your order to the kitchen, gets the food prepared, and brings it back to you (a \"response\").\n\n**How APIs work in real life:**\n1. **Weather apps** - When you check the weather on your phone, your app uses an API to ask a weather service for current data\n2. **Google Maps** - When another app shows you a map, it's using Google's Maps API\n3. **Social media login** - When you \"Sign in with Google\" on other websites, that's using Google's API\n4. **Payment processing** - When you pay online, the store uses PayPal's or Stripe's API to process the payment\n\n**Why APIs are useful:**\n- **They save time** - Developers don't have to build everything from scratch\n- **They're safe** - Programs can share data without exposing their internal workings\n- **They're standardized** - Everyone knows the \"rules\" for requesting and receiving information\n\nIn short: **APIs let different programs communicate and share information in a structured, predictable way** - like a universal language that software can use to work together!",
-        "role": "assistant"
-      }
-    ],
-    "thinking": "The user is asking for a simple explanation of what APIs are. This is a general knowledge question and doesn't require using any of the available tools (run_function or analysis). I should provide a straightforward, easy-to-understand explanation of APIs without needing to write any code or call any functions."
-  }
-}
+```text
+data: {"content": {"type": "thinking_chunk", "content": "The"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " user"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " is"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " asking"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " for"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " the"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " weather"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " in"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " Stockholm"}}
+
+data: {"content": {"type": "thinking_chunk", "content": "."}}
+
+...
+
+data: {"content": {"type": "text_chunk", "content": "I'll get the current weather in Stockholm for you."}}
+
+data: {"content": {"type": "function_call", "function_call_id": "73667411-5c3f-484d-865e-c9c8ce1b6d39", "function_calls": [{"name": "get_weather", "input": {"location": "Stockholm, SE"}}]}}
+
+data: {"content": "[DONE]"}
 ```
 
  

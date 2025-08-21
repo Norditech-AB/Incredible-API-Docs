@@ -1,0 +1,37 @@
+---
+title: "Conversation (Multi‑turn)"
+description: "Build a short back‑and‑forth with remembered context"
+---
+
+Send the whole conversation each turn so the model keeps context.
+
+```bash
+# 1) Ask the first question
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      { "role": "user", "content": "What\'s the capital of France?" }
+    ]
+  }'
+
+# 2) Add the assistant reply to your local history, then ask a follow‑up
+# Replace ASSISTANT_REPLY with the text from result.response[0].content
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      { "role": "user", "content": "What\'s the capital of France?" },
+      { "role": "assistant", "content": "ASSISTANT_REPLY" },
+      { "role": "user", "content": "What\'s the population of that city?" }
+    ]
+  }'
+```
+
+

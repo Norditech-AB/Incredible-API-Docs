@@ -1,195 +1,29 @@
 ---
 title: 'Quick Start'
-description: 'Create your first AI agent in minutes'
+description: 'Say “Hello, Incredible!” with one request'
 ---
 
-Get started with Incredible API and create your first AI agent in minutes. From idea to automation in 30 seconds.
+The fastest way to try Incredible is a single cURL call.
 
-## Prerequisites
-
-Before you begin, make sure you have:
-
-- An Incredible API account
-- Your API credentials
-- Basic knowledge of REST APIs
-
-## Step 1: Set Up Your Environment
-
-### Get Your API Credentials
-
-1. Sign up at [incredible.one](https://www.incredible.one/)
-2. Navigate to your dashboard
-3. Generate your API key from the settings
-
-
-
-## Step 2: Create Your First Agent
-
-Let's create a simple agent that summarizes daily emails.
-
-### Example: Daily Email Summarizer
+## 1) Set your API key
 
 ```bash
-curl -X POST "https://api.incredible.one/v1/agents" \
+export INCREDIBLE_API_KEY=your_api_key_here
+```
+
+## 2) Hello, Incredible (non‑streaming)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
-    "name": "Daily Email Summarizer",
-    "description": "Compile overnight emails from Gmail and create a summary in Todoist",
-    "schedule": "everyday at 07:00",
-    "user_id": "your_user_id",
-    "integrations": ["gmail", "todoist"],
-    "prompt": "Read all unread emails from Gmail, summarize the key points, and create tasks in Todoist for any actionable items"
+    "model":"small-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "hello incredioble!!"}]
   }'
 ```
 
-### Response
+That’s it. You’ll get a JSON response with the assistant’s reply in `result.response[0].content`.
 
-```json
-{
-  "agent_id": "agent_123456",
-  "name": "Daily Email Summarizer",
-  "status": "active",
-  "schedule": "everyday at 07:00",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
-## Step 3: Connect Integrations
-
-Your agent needs access to the applications it will work with.
-
-### Connect Gmail
-
-```bash
-curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "user_id": "your_user_id",
-    "callback_url": "https://backend.viss.ai/app-auth/oauth2-callback"
-  }'
-```
-
-### Connect Todoist
-
-```bash
-curl -X POST "https://api.incredible.one/v1/integrations/todoist/connect" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "user_id": "your_user_id",
-    "api_key": "your_todoist_api_key"
-  }'
-```
-
-## Step 4: Test Your Agent
-
-### Manual Execution
-
-Test your agent immediately without waiting for the schedule:
-
-```bash
-curl -X POST "https://api.incredible.one/v1/agents/agent_123456/execute" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "user_id": "your_user_id"
-  }'
-```
-
-### Check Execution Status
-
-```bash
-curl -X GET "https://api.incredible.one/v1/agents/agent_123456/executions" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## Step 5: Monitor and Optimize
-
-### View Agent Logs
-
-```bash
-curl -X GET "https://api.incredible.one/v1/agents/agent_123456/logs" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### Update Agent Configuration
-
-```bash
-curl -X PUT "https://api.incredible.one/v1/agents/agent_123456" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "description": "Compile overnight emails from Gmail, summarize key points, and create prioritized tasks in Todoist",
-    "schedule": "everyday at 06:30"
-  }'
-```
-
-## Real-World Examples
-
-### Support Ticket Reporter
-
-```bash
-curl -X POST "https://api.incredible.one/v1/agents" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "name": "Support Ticket Reporter",
-    "description": "Get unresolved support tickets from Intercom and send a report to #team-support in Slack",
-    "schedule": "every Saturday at 16:00",
-    "user_id": "your_user_id",
-    "integrations": ["intercom", "slack"],
-    "prompt": "Fetch all unresolved tickets from Intercom, analyze common issues, and send a detailed report to the #team-support Slack channel with critical tickets at the top"
-  }'
-```
-
-### Content Repurposer
-
-```bash
-curl -X POST "https://api.incredible.one/v1/agents" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "name": "Content Repurposer",
-    "description": "Take our latest blog post and create platform-specific versions for LinkedIn & X",
-    "schedule": "everyday at 09:00",
-    "user_id": "your_user_id",
-    "integrations": ["notion", "linkedin", "twitter"],
-    "prompt": "Read the latest blog post from our Notion content calendar, create optimized versions for LinkedIn and Twitter, and save them as drafts in our content management system"
-  }'
-```
-
-## Next Steps
-
-<Card
-  title="Explore Integrations"
-  icon="plug"
-  href="/api-reference/integrations"
->
-  See all available integrations and their capabilities
-</Card>
-
-<Card
-  title="Advanced Configuration"
-  icon="gear"
-  href="/development"
->
-  Learn about advanced agent configuration and optimization
-</Card>
-
-<Card
-  title="API Reference"
-  icon="book"
-  href="/api-reference/integrations"
->
-  Complete API documentation with examples
-</Card>
-
-## Need Help?
-
-- **Documentation**: Browse our comprehensive guides
-- **Community**: Join our community forum
-- **Support**: Contact our support team
-
-Ready to build something incredible? Let's go!
+Next: explore Examples → Basic Chat for a slightly longer sample, or Tools to learn function calling.
