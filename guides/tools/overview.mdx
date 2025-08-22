@@ -1,5 +1,5 @@
 ---
-title: "Tools Overview"
+title: "Function Overview"
 description: "How to use function calling (tools) with the Incredible API"
 ---
 
@@ -10,8 +10,8 @@ Function calling ("tools") lets your assistant request that your application per
 - **User defined functions**: The ones you can enter into the API.
 - **System functions**: Right now it's only the "analysis" function.
 
-<Expandable title="Single tool example">
-  A single tool is invoked to answer the user's request.
+<Expandable title="Single function example">
+  A single function is invoked to answer the user's request.
 
   ```bash
   curl -X POST "https://api.incredible.one/v1/chat-completion" \
@@ -35,8 +35,8 @@ Function calling ("tools") lets your assistant request that your application per
   ```
 </Expandable>
 
-<Expandable title="Sequential tools">
-  Multiple tools are available; the model can call them in sequence.
+<Expandable title="Sequential functions">
+  Multiple functions are available; the model can call them in sequence.
 
   ```bash
   curl -X POST "https://api.incredible.one/v1/chat-completion" \

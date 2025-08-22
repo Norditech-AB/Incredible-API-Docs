@@ -35,7 +35,7 @@
             ]
           },
           {
-            "group": "Tools",
+            "group": "Functions",
             "pages": [
               "guides/tools/overview",
               "guides/tools/implementation",
