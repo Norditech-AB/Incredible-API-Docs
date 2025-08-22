@@ -7,51 +7,60 @@ Welcome to Incredible — where we build AI that can work, not just talk.
 
 ## Let’s break down Incredible
 
-- **Category dominance**: We focus on “AI that can work.” Others optimize for chatting; we optimize for task completion.
-- **The company**: Incredible is a Swedish applied AI lab building Agentic Automation.
-- **The value**: AI Agents are the holy grail of automation — potentially allowing anyone to automate complex work.
+- Category dominance in "AI that can work".
+- Everyone builds "AI that can talk". We build "AI that can work".
+- The company: Incredible is a Swedish applied AI lab building Agentic Automation.
+- The value of automation: AI Agents are the holy grail of automation — potentially allowing anyone to automate.
 
 ## The story
 
-While building agentic automation, we innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming typical stacks (tool frameworks, MCPs, etc.) in the metric that matters: task completion rate. We’re releasing these agentic models in the Incredible API.
+While building agentic automation, we’ve innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming GPT‑5, Opus 4.1 with LangChain, MCPs, and other technologies. We’re now releasing our agentic models in the Incredible API.
 
-### Agentic models
+1. Incredible Tiny — Matching Gemini 2.5 Flash intelligence. Outperforms in every agentic benchmark. (internally powered by GPT‑5 Nano)
+2. Incredible Small — Matching Gemini 2.5 Pro intelligence. Outperforms in every agentic benchmark. (internally powered by GLM)
+3. Incredible Big — Matching Claude 4.0 Sonnet intelligence. Outperforms in every agentic benchmark. (internally powered by Claude 4.0 Sonnet)
+4. Incredible Huge — Outperforms Claude 4.1 Opus. Outperforms GPT‑5 and Opus 4.1 in every agentic benchmark. (internally powered by GPT‑5)
 
-- **Incredible Tiny** — Matches Gemini 2.5 Flash intelligence. Outperforms in agentic benchmarks. (internally powered by GPT‑5 Nano)
-- **Incredible Small** — Matches Gemini 2.5 Pro intelligence. Outperforms in agentic benchmarks. (internally powered by GLM)
-- **Incredible Big** — Matches Claude 4.0 Sonnet intelligence. Outperforms in agentic benchmarks. (internally powered by Claude 4.0 Sonnet)
-- **Incredible Huge** — Exceeds Claude 4.1 Opus and GPT‑5 in agentic benchmarks. (internally powered by GPT‑5)
+While others optimize for MMLU scores and creative writing, we optimize for the metric that matters: task completion rate — solving real‑world problems.
 
-> We optimize for task completion — solving real‑world problems — not classroom tests.
+### Creating sales advantages
 
-## What makes it work (differentiators)
+“Here’s an on‑premise agentic model achieving SOTA that can connect to internal and external APIs — tailored to your market, easy to set up.”
+
+Note: Most enterprise solutions require $10m+ investments in hard‑to‑get infrastructure such as A100s. Our agentic models can be run on a laptop.
+
+With our technology, it only takes a couple of hours to optimize an agentic model for a specific role or purpose such as sales or accounting. Theoretically, we can release a custom agentic model that is SOTA — tailored for every market and enterprise we encounter — in a couple of hours. These are available to run on‑premise, on servers, or even on a laptop.
+
+## What makes it work: differentiators
 
 **Others**
-- Text as reasoning: produce more tokens before acting
-- Text as action: single function calls via tool bridges
-- Raw text inputs: emails/transactions as unstructured blobs
-- Heavy truncation: context limits block real work
+- Using text as reasoning: the LLM outputs more text before acting.
+- Using text to take action: the LLM outputs text to perform a single function call at a time (e.g., via MCPs to call external applications).
+- Representing data in raw text: the LLM ingests emails, transactions, or calendar events as raw text.
+- Data representation challenges: heavy truncation or raw data presentation limits how much data can be used.
 
-**Us**
-- **Code as reasoning**: the model mixes foundational text reasoning with on‑demand live code analysis
-- **Code as action**: the model writes code to take action, call APIs, and reference data
-- **Intelligent truncation**: abstract representations (summaries, structure, snippets) to preserve breadth
-- **Self‑maintaining memory**: the model manages its own memory via code to deep‑dive large datasets
+**Us (how it’s possible)**
+- Code as reasoning — the model combines foundational text reasoning with on‑demand live code analysis.
+- Code as action — the model writes code to take action, reference data, and make API calls.
+- Intelligent truncation — the model uses abstract representations of data (summaries, structure, and snippets) for broad understanding.
+- Self‑maintaining memory — the model manages its own memory by writing code to manipulate it, enabling deep dives into large datasets without exceeding context limits.
 
 ## What this changes
 
-- From single actions to thousands in parallel (e.g., add 1 row vs 1,000 rows)
-- Data‑driven work without hallucination (use data, don’t invent it)
-- Effective 1B+ context via structured retrieval and memory
-- Long tasks stay on track; the agent retains objectives and state
+- From single actions to thousands in parallel. Example: adding 1 row vs 1,000 rows to a spreadsheet.
+- When using data, hallucination does not occur; accuracy in responses and actions increases.
+- Others have 200k context windows; we achieve effectively 1B+ context windows.
+- Others take 10 actions and stop or lose track; we take thousands with task retention.
 
-Additional value:
-- Lower cost for data‑heavy tasks
-- Direct API connections
-- Drop‑in replacement for OpenAI/Anthropic APIs (switch in a few lines)
-- Price + tool‑use performance advantage → rapid adoption
+### Additional value
 
-> Incredible models are optimized for tool use and function calling. For pure chat or creative writing, use traditional LLMs. For getting actual work done with tools and APIs, we’re 10× better.
+- Much lower cost for data‑driven tasks.
+- Direct connections to APIs.
+
+**Other**
+- Drop‑in replacement for OpenAI/Anthropic APIs; developers can switch in a few lines.
+- Price advantage plus large performance advantage on tool use → rapid adoption.
+- “Incredible models are optimized for tool use and function calling. For pure chat or creative writing, we recommend traditional LLMs. For getting actual work done with tools and APIs, we’re 10× better.”
 
 ## Get started
 
