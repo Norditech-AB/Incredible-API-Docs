@@ -5,6 +5,11 @@ openapi: "POST /v1/integrations/{integration_id}/execute"
 
 Execute a specific feature or function from a connected integration. This endpoint is primarily used by agentic models to perform actions through integrations on behalf of users.
 
+## Why use this?
+- Trigger real actions in connected apps (send an email, create an issue, post a message)
+- One consistent endpoint across all integrations
+- Works with agentic tools or direct API calls
+
 ## Overview
 
 After connecting to an integration, you can execute its available features by calling this endpoint. Each integration provides different functions - for example, GitHub might offer functions to create issues, while Slack might offer functions to send messages.

@@ -3,7 +3,12 @@ title: 'Execute Integration Feature'
 openapi: 'POST /v1/integrations/{integration_id}/execute'
 ---
 
-Execute a specific feature from an integration. This endpoint is typically used by the agentic model to perform actions through connected integrations.
+Run a feature from a connected integration.
+
+## Why use this?
+- Take actions in other apps (send email, create issue, post message)
+- One endpoint that works across integrations
+- Plays well with agentic workflows
 
 <ParamField header="integration_id" type="string" required>
   The unique identifier of the integration to execute the feature from

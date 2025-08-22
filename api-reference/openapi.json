@@ -127,7 +127,7 @@
     "/v1/integrations": {
       "get": {
         "summary": "List all integrations",
-        "description": "Returns a list of all available integrations with details such as id, name, description, logo URL, app URL, features, and authentication method",
+        "description": "Returns a list of available integrations with id, name, description, logo URL, app URL, features, and authentication method",
         "responses": {
           "200": {
             "description": "Successful response with list of integrations",
