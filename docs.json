@@ -81,8 +81,7 @@
           {
             "group": "Chat Completion",
             "pages": [
-              "api-reference/chat/completion",
-              "api-reference/chat/completion-streaming"
+              "api-reference/chat/completion"
             ]
           },
           {
