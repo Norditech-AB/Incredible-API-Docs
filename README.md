@@ -1,16 +1,5 @@
-# Mintlify Starter Kit
+![Incredible-API-Docs-logo-lightmode](https://github.com/user-attachments/assets/366ceb9d-06e5-45ac-b234-8c5f28743c9a#gh-light-mode-only) ![Incredible-API-docs-logo](https://github.com/user-attachments/assets/6ffc602e-d3b6-4681-871e-1db4cdf25852#gh-dark-mode-only)
 
-Use the starter kit to get your docs deployed and ready to customize.
-
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
-
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
 
 ## Development
 
