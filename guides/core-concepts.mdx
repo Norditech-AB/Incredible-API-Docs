@@ -1,11 +1,23 @@
 ---
-title: "Core Concepts"
-description: "Agents, integrations, and functions"
+title: "Architecture Overview"
+description: "How requests flow through models, functions, and integrations"
 ---
 
-- **Agents**: Long‑lived automations driven by prompts and schedules.
-- **Integrations**: Connected apps (e.g., Gmail) that expose executable features.
-- **Features**: Concrete actions an integration can perform (e.g., `gmail_send_email`).
-- **Chat Completion**: Core endpoint that generates text and orchestrates tool use.
+This page gives you a quick mental model for how Incredible works end to end.
+
+```mermaid
+flowchart LR
+  A[Client App] --> B[Chat Completion]
+  B --> C{Model}
+  C -->|Respond| D[Assistant Message]
+  C -->|Function Call| E[Your Backend]
+  E -->|Execute| F[(Integrations / APIs / DBs)]
+  E -->|Result| B
+```
+
+Key points:
+- The model can respond directly or emit function calls.
+- Your backend executes functions and returns results to continue the conversation.
+- Integrations allow actions in external apps securely on behalf of users.
 
 

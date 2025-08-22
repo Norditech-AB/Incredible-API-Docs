@@ -7,7 +7,7 @@
     "light": "#FF6200",
     "dark": "#FF6200"
   },
-  "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
+  "css": "body { color: #EDEDED !important; } h1, h2, h3, h4, h5, h6 { color: #FFFFFF !important; } p, li, div { color: #E0E0E0 !important; } .card, .Card_root__ { border-radius: 14px !important; } .card:hover, .Card_root__:hover { border-color: #FF6200 !important; box-shadow: 0 0 0 1px #FF6200 inset !important; } code, pre { font-size: 0.95rem !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
   "favicon": "/logo/Incredible-API-favicon.svg",
   "navigation": {
     "tabs": [
@@ -31,7 +31,9 @@
               "guides/function-calling",
               "guides/streaming-responses",
               "guides/error-handling",
-              "guides/testing"
+              "guides/testing",
+              "guides/core-concepts",
+              "guides/changelog"
             ]
           },
           {
@@ -106,11 +108,15 @@
     "dark": "/logo/Incredible-API-logo.svg"
   },
   "navbar": {
-    "links": [],
+    "links": [
+      {"label": "Quickstart", "href": "/quickstart"},
+      {"label": "API", "href": "/api-reference/chat/completion"},
+      {"label": "Examples", "href": "/examples/hello-incredible"}
+    ],
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://www.incredible.one"
+      "href": "/quickstart"
     }
   },
   "contextual": {

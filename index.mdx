@@ -3,66 +3,88 @@ title: 'What is Incredible?'
 description: 'AI that can work — Agentic Automation, models, and integrations'
 ---
 
-Welcome to Incredible — where we build AI that can work, not just talk.
+Build AI that gets real work done — not just chat. Incredible combines agentic models with direct integrations so you can ship assistants that act, automate, and deliver outcomes.
+
+While building agentic automation, we innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming typical stacks (LangChain, MCPs, etc.) and frontier models in the metric that matters: task completion rate. We’re now releasing these agentic models in the Incredible API.
+
+
+
+## Why teams choose Incredible
+
+- **Code as reasoning and action** — the model reads and writes code to analyze data and call APIs.
+- **Purpose‑built for tools** — structured function calling and robust error handling.
+- **Integrations built‑in** — connect to 500+ apps to take real actions.
+- **Drop‑in compatible** — switch from OpenAI/Anthropic in a few lines.
+
+## Model lineup
+
+- **Incredible Tiny** — lightweight, fast. Great for routing and helpers.
+- **Incredible Small** — balanced cost/perf for most agentic tasks.
+- **Incredible Big** — strong reasoning and tool use for complex flows.
+- **Incredible Huge** — maximum capability for demanding automations.
+
+## What this enables
+
+- Parallelize thousands of actions reliably
+- Use real data instead of hallucinating
+- Keep long‑running tasks on track with memory
 
 ## Let’s break down Incredible
 
-- **Category dominance**: We focus on “AI that can work.” Others optimize for chatting; we optimize for task completion.
-- **The company**: Incredible is a Swedish applied AI lab building Agentic Automation.
-- **The value**: AI Agents are the holy grail of automation — potentially allowing anyone to automate complex work.
+- **Category dominance in “AI that can work.”** Everyone builds “AI that can talk.” We build “AI that can work.”
+- **The company.** Incredible is a Swedish applied AI lab building Agentic Automation.
+- **The value of automation.** AI Agents are the holy grail of automation — potentially allowing anyone to automate.
 
 ## The story
 
-While building agentic automation, we innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming typical stacks (tool frameworks, MCPs, etc.) in the metric that matters: task completion rate. We’re releasing these agentic models in the Incredible API.
+While building agentic automation, we innovated in agentic AI and created state‑of‑the‑art agentic models, outperforming typical stacks (LangChain, MCPs, etc.) and frontier models in the metric that matters: task completion rate. We’re now releasing these agentic models in the Incredible API.
 
-### Agentic models
+1. **Incredible Tiny** — Matching Gemini 2.5 Flash intelligence. Outperforms in agentic benchmarks. (internally powered by GPT‑5 Nano)
+2. **Incredible Small** — Matching Gemini 2.5 Pro intelligence. Outperforms in agentic benchmarks. (internally powered by GLM)
+3. **Incredible Big** — Matching Claude 4.0 Sonnet intelligence. Outperforms in agentic benchmarks. (internally powered by Claude 4.0 Sonnet)
+4. **Incredible Huge** — Outperforms Claude 4.1 Opus and GPT‑5 in agentic benchmarks. (internally powered by GPT‑5)
 
-- **Incredible Tiny** — Matches Gemini 2.5 Flash intelligence. Outperforms in agentic benchmarks. (internally powered by GPT‑5 Nano)
-- **Incredible Small** — Matches Gemini 2.5 Pro intelligence. Outperforms in agentic benchmarks. (internally powered by GLM)
-- **Incredible Big** — Matches Claude 4.0 Sonnet intelligence. Outperforms in agentic benchmarks. (internally powered by Claude 4.0 Sonnet)
-- **Incredible Huge** — Exceeds Claude 4.1 Opus and GPT‑5 in agentic benchmarks. (internally powered by GPT‑5)
+While others optimize for MMLU scores and creative writing, we optimize for the metric that matters: task completion rate — solving real‑world problems.
 
-> We optimize for task completion — solving real‑world problems — not classroom tests.
+### Creating sales advantages
 
-## What makes it work (differentiators)
+“Here’s an on‑premise Agentic model achieving SOTA, that can connect to internal and external APIs — tailored to your market, easy to set up.” Most enterprise solutions require $10m+ investments in hard‑to‑get infrastructure such as A100s. Our agentic models can run on a laptop.
+
+With our technology, it takes only hours to optimize an Agentic model for a specific role or function (e.g., sales, accounting). That means we can release a custom, SOTA agentic model tailored for each market — and for each enterprise — in a couple of hours. Available on‑premise on servers or even laptops.
+
+## What makes it work (deeper)
 
 **Others**
 - Text as reasoning: produce more tokens before acting
-- Text as action: single function calls via tool bridges
+- Text as action: single function calls via tool bridges/MCPs
 - Raw text inputs: emails/transactions as unstructured blobs
 - Heavy truncation: context limits block real work
 
 **Us**
-- **Code as reasoning**: the model mixes foundational text reasoning with on‑demand live code analysis
-- **Code as action**: the model writes code to take action, call APIs, and reference data
-- **Intelligent truncation**: abstract representations (summaries, structure, snippets) to preserve breadth
-- **Self‑maintaining memory**: the model manages its own memory via code to deep‑dive large datasets
+- “Code as reasoning” — combine foundational text reasoning with on‑demand live code analysis
+- “Code as action” — the model writes code to take action, reference data, and call APIs
+- “Intelligent truncation” — abstract representations (summaries, structure, snippets) to preserve breadth
+- “Self‑maintaining memory” — the model manages its own memory via code to deep‑dive large datasets without blowing context
 
-## What this changes
+## Additional value and positioning
 
-- From single actions to thousands in parallel (e.g., add 1 row vs 1,000 rows)
-- Data‑driven work without hallucination (use data, don’t invent it)
-- Effective 1B+ context via structured retrieval and memory
-- Long tasks stay on track; the agent retains objectives and state
-
-Additional value:
-- Lower cost for data‑heavy tasks
-- Direct API connections
+- Much lower cost for data‑driven tasks
+- Direct connections to APIs
 - Drop‑in replacement for OpenAI/Anthropic APIs (switch in a few lines)
-- Price + tool‑use performance advantage → rapid adoption
+- Price and tool‑use performance advantage → rapid adoption
 
 > Incredible models are optimized for tool use and function calling. For pure chat or creative writing, use traditional LLMs. For getting actual work done with tools and APIs, we’re 10× better.
 
-## Get started
+## Start building
 
 <Card title="Quickstart" icon="rocket" href="/quickstart">
-  Create your first agent or call the chat API in minutes.
+  Run your first request in minutes.
 </Card>
 
-<Card title="Chat Completion" icon="comment" href="/api-reference/chat/completion">
-  Core endpoint — non‑streaming and streaming.
+<Card title="API Reference" icon="book" href="/api-reference/chat/completion">
+  Core endpoints and schemas.
 </Card>
 
-<Card title="Integrations" icon="plug" href="/api-reference/endpoint/list-integrations">
-  Available services and features.
+<Card title="Examples" icon="code" href="/examples/hello-incredible">
+  Copy‑paste samples for common flows.
 </Card>
