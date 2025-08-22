@@ -1,16 +1,37 @@
 ---
-title: "Building Your First Agent"
-description: "Step-by-step tutorial"
+title: "Build Your First Agent"
+description: "Step-by-step guide from zero to working agent"
 ---
 
-1) Get an API key from your dashboard
-2) Connect an integration (e.g., Gmail)
+### Overview
+In this guide you'll connect an integration and execute a feature via Chat Completion.
+
+### Steps
+1. Create an API key and export it in your environment.
+2. List integrations and pick one to use.
+3. Connect the integration (API key or OAuth).
+4. Execute a feature.
+5. Handle errors and log results.
+
+### 1) Create and export API key
+```bash
+export INCREDIBLE_API_KEY=your_api_key_here
+```
+
+### 2) List integrations
+```bash
+curl -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  https://api.incredible.one/v1/integrations | jq .
+```
+
+### 3) Connect integration (OAuth example)
 ```bash
 curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"your_user_id","callback_url":"https://your-app.com/callback"}'
 ```
-3) Execute a feature
+
+### 4) Execute a feature
 ```bash
 curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
   -H "Content-Type: application/json" \
@@ -20,5 +41,8 @@ curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
     "inputs": {"recipient_email": "user@example.com", "body": "Hello from Incredible API!"}
   }'
 ```
+
+### 5) Handle errors
+See the Error Handling guide for common scenarios and fixes.
 
 

@@ -3,10 +3,23 @@ title: "Error Handling"
 description: "Best practices and troubleshooting"
 ---
 
+Use these patterns to make your integrations resilient.
+
+### Quick checklist
 - Validate input before requests
 - Check HTTP status codes and error bodies
 - Retry transient errors with backoff
 - Log request IDs and timestamps for support
+
+### Common errors
+
+| Status | Error                         | When it happens                                 | How to fix |
+|--------|-------------------------------|--------------------------------------------------|------------|
+| 400    | Messages are required         | `messages` missing or empty                      | Provide at least one user message |
+| 401    | Unauthorized                  | Missing/invalid API key                          | Set `Authorization: Bearer $INCREDIBLE_API_KEY` |
+| 404    | Integration not found         | Wrong `integration_id`                           | Verify the ID via List/Get Integrations |
+| 429    | Rate limited                  | Too many requests                                | Exponential backoff and jitter |
+| 500    | Execution failed              | Upstream/provider errors                          | Retry with backoff; report `request_id` |
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" \
@@ -16,4 +29,5 @@ curl -s -o /dev/null -w "%{http_code}\n" \
   -d '{"model":"small-1","stream":false,"messages":[{"role":"user","content":"Ping"}]}'
 ```
 
+> Tip: Include the `request_id` from error responses when contacting support.
 

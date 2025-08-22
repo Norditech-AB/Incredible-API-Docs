@@ -12,29 +12,19 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Docs",
         "groups": [
           {
             "group": "Getting Started",
-            "pages": [
-              "index",
-              "quickstart",
-              "guides/authentication",
-              "guides/core-concepts"
-            ]
+            "pages": ["index", "quickstart"]
           },
           {
-            "group": "Guides",
-            "pages": [
-              "guides/build-first-agent",
-              "guides/working-with-integrations",
-              "guides/function-calling",
-              "guides/streaming-responses",
-              "guides/error-handling",
-              "guides/testing",
-              "guides/core-concepts",
-              "guides/changelog"
-            ]
+            "group": "Authentication",
+            "pages": ["guides/authentication"]
+          },
+          {
+            "group": "Architecture",
+            "pages": ["guides/core-concepts", "guides/build-first-agent"]
           },
           {
             "group": "Functions",
@@ -42,54 +32,42 @@
               "guides/tools/overview",
               "guides/tools/implementation",
               "guides/tools/token-efficient",
-              "guides/tools/fine-grained-streaming"
+              "guides/tools/fine-grained-streaming",
+              "guides/function-calling",
+              "guides/streaming-responses"
             ]
           },
           {
-            "group": "Examples",
+            "group": "SDKs & Webhooks",
+            "pages": ["guides/sdks", "guides/webhooks"]
+          },
+          {
+            "group": "Use Cases",
             "pages": [
+              "guides/use-cases",
               "examples/hello-incredible",
               "examples/basic-chat",
               "examples/multiple-models",
-              "examples/conversation",
               "examples/streaming-chat",
               "examples/function-calling",
               "examples/gmail-integration",
               "examples/perplexity-integration",
-              "examples/simple-calculator",
               "examples/multiple-tools",
               "examples/json-extraction",
-              "examples/advanced-workflow"
+              "examples/advanced-workflow",
+              "examples/conversation",
+              "examples/simple-calculator"
             ]
           },
           {
-            "group": "Policies",
-            "pages": [
-              "guides/privacy-policy"
-            ]
+            "group": "Errors & Help",
+            "pages": ["guides/error-handling", "guides/faq", "guides/testing", "guides/changelog", "guides/privacy-policy"]
           },
           {
-            "group": "Help & Resources",
-            "pages": [
-              "guides/faq"
-            ]
-          }
-        ]
-      },
-      
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Chat Completion",
+            "group": "API Reference",
             "pages": [
               "api-reference/chat/completion",
-              "api-reference/chat/completion-streaming"
-            ]
-          },
-          {
-            "group": "Integrations",
-            "pages": [
+              "api-reference/chat/completion-streaming",
               "api-reference/endpoint/list-integrations",
               "api-reference/endpoint/get-integration",
               "api-reference/endpoint/connect-integration",
@@ -99,9 +77,7 @@
         ]
       }
     ],
-    "global": {
-      "anchors": []
-    }
+    "global": {"anchors": []}
   },
   "logo": {
     "light": "/logo/Incredible-API-logo-lightmode.svg",
@@ -142,3 +118,4 @@
     }
   }
 }
+
