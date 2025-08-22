@@ -18,4 +18,12 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -d '{"model":"small-1","stream":false,"messages":[{"role":"user","content":"Ping"}]}'
 ```
 
+## Authentication Schemes
+
+- **API_KEY** - Requires API key in request body
+- **OAUTH2** - OAuth 2.0 flow with redirect
+- **OAUTH1** - OAuth 1.0 flow with redirect
+- **BASIC** - Basic authentication
+- **BEARER_TOKEN** - Bearer token authentication
+
 
