@@ -1,9 +1,9 @@
 ---
 title: 'Connect to Integration'
+description: "Connect a user’s account so your app can use that integration’s features. Supports API key and OAuth flows and is required before executing features."
 openapi: 'POST /v1/integrations/{integration_id}/connect'
 ---
 
-Connect to a specific integration using the appropriate authentication method.
 
 <ParamField header="integration_id" type="string" required>
   The unique identifier of the integration to connect to
@@ -12,6 +12,35 @@ Connect to a specific integration using the appropriate authentication method.
 ## API Key Authentication
 
 For integrations that use API key authentication (like Perplexity):
+
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/{integration_id}/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"user_123","api_key":"YOUR_API_KEY"}'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://api.incredible.one/v1/integrations/{integration_id}/connect",
+    json={"user_id": "user_123", "api_key": "YOUR_API_KEY"},
+)
+print(resp.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations/{integration_id}/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ user_id: "user_123", api_key: "YOUR_API_KEY" })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
 
 <RequestExample>
 
@@ -40,6 +69,35 @@ For integrations that use API key authentication (like Perplexity):
 ## OAuth Authentication
 
 For integrations that use OAuth authentication (like Gmail):
+
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/{integration_id}/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"user_123","callback_url":"https://your.app/oauth/callback"}'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://api.incredible.one/v1/integrations/{integration_id}/connect",
+    json={"user_id": "user_123", "callback_url": "https://your.app/oauth/callback"},
+)
+print(resp.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations/{integration_id}/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ user_id: "user_123", callback_url: "https://your.app/oauth/callback" })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
 
 <RequestExample>
 

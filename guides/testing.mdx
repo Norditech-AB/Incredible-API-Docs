@@ -1,0 +1,99 @@
+---
+title: "Testing the API"
+description: "Quick smoke tests for chat and integrations, with links to full scripts"
+---
+
+Run these minimal tests to verify your setup. For full runnable scripts, use our Cookbook (links below).
+
+## Prerequisites
+
+- An Incredible API key (if required by your deployment)
+- curl installed
+
+## Chat — non‑streaming smoke test
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [{"role": "user", "content": "Hello Incredible."}]
+  }'
+```
+
+Expected: JSON with `result.response[0].content`.
+
+## Chat — streaming smoke test (SSE)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion/stream" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "stream": true,
+    "messages": [{"role": "user", "content": "Stream hello"}]
+  }'
+```
+
+Expected: SSE lines, ending with `[DONE]`.
+
+## Integrations — connect (API key)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/perplexity/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "user_123", "api_key": "YOUR_API_KEY"}'
+```
+
+Expected: `{ "success": true, ... }`.
+
+## Integrations — connect (OAuth)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "user_123", "callback_url": "https://your.app/callback"}'
+```
+
+Expected: `{ "redirect_url": "https://..." }`.
+
+## Integrations — execute a feature
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user_123",
+    "feature_name": "gmail_send_email",
+    "inputs": {"recipient_email": "user@example.com", "body": "Hello"}
+  }'
+```
+
+Expected: `{ "success": true, "result": { ... } }`.
+
+## Full runnable examples (Cookbook)
+
+- Hello world: [0_hello_world.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/0_hello_world.py)
+- Multiple models: [2_multiple_models.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/2_multiple_models.py)
+- Conversation: [3_conversation.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/3_conversation.py)
+- Streaming chat: [4_streaming_chat.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/4_streaming_chat.py)
+- Function calling (basic): [5_function_calling.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/5_function_calling.py)
+- Gmail integration: [6_gmail_integration.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/6_gmail_integration.py)
+- Perplexity integration: [7_perplexity_integration.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/7_perplexity_integration.py)
+- Simple calculator tool: [1_simple_calculator.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/1_simple_calculator.py)
+- Multiple tools: [2_multiple_tools.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/2_multiple_tools.py)
+- JSON extraction: [3_json_extraction.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/3_json_extraction.py)
+- Advanced workflow: [4_advanced_workflow.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/4_advanced_workflow.py)
+
+## Postman collection
+
+Cookbook includes a Postman collection: `01-getting-started/Incredible_API_Postman_Collection.json`.
+
+## Troubleshooting
+
+- Ensure `integration_id` exists before calling connect/execute.
+- For OAuth, complete the redirect flow before executing features.
+- Check model name in requests (`"small-1"`).
+
+

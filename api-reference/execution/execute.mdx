@@ -3,7 +3,7 @@ title: "Execute Integration Feature"
 openapi: "POST /v1/integrations/{integration_id}/execute"
 ---
 
-Execute a specific feature or function from a connected integration. This endpoint is primarily used by agentic models to perform actions through integrations on behalf of users.
+Run a specific feature from a connected integration to take action in another app (for example, send an email or post a message) via a consistent interface across integrations.
 
 ## Overview
 
@@ -15,112 +15,9 @@ After connecting to an integration, you can execute its available features by ca
 2. **Feature must exist** - The feature name must be in the integration's available functions list
 3. **Proper authentication** - User must be authenticated and authorized
 
-## Request Body
-
-### Required Fields
-- **user_id** - The ID of the user executing the feature
-- **feature_name** - The name of the function to execute
-
-### Optional Fields
-- **inputs** - Object containing the parameters needed for the feature
-
 ## Available Features
 
 To see what features an integration supports, use the [Get Integration Details](/api-reference/integrations/get-details) endpoint and check the `functions` array.
-
-## Example Requests
-
-### GitHub: Create an Issue
-```json
-{
-  "user_id": "user123",
-  "feature_name": "create_issue",
-  "inputs": {
-    "repository": "myorg/myrepo",
-    "title": "Bug report",
-    "body": "Description of the issue",
-    "labels": ["bug", "urgent"]
-  }
-}
-```
-
-### Slack: Send Message
-```json
-{
-  "user_id": "user123", 
-  "feature_name": "send_message",
-  "inputs": {
-    "channel": "#general",
-    "text": "Hello from the API!",
-    "thread_ts": "1234567890.123456" // optional
-  }
-}
-```
-
-### Google Drive: Upload File
-```json
-{
-  "user_id": "user123",
-  "feature_name": "upload_file", 
-  "inputs": {
-    "file_name": "document.pdf",
-    "file_content": "base64-encoded-content",
-    "folder_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-  }
-}
-```
-
-## Response Format
-
-### Success Response
-```json
-{
-  "success": true,
-  "result": {
-    // Integration-specific result data
-    "id": "12345",
-    "url": "https://github.com/myorg/myrepo/issues/42"
-  },
-  "integration_id": "github",
-  "feature_name": "create_issue", 
-  "user_id": "user123"
-}
-```
-
-### Error Responses
-
-**400 Bad Request - Missing Parameters:**
-```json
-{
-  "error": "Feature name required",
-  "instructions": "Please provide feature_name in request body"
-}
-```
-
-**400 Bad Request - Feature Not Found:**
-```json
-{
-  "error": "Feature not found",
-  "available_features": ["create_issue", "list_repositories", "create_pull_request"]
-}
-```
-
-**404 Not Found:**
-```json
-{
-  "error": "Integration not found"
-}
-```
-
-**500 Internal Server Error:**
-```json
-{
-  "error": "Feature execution failed",
-  "details": "Authentication token expired",
-  "integration_id": "github",
-  "feature_name": "create_issue"
-}
-```
 
 ## Best Practices
 

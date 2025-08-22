@@ -8,7 +8,7 @@
     "dark": "#FF6200"
   },
   "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
-  "favicon": "/favicon.svg",
+  "favicon": "/logo/Incredible-API-favicon.svg",
   "navigation": {
     "tabs": [
       {
@@ -30,11 +30,12 @@
               "guides/working-with-integrations",
               "guides/function-calling",
               "guides/streaming-responses",
-              "guides/error-handling"
+              "guides/error-handling",
+              "guides/testing"
             ]
           },
           {
-            "group": "Tools",
+            "group": "Functions",
             "pages": [
               "guides/tools/overview",
               "guides/tools/implementation",
@@ -45,11 +46,18 @@
           {
             "group": "Examples",
             "pages": [
+              "examples/hello-incredible",
               "examples/basic-chat",
               "examples/multiple-models",
               "examples/conversation",
               "examples/streaming-chat",
-              "examples/function-calling"
+              "examples/function-calling",
+              "examples/gmail-integration",
+              "examples/perplexity-integration",
+              "examples/simple-calculator",
+              "examples/multiple-tools",
+              "examples/json-extraction",
+              "examples/advanced-workflow"
             ]
           },
           {
@@ -94,8 +102,8 @@
     }
   },
   "logo": {
-    "light": "/images/Incredible — Logomark Black Orange.svg",
-    "dark": "/images/Incredible — Logomark White Orange.svg"
+    "light": "/logo/Incredible-API-logo-lightmode.svg",
+    "dark": "/logo/Incredible-API-logo.svg"
   },
   "navbar": {
     "links": [],
@@ -120,10 +128,10 @@
   "footer": {
     "socials": {
       "x": "https://x.com/incredible_one_",
-      "github": "https://github.com/incredible-ai",
+      "github": "https://github.com/Norditech-AB/Incredible-API-Cookbook",
       "linkedin": "https://www.linkedin.com/company/incredible-linkedin/",
       "youtube": "https://www.youtube.com/@become_incredible",
-      "instagram": "https://www.instagram.com/",
+      "instagram": "https://www.instagram.com/we.r.incredible?igsh=cmEyN2o1NDR2dDIx&utm_source=qr",
       "discord": "https://discord.com/invite/pNmdkxgBe2"
     }
   }

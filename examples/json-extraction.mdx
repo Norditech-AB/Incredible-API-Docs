@@ -1,0 +1,40 @@
+---
+title: "JSON Extraction Tool"
+description: "Use a tool to extract structured JSON from text"
+---
+
+ 
+
+Illustrates schema-driven extraction and validation.
+
+### 1) Provide an extraction tool
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [{"role": "user", "content": "Extract companies mentioned: Apple acquired Beats for $3B."}],
+    "functions": [{
+      "name": "extract_entities",
+      "description": "Extract companies and amounts",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "companies": {"type": "array", "items": {"type": "string"}},
+          "amount": {"type": "string"}
+        },
+        "required": ["companies"]
+      }
+    }]
+  }'
+```
+
+Send `function_call_result` with the extracted JSON to complete the answer.
+
+<Note>
+View source on GitHub → [3_json_extraction.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/3_json_extraction.py)
+</Note>
+
+ 
+

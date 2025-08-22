@@ -10,12 +10,34 @@ Establish a connection to a specific integration. The connection process varies 
 ### API Key Authentication
 For integrations that use API keys, provide the key directly in the request:
 
-```json
-{
-  "user_id": "user123",
-  "api_key": "your-api-key-here"
-}
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/{integration_id}/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"user123","api_key":"YOUR_API_KEY"}'
 ```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://api.incredible.one/v1/integrations/{integration_id}/connect",
+    json={"user_id": "user123", "api_key": "YOUR_API_KEY"},
+)
+print(resp.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations/{integration_id}/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ user_id: "user123", api_key: "YOUR_API_KEY" })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
 
 **Response for API Key Auth:**
 ```json
@@ -28,12 +50,34 @@ For integrations that use API keys, provide the key directly in the request:
 ### OAuth Authentication (OAuth1 & OAuth2)
 For OAuth-based integrations, you'll receive a redirect URL:
 
-```json
-{
-  "user_id": "user123",
-  "callback_url": "https://backend.viss.ai/app-auth/oauth2-callback" // optional
-}
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/{integration_id}/connect" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"user123","callback_url":"https://your.app/oauth/callback"}'
 ```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://api.incredible.one/v1/integrations/{integration_id}/connect",
+    json={"user_id": "user123", "callback_url": "https://your.app/oauth/callback"},
+)
+print(resp.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations/{integration_id}/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ user_id: "user123", callback_url: "https://your.app/oauth/callback" })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
 
 **Response for OAuth:**
 ```json
@@ -60,11 +104,7 @@ For OAuth-based integrations, you'll receive a redirect URL:
 4. **Provider redirects** back to our auth callback endpoint
 5. **We redirect** to your `callback_url` (if provided) with status parameters
 
-## Error Responses
-
-- **400 Bad Request** - Missing required parameters (user_id or api_key)
-- **404 Not Found** - Integration does not exist
-- **500 Internal Server Error** - Connection failed due to server error
+ 
 
 ## Example: Connecting to GitHub
 

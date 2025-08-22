@@ -1,28 +1,48 @@
 ---
 title: 'Execute Integration Feature'
+description: "Run a feature from a connected integration to take action in another app (send email, create issue, post message) using a single endpoint that works across integrations."
 openapi: 'POST /v1/integrations/{integration_id}/execute'
 ---
 
-Execute a specific feature from an integration. This endpoint is typically used by the agentic model to perform actions through connected integrations.
 
 <ParamField header="integration_id" type="string" required>
   The unique identifier of the integration to execute the feature from
 </ParamField>
 
-<RequestExample>
+<CodeGroup>
 
-```json
-{
-  "user_id": "your_user_id",
-  "feature_name": "gmail_send_email",
-  "inputs": {
-    "recipient_email": "user@example.com",
-    "body": "Hello from Incredible API!"
-  }
-}
+```bash
+curl -X POST "https://api.incredible.one/v1/integrations/{integration_id}/execute" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "your_user_id", "feature_name": "gmail_send_email", "inputs": {"recipient_email": "user@example.com", "body": "Hello from Incredible API!"}}'
 ```
 
-</RequestExample>
+```python
+import requests
+
+payload = {
+  "user_id": "your_user_id",
+  "feature_name": "gmail_send_email",
+  "inputs": {"recipient_email": "user@example.com", "body": "Hello from Incredible API!"}
+}
+res = requests.post("https://api.incredible.one/v1/integrations/{integration_id}/execute", json=payload)
+print(res.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations/{integration_id}/execute", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: "your_user_id",
+    feature_name: "gmail_send_email",
+    inputs: { recipient_email: "user@example.com", body: "Hello from Incredible API!" }
+  })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
 
 <ResponseExample>
 

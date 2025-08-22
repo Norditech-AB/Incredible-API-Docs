@@ -11,7 +11,7 @@ The fastest way to try Incredible is a single cURL call.
 export INCREDIBLE_API_KEY=your_api_key_here
 ```
 
-## 2) Hello, Incredible (non‑streaming)
+## 2) Hello, Incredible
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
@@ -20,10 +20,10 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -d '{
     "model":"small-1",
     "stream": false,
-    "messages": [{"role": "user", "content": "hello incredioble!!"}]
+    "messages": [{"role": "user", "content": "Hello, Incredible!"}]
   }'
 ```
 
 That’s it. You’ll get a JSON response with the assistant’s reply in `result.response[0].content`.
 
-Next: explore Examples → Basic Chat for a slightly longer sample, or Tools to learn function calling.
+Next: explore Examples → Basic Chat for a slightly longer sample,or Tools to learn function calling
