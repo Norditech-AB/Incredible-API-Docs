@@ -1,9 +1,9 @@
 ---
 title: 'Connect to Integration'
+description: "Connect a user’s account so your app can use that integration’s features. Supports API key and OAuth flows and is required before executing features."
 openapi: 'POST /v1/integrations/{integration_id}/connect'
 ---
 
-Connect a user’s account so your app can access and use that integration’s features. Supports API key and OAuth flows and is required before any feature execution.
 
 <ParamField header="integration_id" type="string" required>
   The unique identifier of the integration to connect to
