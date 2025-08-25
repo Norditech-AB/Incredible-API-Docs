@@ -1,6 +1,32 @@
 ---
-title: "Chat Completion (Non-Streaming)"
-description: "Ask a question and get a complete answer in one response — ideal for quick answers, UI buttons, background jobs, and simple function orchestration when you want the final text without streaming or SSE handling."
+title: "Chat Completion"
+description: "Ask a question and get a response. Use stream=true to receive an SSE stream, or stream=false for a single JSON response."
 openapi: "POST /v1/chat-completion"
 ---
+
+### Responses
+
+#### stream = true
+
+```text
+data: {"content": {"type": "text_chunk", "content": "Hello"}}
+data: {"content": {"type": "function_call", "function_call_id": "...", "function_calls": []}}
+data: {"content": "[DONE]"}
+```
+
+#### stream = false
+
+```json
+{
+  "result": {
+    "response": [
+      {
+        "content": "Hello! 👋",
+        "role": "assistant"
+      }
+    ],
+    "thinking": "Greet the user briefly."
+  }
+}
+```
 
