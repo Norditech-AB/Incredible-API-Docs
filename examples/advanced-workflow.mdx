@@ -17,9 +17,13 @@ Open the linked file for the full runnable script.
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
-    "messages": [{"role": "user", "content": "Research and draft a brief report; use tools as needed."}],
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "Research and draft a brief report; use tools as needed."}
+    ],
     "functions": [/* planner, fetch, analyze, format tools */]
   }'
 ```

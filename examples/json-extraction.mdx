@@ -7,30 +7,61 @@ description: "Use a tool to extract structured JSON from text"
 
 Illustrates schema-driven extraction and validation.
 
-### 1) Provide an extraction tool
+### 1) Provide extraction tools and ask for structured data
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
-    "messages": [{"role": "user", "content": "Extract companies mentioned: Apple acquired Beats for $3B."}],
-    "functions": [{
-      "name": "extract_entities",
-      "description": "Extract companies and amounts",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "companies": {"type": "array", "items": {"type": "string"}},
-          "amount": {"type": "string"}
-        },
-        "required": ["companies"]
+    "stream": false,
+    "messages": [{"role": "user", "content": "Extract structured company M&A info from: Apple acquired Beats for $3B."}],
+    "functions": [
+      {
+        "name": "extract_business_info",
+        "description": "Extract and structure business information from unstructured text",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "company": {"type": "string"},
+            "industry": {"type": "string"},
+            "employees": {"type": "string"},
+            "location": {"type": "string"},
+            "revenue": {"type": "string"},
+            "founded": {"type": "string"}
+          },
+          "required": ["company", "industry", "location"]
+        }
       }
-    }]
+    ]
   }'
 ```
 
-Send `function_call_result` with the extracted JSON to complete the answer.
+The response includes a `type: "function_call"` with `function_call_id` and extracted fields. Execute your extraction locally if needed, then send the result.
+
+### 2) Send back the extracted JSON
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "Extract structured company M&A info from: Apple acquired Beats for $3B."},
+      {"type": "function_call", "function_call_id": "CALL_ID_FROM_STEP_1", "function_calls": [{
+        "name": "extract_business_info",
+        "input": {"company": "Apple", "industry": "Technology", "location": "Cupertino", "revenue": "$3B"}
+      }]},
+      {"type": "function_call_result", "function_call_id": "CALL_ID_FROM_STEP_1", "function_call_results": [{"company": "Apple", "industry": "Technology", "location": "Cupertino", "financial": {"revenue": "$3B"}}]}
+    ],
+    "functions": [
+      {"name": "extract_business_info", "description": "Extract and structure business information from unstructured text", "parameters": {"type": "object", "properties": {"company": {"type": "string"}, "industry": {"type": "string"}, "employees": {"type": "string"}, "location": {"type": "string"}, "revenue": {"type": "string"}, "founded": {"type": "string"}}, "required": ["company", "industry", "location"]}}
+    ]
+  }'
+```
 
 <Note>
 View source on GitHub → [3_json_extraction.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/3_json_extraction.py)

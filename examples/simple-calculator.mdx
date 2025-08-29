@@ -3,36 +3,64 @@ title: "Simple Calculator Tool"
 description: "Function calling with a calculator tool"
 ---
 
- 
+This mirrors the current Cookbook. The assistant first asks to call your function, then you return the result using `function_call_result`.
 
-Shows defining a `calculate_product` tool and returning results to the assistant.
-
-### 1) Request with tool
+### 1) Initial request (expose calculator)
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,
+    "messages": [{"role": "user", "content": "What is 127 + 349?"}],
     "functions": [{
-      "name": "calculate_product",
-      "description": "Multiply two numbers",
+      "name": "calculate_sum",
+      "description": "Add two numbers together and return the sum",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
+    }]
+  }'
+```
+
+The response includes a `type: "function_call"` with `function_call_id` and arguments.
+
+### 2) Follow-up with the result
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "What is 127 + 349?"},
+      {"type": "function_call", "function_call_id": "CALL_ID_FROM_STEP_1", "function_calls": [{
+        "name": "calculate_sum", "input": {"a": 127, "b": 349}
+      }]},
+      {"type": "function_call_result", "function_call_id": "CALL_ID_FROM_STEP_1", "function_call_results": [476]}
+    ],
+    "functions": [{
+      "name": "calculate_sum",
+      "description": "Add two numbers together and return the sum",
       "parameters": {
         "type": "object",
         "properties": {"a": {"type": "number"}, "b": {"type": "number"}},
         "required": ["a", "b"]
       }
-    }],
-    "messages": [{"role": "user", "content": "What is 15 * 23?"}]
+    }]
   }'
 ```
-
-When the model returns a `function_call`, execute the function locally and send back a `function_call_result` in a follow‑up request.
 
 <Note>
 View source on GitHub → [1_simple_calculator.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/1_simple_calculator.py)
 </Note>
-
- 
 
