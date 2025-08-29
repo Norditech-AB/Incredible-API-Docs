@@ -93,7 +93,16 @@
     "dark": "/logo/Incredible-API-logo.svg"
   },
   "navbar": {
-    "links": [],
+    "links": [
+      {
+        "label": "Blog",
+        "href": "https://www.incredible.one/blog"
+      },
+      {
+        "label": "Website",
+        "href": "https://www.incredible.one/"
+      }
+    ],
     "primary": {
       "type": "button",
       "label": "Get Started",
