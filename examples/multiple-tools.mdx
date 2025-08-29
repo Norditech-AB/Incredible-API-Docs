@@ -3,30 +3,69 @@ title: "Multiple Tools"
 description: "Chain multiple tools in one session"
 ---
 
- 
+This mirrors the Cookbook’s multi-tool flow. The model returns a `function_call`, you execute it locally, then send a `function_call_result`. Repeat for subsequent tool calls.
 
-Shows sequential tool calls and passing outputs between tools.
-
-### 1) Enable two tools
+### 1) Initial request (expose multiple tools)
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
-    "messages": [{"role": "user", "content": "What\'s the weather where I am?"}],
+    "stream": false,
+    "messages": [{"role": "user", "content": "What's the weather in Tokyo right now?"}],
     "functions": [
-      {"name": "get_location", "description": "Infer city from IP", "parameters": {"type": "object", "properties": {"ip": {"type": "string"}}}},
-      {"name": "get_weather", "description": "Weather by city", "parameters": {"type": "object", "properties": {"location": {"type": "string"}}, "required": ["location"]}}
+      {
+        "name": "get_weather_info",
+        "description": "Get current weather information for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {"city": {"type": "string"}},
+          "required": ["city"]
+        }
+      },
+      {
+        "name": "get_current_time",
+        "description": "Get the current time in a specified timezone",
+        "parameters": {
+          "type": "object",
+          "properties": {"timezone": {"type": "string", "enum": ["UTC", "EST", "PST", "JST", "GMT"]}},
+          "required": []
+        }
+      }
     ]
   }'
 ```
 
-Execute `get_location`, then call back with its result, allowing the model to invoke `get_weather` next.
+The response will include a `type: "function_call"` for the chosen tool.
+
+### 2) Send the result back (repeat per tool)
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "What's the weather in Tokyo right now?"},
+      {"type": "function_call", "function_call_id": "CALL_ID_FROM_STEP_1", "function_calls": [{
+        "name": "get_weather_info", "input": {"city": "Tokyo"}
+      }]},
+      {"type": "function_call_result", "function_call_id": "CALL_ID_FROM_STEP_1", "function_call_results": ["Rainy, 68°F, Humidity: 90%"]}
+    ],
+    "functions": [
+      {"name": "get_weather_info", "description": "Get current weather information for a city", "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}},
+      {"name": "get_current_time", "description": "Get the current time in a specified timezone", "parameters": {"type": "object", "properties": {"timezone": {"type": "string", "enum": ["UTC", "EST", "PST", "JST", "GMT"]}}, "required": []}}
+    ]
+  }'
+```
 
 <Note>
 View source on GitHub → [2_multiple_tools.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/02-function-calling/2_multiple_tools.py)
 </Note>
 
  
-
+ 

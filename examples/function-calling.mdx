@@ -3,6 +3,10 @@ title: "Function Calling"
 description: "Let the AI call your functions and use the results"
 ---
 
+This shows the two-step flow used by the current Cookbook: the model returns a function call first, you execute it locally, then send back a `function_call_result` for the final answer.
+
+### 1) Initial request (expose your functions)
+
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
@@ -10,18 +14,61 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -d '{
     "model": "small-1",
     "stream": false,
-    "messages": [{"role": "user", "content": "What is 25 + 17?"}],
+    "messages": [
+      {"role": "user", "content": "What is 25 + 17?"}
+    ],
     "functions": [{
       "name": "add_numbers",
-      "description": "Add two numbers",
+      "description": "Add two numbers together",
       "parameters": {
         "type": "object",
-        "properties": {"a": {"type": "number"}, "b": {"type": "number"}},
+        "properties": {
+          "a": {"type": "number", "description": "First number"},
+          "b": {"type": "number", "description": "Second number"}
+        },
         "required": ["a", "b"]
       }
     }]
   }'
 ```
+
+The response will include a `type: "function_call"` item with a `function_call_id` and the arguments for `add_numbers`.
+
+### 2) Send back the function result
+
+Execute `add_numbers(a, b)` locally, then include both the function call item and a `function_call_result` in a follow-up request:
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
+  -d '{
+    "model": "small-1",
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "What is 25 + 17?"},
+      {"type": "function_call", "function_call_id": "CALL_ID_FROM_STEP_1", "function_calls": [{
+        "name": "add_numbers",
+        "input": {"a": 25, "b": 17}
+      }]},
+      {"type": "function_call_result", "function_call_id": "CALL_ID_FROM_STEP_1", "function_call_results": [42]}
+    ],
+    "functions": [{
+      "name": "add_numbers",
+      "description": "Add two numbers together",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
+    }]
+  }'
+```
+
+The assistant will return the final natural-language answer using the function result.
 
 <Note>
 View source on GitHub → [5_function_calling.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/5_function_calling.py)
