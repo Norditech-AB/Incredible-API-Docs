@@ -17,32 +17,32 @@
           {
             "group": "Getting Started",
             "pages": [
-              "index",
+              "api-reference/introduction",
               "quickstart",
-              "guides/authentication",
-              "guides/core-concepts"
+              "guides/models-overview"
             ]
           },
           {
-            "group": "Guides",
+            "group": "Taking Actions",
             "pages": [
-              "guides/build-first-agent",
-              "guides/working-with-integrations",
-              "guides/function-calling",
-              "guides/streaming-responses",
-              "guides/error-handling",
-              "guides/testing"
+              "guides/taking-actions-overview",
+              "guides/how-to-implement-function-calling",
+              "guides/mathematical-operations",
+              "guides/connecting-api-endpoints",
+              "guides/application-state-management"
             ]
           },
           {
-            "group": "Functions",
+            "group": "Capabilities",
             "pages": [
-              "guides/tools/overview",
-              "guides/tools/implementation",
-              "guides/tools/token-efficient",
-              "guides/tools/fine-grained-streaming"
+              "guides/streaming-responses"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Examples",
+        "groups": [
           {
             "group": "Examples",
             "pages": [
@@ -58,18 +58,6 @@
               "examples/multiple-tools",
               "examples/json-extraction",
               "examples/advanced-workflow"
-            ]
-          },
-          {
-            "group": "Policies",
-            "pages": [
-              "guides/privacy-policy"
-            ]
-          },
-          {
-            "group": "Help & Resources",
-            "pages": [
-              "guides/faq"
             ]
           }
         ]

@@ -1,19 +1,71 @@
 ---
-title: "Streaming Responses"
+title: "Streaming"
 description: "Real-time data handling"
 ---
 
-Enable streaming with `stream: true` and handle SSE on the client.
+Streaming allows you to receive Incredible's response incrementally as it's generated, rather than waiting for the complete response. This provides a better user experience for longer responses and enables real-time interactions.
 
-```bash
+## Streaming with Tools
+
+When using function calling with streaming, tool parameters are streamed as partial JSON:
+
+```jsx
+
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
-    "stream": true,
-    "messages": [{"role": "user", "content": "Explain streaming in one sentence"}]
+    "stream":true,
+    "messages": [{"role": "user", "content": "What is the weather in San Francisco?"}],
+    "functions": [{
+      "name": "get_weather",
+      "description": "Get the current weather in a given location",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}
+        },
+        "required": ["location"]
+      }
+    }]
   }'
+
 ```
 
+Example response
 
+```jsx
+[
+  {
+    "content": {
+      "type": "text_chunk",
+      "content": "Hello"
+    }
+  },
+  {
+    "content": {
+      "type": "function_call",
+      "function_call_id": "...",
+      "function_calls": [
+        {
+          "name": "get_weather",
+          "arguments": {
+            "location": "San Francisco, CA"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "content": "[DONE]"
+  }
+]
+
+```
+
+When working with streaming responses, the API returns content in multiple `text_chunks`. To get the full message, you need to combine these chunks together in the order they arrive. Each chunk is part of the overall text, so only after concatenation do you get the complete response.
+
+### User Experience
+
+- **Progressive rendering**: Display content as it streams in for better perceived performance
+- **Loading indicators**: Show appropriate loading states during streaming

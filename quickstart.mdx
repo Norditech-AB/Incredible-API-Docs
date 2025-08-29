@@ -1,29 +1,56 @@
 ---
-title: 'Quick Start'
+title: 'Quickstart'
 description: 'Say “Hello, Incredible!” with one request'
 ---
 
-The fastest way to try Incredible is a single cURL call.
+Welcome to **Incredible**!
 
-## 1) Set your API key
+The fastest way to get started is with a single API call—say *“Hello, Incredible!”* using cURL.
 
-```bash
-export INCREDIBLE_API_KEY=your_api_key_here
-```
+### 📡 Make Your First API Call
 
-## 2) Hello, Incredible
+Run the following cURL command to send your first request:
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
-    "model":"small-1",
-    "stream": false,
-    "messages": [{"role": "user", "content": "Hello, Incredible!"}]
+    "model": "small-1",
+    "messages": [
+      { "role": "user", "content": "Hello, Incredible!" }
+    ]
   }'
 ```
 
-That’s it. You’ll get a JSON response with the assistant’s reply in `result.response[0].content`.
+**Example output:**
 
-Next: explore Examples → Basic Chat for a slightly longer sample,or Tools to learn function calling
+```jsx
+{
+    "result": {
+        "thinking": "The user is greeting me with \"Hello, Incredible!\" I should respond politely and introducem myself as a helpful assistant. I don't need to use any tools for this simple greeting."
+        "response": [{
+            "content": "\nHello! I'm an AI assistant powered by Incredible, and I'm here to help you. I have access to various tools that allow me to run functions and perform analysis. How can I assist you today?",
+            "role": "assistant"
+        }],
+    }
+}
+```
+
+The output includes what the model was “thinking” before it gave the user a “response”.
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Quick note:</strong> The model can also perform other types of server-side actions, and will include the results from those in the response. The full response needs to be added to future messages. Tip: copy all items from the response into your messages so the model can use them in subsequent steps.
+</div>
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Taking actions" icon="wrench" href="/guides/function-calling">
+    Using function calling.
+  </Card>
+  <Card title="Capabilities" icon="bolt" href="/guides/streaming-responses">
+    Learn about streaming responses and more.
+  </Card>
+  <Card title="Cookbook" icon="book-open" href="https://github.com/Norditech-AB/Incredible-API-Cookbook">
+    Example projects you can try out.
+  </Card>
+</div>
+

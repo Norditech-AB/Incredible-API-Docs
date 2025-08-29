@@ -1,0 +1,46 @@
+---
+title: 'Connecting API Endpoints'
+description: 'Call external APIs via function calling and pass results back to the model'
+---
+
+### External API Integration
+
+Enable Incredible to interact with third-party services:
+
+Connect your AI to real services and systems:
+
+```jsx
+curl https://api.incredible.one/v1/chat-completion \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "functions": [
+      {
+        "name": "get_weather",
+        "description": "Get current weather information for a specific location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City name or coordinates"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"],
+              "description": "Temperature unit"
+            }
+          },
+          "required": ["location"]
+        }
+      }
+    ],
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather like in San Francisco?"
+      }
+    ]
+  }'
+```
+

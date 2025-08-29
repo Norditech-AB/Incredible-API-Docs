@@ -1,0 +1,151 @@
+---
+title: 'How to implement Function Calling'
+description: 'Define functions, detect calls, execute them, and return results'
+---
+
+### **Defining functions**
+
+This request is an example of **function calling**. You’re telling the AI model not only *what the user said* but also *what tools (functions) are available* for it to use.
+
+<table style={{ width: '100%', borderCollapse: 'separate' }}>
+  <thead>
+    <tr>
+      <th style={{ textAlign: 'left', padding: '12px 16px', width: '26%' }}>Field</th>
+      <th style={{ textAlign: 'left', padding: '12px 16px' }}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>model</code></td>
+      <td style={{ padding: '12px 16px' }}>Specifies which AI model will process the request.</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>functions</code></td>
+      <td style={{ padding: '12px 16px' }}>A cookbook of tools. Each function has a name, description, and parameters. Here, <code>get_weather</code> is defined to fetch weather details.</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>parameters</code></td>
+      <td style={{ padding: '12px 16px' }}>Describes the function inputs. Requires <code>location</code>; optionally <code>unit</code> (<code>celsius</code> or <code>fahrenheit</code>).</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>messages</code></td>
+      <td style={{ padding: '12px 16px' }}>Represents the conversation history. The user asked, “What is the weather like in San Francisco?”</td>
+    </tr>
+  </tbody>
+ </table>
+
+Here is an example function definition for a `get_weather` function:
+
+```jsx
+{
+    "model": "small-1",
+    "functions": [
+      {
+        "name": "get_weather",
+        "description": "Get current weather information for a specific location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City name or coordinates"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"],
+              "description": "Temperature unit"
+            }
+          },
+          "required": ["location"]
+        }
+      }
+    ],
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather like in San Francisco?"
+      }
+    ]
+}
+```
+
+### Handling Function Calls
+
+When the model calls a function, you must execute it and return the result. Since model responses can include zero, one, or multiple calls, it is best practice to assume there are several.
+
+Sample response with multiple function calls:
+
+```jsx
+{
+    "result": {
+        "response": [
+	        {
+	            "content": "\nI'll get the current weather information for San Francisco for you.\n",
+	            "role": "assistant"
+	        }, 
+	        {
+	            "type": "function_call"
+	            "function_call_id": "664fdcb1-f26b-4a3c-a96d-beb733f321b1",
+	            "function_calls": [
+		            {
+		                "name": "get_weather"
+		                "input": {
+		                    "location": "San Francisco"
+		                },
+		            }
+	            ],
+	        }
+        ],
+        "thinking": "The user is asking about the weather in San Francisco. I need to use the `get_weather` function to get this information. Looking at the function description:\n\n- `location` (required): City name or coordinates (type: string)\n- `unit` (optional): Temperature unit (type: string), allowed values: celsius, fahrenheit\n\nThe user provided \"San Francisco\" as the location, which is a city name. They didn't specify a temperature unit, and since it's optional, I don't need to ask for it. I'll just call the function with the location parameter.\n\nI need to use the `run_function` tool to write code that calls the `get_weather` function."
+    }
+}
+```
+
+<p><code>function_call_id</code> is a unique identifier for a specific function call. You will use this ID when you later submit the <em>result</em> of that call back to the model so it can associate the output with the correct request.</p>
+
+<p><code>function_calls</code> contains one or more function invocations in the order the model wants them executed. If multiple functions are requested, execute them and return their results <strong>in the same order</strong> so the model can reason correctly over each output.</p>
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Quick note:</strong> The model can also perform other types of server-side actions, and will include the results from those in the response. The full response needs to be added to future messages. Tip: copy all items from the response into your messages so the model can use them in subsequent steps.
+</div>
+
+### Providing Tool Results
+
+After executing the function, send the results back in a follow-up message to let the agentic model continue.
+
+```jsx
+{
+    "model": "small-1",
+    "functions": [ ...same as before ],
+    "messages": [
+      { 
+	      "role": "user", 
+	      "content": "What is the weather like in San Francisco?" 
+      },
+      {
+          "content": "\nI'll get the current weather information for San Francisco for you.\n",
+          "role": "assistant"
+      }, 
+      {
+          "type": "function_call"
+          "function_call_id": "664fdcb1-f26b-4a3c-a96d-beb733f321b1",
+          "function_calls": [
+            {
+                "name": "get_weather"
+                "input": {
+                    "location": "San Francisco"
+                },
+            }
+          ],
+	    },
+	    {
+	        "type": "function_call_result",
+	        "function_call_id": "664fdcb1-f26b-4a3c-a96d-beb733f321b1",
+	        "function_call_results": [
+		        { "degrees": 14 }
+	        ]
+      }
+    ]
+}
+```
+
