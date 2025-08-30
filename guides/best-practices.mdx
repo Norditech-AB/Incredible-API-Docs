@@ -11,92 +11,81 @@ Here are the key practices that will help you build reliable applications with t
 
 Instead of multiple API calls, combine related requests:
 
-<Tabs>
-  <Tab title="cURL">
-```bash
+<CodeGroup>
+  ```bash Shell
 # ❌ Multiple calls
 curl -d '{"messages": [{"role": "user", "content": "Get user 1"}]}' ...
 curl -d '{"messages": [{"role": "user", "content": "Get user 2"}]}' ...
 
 # ✅ Single call
 curl -d '{"messages": [{"role": "user", "content": "Get users 1 and 2"}]}' ...
-```
-  </Tab>
-  <Tab title="Python">
-```python
+  ```
+
+  ```python Python
 # ❌ Multiple calls
 response1 = requests.post(url, json={"messages": [{"role": "user", "content": "Get user 1"}]})
 response2 = requests.post(url, json={"messages": [{"role": "user", "content": "Get user 2"}]})
 
 # ✅ Single call
 response = requests.post(url, json={"messages": [{"role": "user", "content": "Get users 1 and 2"}]})
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ### 2. **Use Streaming for Long Responses**
 
 Enable streaming for better user experience:
 
-<Tabs>
-  <Tab title="cURL">
-```bash
+<CodeGroup>
+  ```bash Shell
 curl -d '{"stream": true, "messages": [{"role": "user", "content": "Generate a long report"}]}' ...
-```
-  </Tab>
-  <Tab title="Python">
-```python
+  ```
+
+  ```python Python
 response = requests.post(url, json={
     "stream": True, 
     "messages": [{"role": "user", "content": "Generate a long report"}]
 }, stream=True)
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ## 🛡️ Security
 
 ### 3. **Never Hardcode Credentials**
 
-<Tabs>
-  <Tab title="cURL">
-```bash
+<CodeGroup>
+  ```bash Shell
 # ❌ Don't do this
 api_key="inc_abc123..."
 
 # ✅ Use environment variables
 api_key="$INCREDIBLE_API_KEY"
-```
-  </Tab>
-  <Tab title="Python">
-```python
+  ```
+
+  ```python Python
 # ❌ Don't do this
 api_key = "inc_abc123..."
 
 # ✅ Use environment variables
 import os
 api_key = os.getenv("INCREDIBLE_API_KEY")
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ### 4. **Validate User Input**
 
 Check prompts before sending to the API:
 
-<Tabs>
-  <Tab title="Python">
-```python
+<CodeGroup>
+  ```python Python
 def validate_prompt(prompt):
     if len(prompt) > 10000:
         return "Prompt too long"
     if "<script>" in prompt.lower():
         return "Invalid content"
     return None
-```
-  </Tab>
-  <Tab title="JavaScript">
-```javascript
+  ```
+
+  ```javascript JavaScript
 function validatePrompt(prompt) {
     if (prompt.length > 10000) {
         return "Prompt too long";
@@ -106,27 +95,24 @@ function validatePrompt(prompt) {
     }
     return null;
 }
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ## 🔄 Reliability
 
 ### 5. **Handle Errors Gracefully**
 
-<Tabs>
-  <Tab title="Python">
-```python
+<CodeGroup>
+  ```python Python
 try:
     response = call_incredible_api(prompt)
     return response
 except Exception as e:
     print(f"API call failed: {e}")
     return fallback_response()
-```
-  </Tab>
-  <Tab title="JavaScript">
-```javascript
+  ```
+
+  ```javascript JavaScript
 try {
     const response = await callIncredibleApi(prompt);
     return response;
@@ -134,15 +120,13 @@ try {
     console.error(`API call failed: ${error}`);
     return fallbackResponse();
 }
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ### 6. **Implement Retries**
 
-<Tabs>
-  <Tab title="Python">
-```python
+<CodeGroup>
+  ```python Python
 def call_with_retry(prompt, max_retries=3):
     for attempt in range(max_retries):
         try:
@@ -151,10 +135,9 @@ def call_with_retry(prompt, max_retries=3):
             if attempt == max_retries - 1:
                 raise e
             time.sleep(2 ** attempt)  # Exponential backoff
-```
-  </Tab>
-  <Tab title="JavaScript">
-```javascript
+  ```
+
+  ```javascript JavaScript
 async function callWithRetry(prompt, maxRetries = 3) {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
@@ -167,9 +150,8 @@ async function callWithRetry(prompt, maxRetries = 3) {
         }
     }
 }
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ## 📊 Monitoring
 
@@ -177,23 +159,20 @@ async function callWithRetry(prompt, maxRetries = 3) {
 
 Track usage and errors:
 
-<Tabs>
-  <Tab title="Python">
-```python
+<CodeGroup>
+  ```python Python
 import logging
 
 def log_api_call(prompt, response, duration):
     logging.info(f"API call: {len(prompt)} chars, {duration:.2f}s, success")
-```
-  </Tab>
-  <Tab title="JavaScript">
-```javascript
+  ```
+
+  ```javascript JavaScript
 function logApiCall(prompt, response, duration) {
     console.log(`API call: ${prompt.length} chars, ${duration.toFixed(2)}s, success`);
 }
-```
-  </Tab>
-</Tabs>
+  ```
+</CodeGroup>
 
 ## 🎯 What's Next?
 
