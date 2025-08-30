@@ -1,11 +1,310 @@
 ---
 title: "Core Concepts"
-description: "Agents, integrations, and functions"
+description: "Understanding what makes Incredible API different from traditional LLMs"
 ---
 
-- **Agents**: Long‑lived automations driven by prompts and schedules.
-- **Integrations**: Connected apps (e.g., Gmail) that expose executable features.
-- **Features**: Concrete actions an integration can perform (e.g., `gmail_send_email`).
-- **Chat Completion**: Core endpoint that generates text and orchestrates tool use.
+The Incredible API represents a fundamental shift from traditional language models to **agentic AI** that can actually execute tasks and perform work. This guide explains the core concepts that make Incredible unique.
+
+## 🤖 What is Agentic AI?
+
+### Traditional LLMs vs. Agentic AI
+
+**Traditional Language Models:**
+- Generate text based on patterns in training data
+- Cannot execute code or perform actions
+- Limited to providing information and suggestions
+- Require human intervention for any real-world tasks
+
+**Agentic AI (Incredible):**
+- Can reason about tasks and execute them
+- Runs live code and calls functions
+- Performs actions in the real world
+- Maintains context and learns from results
+- Chains multiple operations together
+
+### The "Agentic" Difference
+
+Think of traditional LLMs as knowledgeable consultants who can give advice, while Incredible is like a skilled worker who can actually do the work. When you ask Incredible to solve a problem, it doesn't just tell you how to solve it—it solves it for you.
+
+## 🧠 How Incredible Works
+
+### 1. Understanding the Task
+
+When you send a request to Incredible, the model first analyzes what you're asking for:
+
+```
+User: "What's the current weather in New York and how does it compare to yesterday?"
+```
+
+The model understands this requires:
+- Getting current weather data
+- Getting historical weather data
+- Comparing the two datasets
+- Providing a meaningful analysis
+
+### 2. Planning the Solution
+
+Incredible creates a plan to accomplish the task:
+
+1. **Call weather API** for current conditions in New York
+2. **Call weather API** for yesterday's conditions
+3. **Analyze the data** to identify differences
+4. **Format the response** in a clear, useful way
+
+### 3. Executing the Plan
+
+Unlike traditional LLMs that would just describe how to do this, Incredible actually:
+
+- Makes API calls to weather services
+- Processes the returned data
+- Performs calculations and comparisons
+- Returns actionable results
+
+### 4. Learning and Adapting
+
+If something goes wrong, Incredible can:
+- Try alternative approaches
+- Ask for clarification
+- Suggest better solutions
+- Learn from the experience
+
+## 🔧 Key Capabilities
+
+### Live Code Execution
+
+Incredible can run actual code, not just describe it:
+
+```python
+# Incredible can execute this code and return the result
+import requests
+response = requests.get("https://api.weatherapi.com/v1/current.json?key=YOUR_KEY&q=New York")
+weather_data = response.json()
+current_temp = weather_data['current']['temp_f']
+return f"Current temperature in New York: {current_temp}°F"
+```
+
+### Function Calling
+
+Define custom functions that Incredible can use:
+
+```json
+{
+  "name": "calculate_distance",
+  "description": "Calculate distance between two coordinates",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "lat1": {"type": "number"},
+      "lon1": {"type": "number"},
+      "lat2": {"type": "number"},
+      "lon2": {"type": "number"}
+    },
+    "required": ["lat1", "lon1", "lat2", "lon2"]
+  }
+}
+```
+
+### Parallel Processing
+
+Incredible can execute multiple tasks simultaneously:
+
+```
+User: "Get the weather in New York, London, and Tokyo, then tell me which city has the best weather for outdoor activities."
+```
+
+Instead of doing this sequentially, Incredible can:
+- Make three weather API calls in parallel
+- Process all results simultaneously
+- Provide a comprehensive comparison
+
+### Context Awareness
+
+Incredible maintains context across multiple interactions:
+
+```
+User: "What's the weather like in New York?"
+Assistant: "The current temperature in New York is 72°F with sunny skies."
+User: "How does that compare to what you told me yesterday?"
+Assistant: "Yesterday you asked about London, not New York. Would you like me to check London's weather for comparison?"
+```
+
+## 🌟 Real-World Examples
+
+### Example 1: Data Analysis
+
+**Traditional LLM Response:**
+"I can help you analyze that dataset. You would need to use Python with pandas to load the CSV file, then use groupby() to aggregate the data by category, and finally create a visualization with matplotlib."
+
+**Incredible Response:**
+*Actually loads your CSV file, performs the analysis, and returns a chart showing the aggregated data by category.*
+
+### Example 2: API Integration
+
+**Traditional LLM Response:**
+"To integrate with the Gmail API, you'll need to set up OAuth 2.0 authentication, install the Google API client library, and write code to authenticate and send emails."
+
+**Incredible Response:**
+*Actually sets up the OAuth flow, authenticates with Gmail, and sends the email for you.*
+
+### Example 3: Complex Workflows
+
+**Traditional LLM Response:**
+"This is a multi-step process. First, you'd need to scrape the website, then process the data, analyze it, and finally generate a report."
+
+**Incredible Response:**
+*Actually performs the entire workflow: scrapes the website, processes the data, runs the analysis, and generates a comprehensive report.*
+
+## 🔄 Workflow Patterns
+
+### Sequential Execution
+
+```
+Task 1 → Task 2 → Task 3 → Final Result
+```
+
+**Example:** Scrape data → Clean data → Analyze data → Generate report
+
+### Parallel Execution
+
+```
+Task 1 ─┐
+Task 2 ─┼─→ Combine Results → Final Result
+Task 3 ─┘
+```
+
+**Example:** Get weather for 5 cities simultaneously → Compare all results → Recommend best option
+
+### Conditional Execution
+
+```
+Check Condition → Branch A or Branch B → Continue → Final Result
+```
+
+**Example:** Check if user is authenticated → If yes, proceed; if no, redirect to login → Complete the task
+
+### Iterative Execution
+
+```
+Start → Execute Task → Check Result → Repeat or Finish
+```
+
+**Example:** Try API call → If rate limited, wait and retry → If successful, process result
+
+## 🎯 When to Use Incredible
+
+### Perfect Use Cases
+
+- **Data Processing**: Cleaning, transforming, and analyzing datasets
+- **API Integrations**: Connecting multiple services and APIs
+- **Automation**: Automating repetitive tasks and workflows
+- **Real-time Operations**: Getting live data and performing immediate actions
+- **Complex Workflows**: Multi-step processes that require coordination
+
+### Less Ideal Use Cases
+
+- **Simple Q&A**: Basic questions that don't require action
+- **Creative Writing**: Pure text generation without execution
+- **Static Information**: Historical facts or reference material
+- **Personal Advice**: Subjective recommendations that don't benefit from execution
+
+## 🚀 Getting Started with Agentic Thinking
+
+### 1. Think in Terms of Actions
+
+Instead of asking "How do I...", ask "Do this for me":
+
+```
+❌ "How do I calculate the distance between two cities?"
+✅ "Calculate the distance between New York and Los Angeles"
+```
+
+### 2. Be Specific About What You Want
+
+```
+❌ "Analyze this data"
+✅ "Analyze this data and show me the top 5 results by revenue"
+```
+
+### 3. Let Incredible Handle the Details
+
+```
+❌ "First scrape the website, then clean the data, then..."
+✅ "Get me a clean dataset from this website with the top products by sales"
+```
+
+### 4. Build on Previous Results
+
+```
+User: "Get the weather in New York"
+Assistant: "Current temperature: 72°F, sunny"
+User: "What should I wear for that weather?"
+Assistant: "With 72°F and sunny conditions, I'd recommend light clothing like a t-shirt and shorts, plus sunglasses and sunscreen."
+```
+
+## 🔍 Understanding the Response Structure
+
+### Standard Response
+
+```json
+{
+  "result": {
+    "thinking": "The user wants to know the weather in New York. I should call the weather API to get current conditions.",
+    "response": [
+      {
+        "content": "The current weather in New York is 72°F with sunny skies.",
+        "role": "assistant"
+      }
+    ]
+  }
+}
+```
+
+### Response with Function Calls
+
+```json
+{
+  "result": {
+    "thinking": "I need to call the weather API to get current conditions for New York.",
+    "response": [
+      {
+        "content": "Let me check the current weather in New York for you.",
+        "role": "assistant"
+      }
+    ],
+    "function_calls": [
+      {
+        "name": "get_weather",
+        "arguments": {"location": "New York"}
+      }
+    ]
+  }
+}
+```
+
+## 🎯 What's Next?
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Try your first agentic AI request.
+  </Card>
+  <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
+    Learn how to define custom functions.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples/hello-incredible">
+    See agentic AI in action with real examples.
+  </Card>
+</div>
+
+## 💡 Key Takeaways
+
+1. **Incredible is Agentic**: It doesn't just talk about doing things—it actually does them
+2. **Live Code Execution**: Can run real code and interact with real APIs
+3. **Context Awareness**: Maintains understanding across multiple interactions
+4. **Parallel Processing**: Can handle multiple tasks simultaneously
+5. **Real-World Actions**: Performs actual work, not just provides information
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Ready to Get Started?</strong> Head to the <a href="/quickstart" style={{color: '#FF6200'}}>Quickstart guide</a> to make your first agentic AI request, or explore our <a href="/examples" style={{color: '#FF6200'}}>examples</a> to see what's possible.
+</div>
 
 

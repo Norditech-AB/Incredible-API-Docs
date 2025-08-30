@@ -1,0 +1,662 @@
+---
+title: "Best Practices"
+description: "Learn the best practices for building robust applications with Incredible API"
+---
+
+Building applications with the Incredible API requires understanding not just how to make API calls, but how to do it efficiently, securely, and reliably. This guide covers the essential best practices that will help you create production-ready applications.
+
+## 🚀 Performance Optimization
+
+### Efficient API Usage
+
+#### 1. Batch Operations When Possible
+
+Instead of making multiple separate API calls, combine related requests:
+
+```python
+# ❌ Inefficient: Multiple API calls
+def get_user_data(user_ids):
+    results = []
+    for user_id in user_ids:
+        response = call_incredible_api(f"Get user {user_id} profile")
+        results.append(response)
+    return results
+
+# ✅ Efficient: Single API call with multiple requests
+def get_user_data(user_ids):
+    prompt = f"Get profiles for users: {', '.join(user_ids)}"
+    response = call_incredible_api(prompt)
+    return response
+```
+
+#### 2. Use Streaming for Long Responses
+
+Enable streaming for responses that might take time to generate:
+
+```python
+# For long-form content or real-time applications
+def get_streaming_response(prompt):
+    response = requests.post(
+        "https://api.incredible.one/v1/chat-completion",
+        headers=headers,
+        json={
+            "model": "small-1",
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": True
+        },
+        stream=True
+    )
+    
+    for line in response.iter_lines():
+        if line:
+            data = json.loads(line.decode('utf-8').replace('data: ', ''))
+            if data.get('content') == '[DONE]':
+                break
+            yield data
+```
+
+#### 3. Implement Caching
+
+Cache frequently requested data to reduce API calls:
+
+```python
+import redis
+import hashlib
+import json
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+def get_cached_response(prompt, cache_ttl=3600):
+    # Create cache key from prompt
+    cache_key = hashlib.md5(prompt.encode()).hexdigest()
+    
+    # Check cache first
+    cached = redis_client.get(cache_key)
+    if cached:
+        return json.loads(cached)
+    
+    # Make API call if not cached
+    response = call_incredible_api(prompt)
+    
+    # Cache the response
+    redis_client.setex(cache_key, cache_ttl, json.dumps(response))
+    
+    return response
+```
+
+#### 4. Optimize Token Usage
+
+Be mindful of token limits and costs:
+
+```python
+# ❌ Verbose prompt
+prompt = """
+Please analyze the following dataset and provide insights:
+1. What are the key trends?
+2. What patterns do you see?
+3. What recommendations do you have?
+4. What are the main challenges?
+5. What opportunities exist?
+
+Dataset: [data here]
+"""
+
+# ✅ Concise prompt
+prompt = "Analyze this dataset for trends, patterns, and recommendations: [data]"
+```
+
+### Rate Limiting and Quotas
+
+#### 1. Implement Exponential Backoff
+
+```python
+import time
+import random
+
+def call_api_with_backoff(prompt, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            response = call_incredible_api(prompt)
+            return response
+            
+        except Exception as e:
+            if "rate limit" in str(e).lower() or "429" in str(e):
+                if attempt == max_retries - 1:
+                    raise e
+                
+                # Exponential backoff with jitter
+                wait_time = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(wait_time)
+                continue
+            else:
+                raise e
+    
+    raise Exception("Max retries exceeded")
+```
+
+#### 2. Monitor Usage
+
+```python
+def check_api_usage():
+    """Check current API usage and limits"""
+    try:
+        response = requests.get(
+            "https://api.incredible.one/v1/usage",
+            headers={"Authorization": f"Bearer {os.getenv('INCREDIBLE_API_KEY')}"}
+        )
+        
+        if response.status_code == 200:
+            usage_data = response.json()
+            print(f"Used: {usage_data['usage']}/{usage_data['limit']}")
+            print(f"Reset time: {usage_data['reset_time']}")
+            
+            # Alert if approaching limits
+            if usage_data['usage'] > usage_data['limit'] * 0.8:
+                print("⚠️  Warning: Approaching rate limit!")
+                
+    except Exception as e:
+        print(f"Could not check usage: {e}")
+```
+
+## 🛡️ Security Best Practices
+
+### API Key Management
+
+#### 1. Never Hardcode Credentials
+
+```python
+# ❌ Never do this
+api_key = "inc_abc123def456..."
+
+# ✅ Use environment variables
+api_key = os.getenv('INCREDIBLE_API_KEY')
+if not api_key:
+    raise ValueError("INCREDIBLE_API_KEY not set")
+```
+
+#### 2. Rotate Keys Regularly
+
+```python
+import datetime
+
+def should_rotate_key(key_created_date):
+    """Check if API key should be rotated (older than 90 days)"""
+    created = datetime.datetime.fromisoformat(key_created_date)
+    age = datetime.datetime.now() - created
+    return age.days > 90
+
+# Usage
+if should_rotate_key(os.getenv('KEY_CREATED_DATE')):
+    print("⚠️  Consider rotating your API key")
+```
+
+#### 3. Use Different Keys for Different Environments
+
+```python
+# Development
+dev_key = os.getenv('INCREDIBLE_API_KEY_DEV')
+
+# Staging
+staging_key = os.getenv('INCREDIBLE_API_KEY_STAGING')
+
+# Production
+prod_key = os.getenv('INCREDIBLE_API_KEY_PROD')
+
+# Use appropriate key based on environment
+environment = os.getenv('ENVIRONMENT', 'development')
+if environment == 'production':
+    api_key = prod_key
+elif environment == 'staging':
+    api_key = staging_key
+else:
+    api_key = dev_key
+```
+
+### Input Validation
+
+#### 1. Validate User Input
+
+```python
+import re
+from typing import Optional
+
+def validate_prompt(prompt: str) -> Optional[str]:
+    """Validate user prompt for security and appropriateness"""
+    
+    # Check length
+    if len(prompt) > 10000:
+        return "Prompt too long (max 10,000 characters)"
+    
+    # Check for potentially harmful content
+    harmful_patterns = [
+        r'system:|role:|assistant:|user:',  # Role injection
+        r'<script|javascript:|eval\(',      # Script injection
+        r'file://|ftp://|http://',          # File access
+    ]
+    
+    for pattern in harmful_patterns:
+        if re.search(pattern, prompt, re.IGNORECASE):
+            return f"Prompt contains potentially harmful content: {pattern}"
+    
+    return None
+
+# Usage
+validation_error = validate_prompt(user_input)
+if validation_error:
+    return {"error": validation_error}
+```
+
+#### 2. Sanitize Function Parameters
+
+```python
+def sanitize_function_params(params: dict) -> dict:
+    """Sanitize function parameters before sending to API"""
+    sanitized = {}
+    
+    for key, value in params.items():
+        if isinstance(value, str):
+            # Remove potentially dangerous characters
+            sanitized[key] = re.sub(r'[<>"\']', '', value)
+        elif isinstance(value, (int, float, bool)):
+            sanitized[key] = value
+        elif isinstance(value, list):
+            sanitized[key] = [sanitize_function_params(item) if isinstance(item, dict) else item for item in value]
+        elif isinstance(value, dict):
+            sanitized[key] = sanitize_function_params(value)
+        else:
+            # Skip unknown types
+            continue
+    
+    return sanitized
+```
+
+## 🔄 Error Handling and Resilience
+
+### Comprehensive Error Handling
+
+#### 1. Handle Different Error Types
+
+```python
+def robust_api_call(prompt, max_retries=3):
+    """Make API call with comprehensive error handling"""
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                "https://api.incredible.one/v1/chat-completion",
+                headers=headers,
+                json={
+                    "model": "small-1",
+                    "messages": [{"role": "user", "content": prompt}]
+                },
+                timeout=30
+            )
+            
+            # Handle different HTTP status codes
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 401:
+                raise AuthenticationError("Invalid API key")
+            elif response.status_code == 403:
+                raise PermissionError("Insufficient permissions")
+            elif response.status_code == 429:
+                raise RateLimitError("Rate limit exceeded")
+            elif response.status_code >= 500:
+                raise ServerError(f"Server error: {response.status_code}")
+            else:
+                raise APIError(f"Unexpected status: {response.status_code}")
+                
+        except requests.exceptions.Timeout:
+            if attempt == max_retries - 1:
+                raise TimeoutError("Request timed out after all retries")
+            continue
+            
+        except requests.exceptions.ConnectionError:
+            if attempt == max_retries - 1:
+                raise ConnectionError("Connection failed after all retries")
+            time.sleep(2 ** attempt)
+            continue
+            
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2 ** attempt)
+            continue
+    
+    raise Exception("Max retries exceeded")
+```
+
+#### 2. Custom Exception Classes
+
+```python
+class IncredibleAPIError(Exception):
+    """Base exception for Incredible API errors"""
+    pass
+
+class AuthenticationError(IncredibleAPIError):
+    """Authentication failed"""
+    pass
+
+class PermissionError(IncredibleAPIError):
+    """Insufficient permissions"""
+    pass
+
+class RateLimitError(IncredibleAPIError):
+    """Rate limit exceeded"""
+    pass
+
+class ServerError(IncredibleAPIError):
+    """Server-side error"""
+    pass
+
+class APIError(IncredibleAPIError):
+    """General API error"""
+    pass
+```
+
+### Circuit Breaker Pattern
+
+```python
+import time
+from enum import Enum
+
+class CircuitState(Enum):
+    CLOSED = "closed"      # Normal operation
+    OPEN = "open"          # Failing, reject requests
+    HALF_OPEN = "half_open"  # Testing if service is back
+
+class CircuitBreaker:
+    def __init__(self, failure_threshold=5, recovery_timeout=60):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = CircuitState.CLOSED
+    
+    def call(self, func, *args, **kwargs):
+        if self.state == CircuitState.OPEN:
+            if time.time() - self.last_failure_time > self.recovery_timeout:
+                self.state = CircuitState.HALF_OPEN
+            else:
+                raise Exception("Circuit breaker is OPEN")
+        
+        try:
+            result = func(*args, **kwargs)
+            self.on_success()
+            return result
+        except Exception as e:
+            self.on_failure()
+            raise e
+    
+    def on_success(self):
+        self.failure_count = 0
+        self.state = CircuitState.CLOSED
+    
+    def on_failure(self):
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+
+# Usage
+circuit_breaker = CircuitBreaker()
+
+def safe_api_call(prompt):
+    return circuit_breaker.call(call_incredible_api, prompt)
+```
+
+## 📊 Monitoring and Logging
+
+### Comprehensive Logging
+
+#### 1. Structured Logging
+
+```python
+import logging
+import json
+from datetime import datetime
+
+# Configure structured logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def log_api_call(prompt, response, duration, status="success"):
+    """Log API call details in structured format"""
+    
+    log_data = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "event": "api_call",
+        "status": status,
+        "duration_ms": round(duration * 1000, 2),
+        "prompt_length": len(prompt),
+        "response_length": len(str(response)) if response else 0,
+        "model": "small-1"
+    }
+    
+    if status == "error":
+        log_data["error"] = str(response)
+    
+    logger.info(json.dumps(log_data))
+
+# Usage
+start_time = time.time()
+try:
+    response = call_incredible_api(prompt)
+    duration = time.time() - start_time
+    log_api_call(prompt, response, duration, "success")
+except Exception as e:
+    duration = time.time() - start_time
+    log_api_call(prompt, e, duration, "error")
+    raise
+```
+
+#### 2. Performance Metrics
+
+```python
+import time
+from collections import defaultdict
+import threading
+
+class APIMetrics:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.call_count = 0
+        self.total_duration = 0
+        self.error_count = 0
+        self.response_times = []
+    
+    def record_call(self, duration, success=True):
+        with self.lock:
+            self.call_count += 1
+            self.total_duration += duration
+            self.response_times.append(duration)
+            
+            if not success:
+                self.error_count += 1
+    
+    def get_stats(self):
+        with self.lock:
+            if not self.response_times:
+                return {}
+            
+            return {
+                "total_calls": self.call_count,
+                "success_rate": (self.call_count - self.error_count) / self.call_count,
+                "avg_response_time": self.total_duration / self.call_count,
+                "min_response_time": min(self.response_times),
+                "max_response_time": max(self.response_times),
+                "error_count": self.error_count
+            }
+
+# Global metrics instance
+metrics = APIMetrics()
+
+def instrumented_api_call(prompt):
+    start_time = time.time()
+    try:
+        response = call_incredible_api(prompt)
+        duration = time.time() - start_time
+        metrics.record_call(duration, success=True)
+        return response
+    except Exception as e:
+        duration = time.time() - start_time
+        metrics.record_call(duration, success=False)
+        raise
+```
+
+## 🧪 Testing Best Practices
+
+### Unit Testing
+
+#### 1. Mock API Responses
+
+```python
+import unittest
+from unittest.mock import patch, Mock
+import responses
+
+class TestIncredibleAPI(unittest.TestCase):
+    
+    @patch('requests.post')
+    def test_successful_api_call(self, mock_post):
+        # Mock successful response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "result": {
+                "response": [{"content": "Hello!", "role": "assistant"}]
+            }
+        }
+        mock_post.return_value = mock_response
+        
+        # Test the function
+        result = call_incredible_api("Hello")
+        self.assertIsNotNone(result)
+        self.assertEqual(result["result"]["response"][0]["content"], "Hello!")
+    
+    @responses.activate
+    def test_rate_limit_handling(self):
+        # Mock rate limit response
+        responses.add(
+            responses.POST,
+            "https://api.incredible.one/v1/chat-completion",
+            json={"error": "Rate limit exceeded"},
+            status=429
+        )
+        
+        # Test that rate limit is handled properly
+        with self.assertRaises(RateLimitError):
+            call_incredible_api("Test prompt")
+```
+
+#### 2. Integration Testing
+
+```python
+class TestIncredibleAPIIntegration(unittest.TestCase):
+    
+    def setUp(self):
+        # Use test API key for integration tests
+        self.api_key = os.getenv('INCREDIBLE_API_KEY_TEST')
+        if not self.api_key:
+            self.skipTest("Test API key not available")
+    
+    def test_real_api_call(self):
+        """Test with real API (use sparingly)"""
+        response = call_incredible_api("Say hello")
+        self.assertIn("result", response)
+        self.assertIn("response", response["result"])
+```
+
+## 🔧 Development Workflow
+
+### Environment Management
+
+#### 1. Configuration Management
+
+```python
+import os
+from typing import Dict, Any
+
+class Config:
+    def __init__(self):
+        self.environment = os.getenv('ENVIRONMENT', 'development')
+        self.api_key = os.getenv('INCREDIBLE_API_KEY')
+        self.base_url = os.getenv('INCREDIBLE_API_URL', 'https://api.incredible.one')
+        self.timeout = int(os.getenv('API_TIMEOUT', '30'))
+        self.max_retries = int(os.getenv('MAX_RETRIES', '3'))
+    
+    def validate(self):
+        """Validate configuration"""
+        if not self.api_key:
+            raise ValueError("INCREDIBLE_API_KEY is required")
+        
+        if not self.api_key.startswith('inc_'):
+            raise ValueError("API key must start with 'inc_'")
+        
+        return True
+
+# Usage
+config = Config()
+config.validate()
+```
+
+#### 2. Development vs Production
+
+```python
+def get_api_config():
+    """Get API configuration based on environment"""
+    env = os.getenv('ENVIRONMENT', 'development')
+    
+    if env == 'production':
+        return {
+            'base_url': 'https://api.incredible.one',
+            'timeout': 30,
+            'max_retries': 3,
+            'enable_logging': True,
+            'enable_metrics': True
+        }
+    elif env == 'staging':
+        return {
+            'base_url': 'https://api-staging.incredible.one',
+            'timeout': 60,
+            'max_retries': 5,
+            'enable_logging': True,
+            'enable_metrics': False
+        }
+    else:  # development
+        return {
+            'base_url': 'https://api-dev.incredible.one',
+            'timeout': 120,
+            'max_retries': 10,
+            'enable_logging': False,
+            'enable_metrics': False
+        }
+```
+
+## 🎯 What's Next?
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
+    Learn advanced function calling patterns.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples">
+    See these best practices in action.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference">
+    Complete API documentation.
+  </Card>
+</div>
+
+## 💡 Key Takeaways
+
+1. **Performance**: Batch operations, use streaming, implement caching
+2. **Security**: Never hardcode credentials, validate input, rotate keys
+3. **Reliability**: Implement retries, circuit breakers, comprehensive error handling
+4. **Monitoring**: Log everything, track metrics, set up alerts
+5. **Testing**: Mock external dependencies, test error scenarios
+6. **Configuration**: Use environment variables, separate configs by environment
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Ready to Build?</strong> Check out our <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for complete working examples that implement these best practices, or join our <a href="https://discord.com/invite/pNmdkxgBe2" style={{color: '#FF6200'}}>Discord community</a> to discuss implementation strategies.
+</div>
