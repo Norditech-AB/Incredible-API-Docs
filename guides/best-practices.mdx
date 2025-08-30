@@ -1,0 +1,193 @@
+---
+title: "Best Practices"
+description: "Essential practices for building with Incredible API"
+---
+
+Here are the key practices that will help you build reliable applications with the Incredible API:
+
+## 🚀 Performance
+
+### 1. **Batch Related Requests**
+
+Instead of multiple API calls, combine related requests:
+
+<CodeGroup>
+  ```bash Shell
+# ❌ Multiple calls
+curl -d '{"messages": [{"role": "user", "content": "Get user 1"}]}' ...
+curl -d '{"messages": [{"role": "user", "content": "Get user 2"}]}' ...
+
+# ✅ Single call
+curl -d '{"messages": [{"role": "user", "content": "Get users 1 and 2"}]}' ...
+  ```
+
+  ```python Python
+# ❌ Multiple calls
+response1 = requests.post(url, json={"messages": [{"role": "user", "content": "Get user 1"}]})
+response2 = requests.post(url, json={"messages": [{"role": "user", "content": "Get user 2"}]})
+
+# ✅ Single call
+response = requests.post(url, json={"messages": [{"role": "user", "content": "Get users 1 and 2"}]})
+  ```
+</CodeGroup>
+
+### 2. **Use Streaming for Long Responses**
+
+Enable streaming for better user experience:
+
+<CodeGroup>
+  ```bash Shell
+curl -d '{"stream": true, "messages": [{"role": "user", "content": "Generate a long report"}]}' ...
+  ```
+
+  ```python Python
+response = requests.post(url, json={
+    "stream": True, 
+    "messages": [{"role": "user", "content": "Generate a long report"}]
+}, stream=True)
+  ```
+</CodeGroup>
+
+## 🛡️ Security
+
+### 3. **Never Hardcode Credentials**
+
+<CodeGroup>
+  ```bash Shell
+# ❌ Don't do this
+api_key="inc_abc123..."
+
+# ✅ Use environment variables
+api_key="$INCREDIBLE_API_KEY"
+  ```
+
+  ```python Python
+# ❌ Don't do this
+api_key = "inc_abc123..."
+
+# ✅ Use environment variables
+import os
+api_key = os.getenv("INCREDIBLE_API_KEY")
+  ```
+</CodeGroup>
+
+### 4. **Validate User Input**
+
+Check prompts before sending to the API:
+
+<CodeGroup>
+  ```python Python
+def validate_prompt(prompt):
+    if len(prompt) > 10000:
+        return "Prompt too long"
+    if "<script>" in prompt.lower():
+        return "Invalid content"
+    return None
+  ```
+
+  ```javascript JavaScript
+function validatePrompt(prompt) {
+    if (prompt.length > 10000) {
+        return "Prompt too long";
+    }
+    if (prompt.toLowerCase().includes("<script>")) {
+        return "Invalid content";
+    }
+    return null;
+}
+  ```
+</CodeGroup>
+
+## 🔄 Reliability
+
+### 5. **Handle Errors Gracefully**
+
+<CodeGroup>
+  ```python Python
+try:
+    response = call_incredible_api(prompt)
+    return response
+except Exception as e:
+    print(f"API call failed: {e}")
+    return fallback_response()
+  ```
+
+  ```javascript JavaScript
+try {
+    const response = await callIncredibleApi(prompt);
+    return response;
+} catch (error) {
+    console.error(`API call failed: ${error}`);
+    return fallbackResponse();
+}
+  ```
+</CodeGroup>
+
+### 6. **Implement Retries**
+
+<CodeGroup>
+  ```python Python
+def call_with_retry(prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return call_incredible_api(prompt)
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2 ** attempt)  # Exponential backoff
+  ```
+
+  ```javascript JavaScript
+async function callWithRetry(prompt, maxRetries = 3) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            return await callIncredibleApi(prompt);
+        } catch (error) {
+            if (attempt === maxRetries - 1) {
+                throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, 2 ** attempt * 1000));
+        }
+    }
+}
+  ```
+</CodeGroup>
+
+## 📊 Monitoring
+
+### 7. **Log API Calls**
+
+Track usage and errors:
+
+<CodeGroup>
+  ```python Python
+import logging
+
+def log_api_call(prompt, response, duration):
+    logging.info(f"API call: {len(prompt)} chars, {duration:.2f}s, success")
+  ```
+
+  ```javascript JavaScript
+function logApiCall(prompt, response, duration) {
+    console.log(`API call: ${prompt.length} chars, ${duration.toFixed(2)}s, success`);
+}
+  ```
+</CodeGroup>
+
+## 🎯 What's Next?
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
+    Learn advanced function patterns.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples">
+    See these practices in action.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference">
+    Complete API documentation.
+  </Card>
+</div>
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Key Takeaway:</strong> Start simple, handle errors, and add monitoring as your application grows.
+</div>
