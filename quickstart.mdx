@@ -1,70 +1,33 @@
 ---
 title: 'Quickstart'
-description: 'Get started with Incredible API in minutes - complete setup and your first API call'
+description: 'Get started with Incredible API in minutes'
 ---
 
-Welcome to **Incredible**! This guide will get you up and running with the Incredible API in under 10 minutes.
+Welcome to **Incredible**! This guide will get you up and running in under 3 minutes.
 
-## 🚀 Prerequisites
+## 🚀 Step 1: Make Your First API Call
 
-Before you begin, you'll need:
-- An Incredible API key ([Get one here](https://www.incredible.one))
-- `curl` installed (or use any HTTP client)
-- Basic familiarity with APIs
-
-## 🔑 Step 1: Get Your API Key
-
-1. Visit [incredible.one](https://www.incredible.one)
-2. Sign up for an account
-3. Navigate to your dashboard
-4. Copy your API key (it starts with `inc_`)
-
-<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
-  <strong>Security Note:</strong> Keep your API key secret! Never commit it to source control or share it publicly.
-</div>
-
-## ⚙️ Step 2: Set Up Your Environment
-
-Set your API key as an environment variable:
-
-```bash
-# Linux/macOS
-export INCREDIBLE_API_KEY="inc_your_api_key_here"
-
-# Windows (Command Prompt)
-set INCREDIBLE_API_KEY=inc_your_api_key_here
-
-# Windows (PowerShell)
-$env:INCREDIBLE_API_KEY="inc_your_api_key_here"
-```
-
-## 📡 Step 3: Make Your First API Call
-
-### Basic Chat Request
-
-Run this cURL command to send your first request:
+The Incredible API works without authentication for basic usage. Here's your first request:
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "messages": [
-      { "role": "user", "content": "Hello, Incredible! What can you do?" }
+      { "role": "user", "content": "Hello, Incredible!" }
     ]
   }'
 ```
 
-**Expected Response:**
-
+**Response:**
 ```json
 {
   "result": {
-    "thinking": "The user is greeting me and asking about my capabilities. I should respond politely and explain what I can do as an Incredible AI assistant.",
+    "thinking": "The user is greeting me...",
     "response": [
       {
-        "content": "Hello! I'm an AI assistant powered by Incredible, and I'm here to help you. I have access to various tools that allow me to run functions, perform analysis, and execute code. I can help with mathematical operations, API integrations, data processing, and much more. What would you like to work on today?",
+        "content": "Hello! I'm here to help you...",
         "role": "assistant"
       }
     ]
@@ -72,105 +35,64 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
 }
 ```
 
-### Understanding the Response
+## 🔄 Step 2: Try Streaming
 
-The response includes:
-- **`thinking`**: The model's reasoning process before responding
-- **`response`**: The actual assistant message(s)
-- **`role`**: Always "assistant" for AI responses
-
-## 🔄 Step 4: Try Streaming
-
-Enable streaming to see responses in real-time:
+Enable streaming for real-time responses:
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": true,
     "messages": [
-      { "role": "user", "content": "Count from 1 to 5 slowly." }
+      { "role": "user", "content": "Count to 3" }
     ]
   }'
 ```
 
-**Streaming Response:**
-```text
-data: {"content": {"type": "text_chunk", "content": "1"}}
-data: {"content": {"type": "text_chunk", "content": "..."}}
-data: {"content": {"type": "text_chunk", "content": "2"}}
-data: {"content": {"type": "text_chunk", "content": "..."}}
-data: {"content": {"type": "text_chunk", "content": "3"}}
-data: {"content": {"type": "text_chunk", "content": "..."}}
-data: {"content": {"type": "text_chunk", "content": "4"}}
-data: {"content": {"type": "text_chunk", "content": "..."}}
-data: {"content": {"type": "text_chunk", "content": "5"}}
-data: {"content": {"type": "function_call", "function_call_id": "...", "function_calls": []}}
-data: {"content": "[DONE]"}
-```
+## 🛠️ Step 3: Test Function Calling
 
-## 🛠️ Step 5: Test Function Calling
-
-Try a simple mathematical operation:
+Try a simple calculation:
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "messages": [
-      { "role": "user", "content": "What is 25 + 17?" }
-    ]
+      { "role": "user", "content": "What is 15 + 27?" }
+    ],
+    "functions": [{
+      "name": "add_numbers",
+      "description": "Add two numbers",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
+    }]
   }'
 ```
 
-The model will automatically use its built-in mathematical capabilities to calculate the answer.
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**401 Unauthorized:**
-- Check that your API key is correct
-- Ensure the Authorization header includes "Bearer "
-- Verify your API key hasn't expired
-
-**400 Bad Request:**
-- Check your JSON syntax
-- Ensure all required fields are present
-- Verify the model name is correct
-
-**Rate Limiting:**
-- If you get rate limited, wait a moment and try again
-- Check your dashboard for current usage
-
 ## 🎯 What's Next?
 
-Now that you've made your first API call, explore these areas:
-
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Core Concepts" icon="brain" href="/guides/core-concepts">
+    Understand what makes Incredible different.
+  </Card>
   <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
-    Learn how to use custom functions and tools.
+    Learn to use custom functions.
   </Card>
   <Card title="Examples" icon="file-code" href="/examples/hello-incredible">
-    Explore more complex examples and use cases.
-  </Card>
-  <Card title="API Reference" icon="book" href="/api-reference/chat/completion">
-    Complete API documentation and parameters.
+    See more examples in action.
   </Card>
 </div>
 
-## 💡 Pro Tips
-
-- **Keep Context**: Include previous messages in your requests for multi-turn conversations
-- **Use Streaming**: Enable streaming for better user experience in real-time applications
-- **Start Simple**: Begin with basic chat before moving to complex function calling
-- **Monitor Usage**: Check your dashboard regularly to track API usage and costs
-
 <div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
-  <strong>Need Help?</strong> Join our <a href="https://discord.com/invite/pNmdkxgBe2" style={{color: '#FF6200'}}>Discord community</a> or check the <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for more examples.
+  <strong>Need Help?</strong> Join our <a href="https://discord.com/invite/pNmdkxgBe2" style={{color: '#FF6200'}}>Discord community</a> or check the <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a>.
 </div>
 

@@ -1,29 +1,17 @@
 ---
 title: "Function Calling"
-description: "Learn how to use custom functions and tools with Incredible API"
+description: "Learn how to use custom functions with Incredible API"
 ---
 
-Function calling is one of the most powerful features of the Incredible API. It allows you to define custom functions that the AI can call to perform specific tasks, from simple calculations to complex API integrations.
-
-## 🎯 What is Function Calling?
-
-Function calling enables the AI to:
-- Execute custom code and functions
-- Interact with external APIs and services
-- Perform complex calculations and data processing
-- Maintain state across conversations
-- Chain multiple operations together
+Function calling allows Incredible to execute custom code and tools. Here's how to use it:
 
 ## 🚀 Basic Function Calling
 
-### Simple Example: Calculator Function
-
-Here's a basic example using cURL:
+### Simple Example
 
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
@@ -33,8 +21,8 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
       "parameters": {
         "type": "object",
         "properties": {
-          "a": {"type": "number", "description": "First number"},
-          "b": {"type": "number", "description": "Second number"}
+          "a": {"type": "number"},
+          "b": {"type": "number"}
         },
         "required": ["a", "b"]
       }
@@ -42,98 +30,31 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
   }'
 ```
 
-### Python Example
-
-```python
-import requests
-import json
-
-def call_incredible_api(prompt, functions=None):
-    url = "https://api.incredible.one/v1/chat-completion"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('INCREDIBLE_API_KEY')}"
-    }
-    
-    data = {
-        "model": "small-1",
-        "messages": [{"role": "user", "content": prompt}]
-    }
-    
-    if functions:
-        data["functions"] = functions
-    
-    response = requests.post(url, headers=headers, json=data)
-    return response.json()
-
-# Define a function
-functions = [{
-    "name": "add_numbers",
-    "description": "Add two numbers together",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "a": {"type": "number", "description": "First number"},
-            "b": {"type": "number", "description": "Second number"}
-        },
-        "required": ["a", "b"]
-    }
-}]
-
-# Make the API call
-result = call_incredible_api("Calculate 25 + 17", functions)
-print(json.dumps(result, indent=2))
+**Response:**
+```json
+{
+  "result": {
+    "response": [
+      {
+        "content": "I'll use the available function to add those two numbers for you.",
+        "role": "assistant"
+      },
+      {
+        "function_call_id": "ce9ea390-450f-4a7f-8872-2f0aa69c3467",
+        "function_calls": [
+          {
+            "input": {"a": 25, "b": 17},
+            "name": "add_numbers"
+          }
+        ],
+        "type": "function_call"
+      }
+    ]
+  }
+}
 ```
 
-### JavaScript Example
-
-```javascript
-const callIncredibleAPI = async (prompt, functions = null) => {
-  const url = "https://api.incredible.one/v1/chat-completion";
-  const headers = {
-    "Content-Type": "application/json",
-    "Authorization: `Bearer ${process.env.INCREDIBLE_API_KEY}`
-  };
-  
-  const data = {
-    model: "small-1",
-    messages: [{ role: "user", content: prompt }]
-  };
-  
-  if (functions) {
-    data.functions = functions;
-  }
-  
-  const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(data)
-  });
-  
-  return response.json();
-};
-
-// Define a function
-const functions = [{
-  name: "add_numbers",
-  description: "Add two numbers together",
-  parameters: {
-    type: "object",
-    properties: {
-      a: { type: "number", description: "First number" },
-      b: { type: "number", description: "Second number" }
-    },
-    required: ["a", "b"]
-  }
-}];
-
-// Make the API call
-callIncredibleAPI("Calculate 25 + 17", functions)
-  .then(result => console.log(JSON.stringify(result, null, 2)))
-  .catch(error => console.error("Error:", error));
-```
-
-## 🔧 Function Definition Schema
+## 🔧 Function Schema
 
 ### Required Fields
 
@@ -157,59 +78,14 @@ callIncredibleAPI("Calculate 25 + 17", functions)
 ### Parameter Types
 
 - **`string`**: Text values
-- **`number`**: Numeric values (integers and decimals)
+- **`number`**: Numeric values
 - **`boolean`**: True/false values
 - **`array`**: Lists of values
-- **`object`**: Structured data objects
-
-### Advanced Parameter Definitions
-
-```json
-{
-  "name": "send_email",
-  "description": "Send an email to a recipient",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "to": {
-        "type": "string",
-        "description": "Recipient email address",
-        "format": "email"
-      },
-      "subject": {
-        "type": "string",
-        "description": "Email subject line",
-        "maxLength": 200
-      },
-      "body": {
-        "type": "string",
-        "description": "Email body content"
-      },
-      "cc": {
-        "type": "array",
-        "items": {"type": "string", "format": "email"},
-        "description": "CC recipients"
-      },
-      "attachments": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "filename": {"type": "string"},
-            "content": {"type": "string"},
-            "type": {"type": "string"}
-          }
-        }
-      }
-    },
-    "required": ["to", "subject", "body"]
-  }
-}
-```
+- **`object`**: Structured data
 
 ## 🎭 Multiple Functions
 
-You can provide multiple functions and let the AI choose which one to use:
+Provide multiple functions and let Incredible choose:
 
 ```json
 {
@@ -220,7 +96,7 @@ You can provide multiple functions and let the AI choose which one to use:
       "parameters": {
         "type": "object",
         "properties": {
-          "location": {"type": "string", "description": "City name or coordinates"}
+          "location": {"type": "string"}
         },
         "required": ["location"]
       }
@@ -231,10 +107,10 @@ You can provide multiple functions and let the AI choose which one to use:
       "parameters": {
         "type": "object",
         "properties": {
-          "lat1": {"type": "number", "description": "First latitude"},
-          "lon1": {"type": "number", "description": "First longitude"},
-          "lat2": {"type": "number", "description": "Second latitude"},
-          "lon2": {"type": "number", "description": "Second longitude"}
+          "lat1": {"type": "number"},
+          "lon1": {"type": "number"},
+          "lat2": {"type": "number"},
+          "lon2": {"type": "number"}
         },
         "required": ["lat1", "lon1", "lat2", "lon2"]
       }
@@ -245,9 +121,7 @@ You can provide multiple functions and let the AI choose which one to use:
 
 ## 🔄 Function Calling in Conversations
 
-### Maintaining Context
-
-When using function calling in multi-turn conversations, include the function results in subsequent messages:
+Include function results in subsequent messages:
 
 ```json
 {
@@ -260,180 +134,30 @@ When using function calling in multi-turn conversations, include the function re
 }
 ```
 
-### Streaming with Functions
-
-Function calls work with streaming responses:
-
-```bash
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
-  -d '{
-    "model": "small-1",
-    "stream": true,
-    "messages": [{"role": "user", "content": "Calculate 15 * 23"}],
-    "functions": [{
-      "name": "multiply_numbers",
-      "description": "Multiply two numbers",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "a": {"type": "number"},
-          "b": {"type": "number"}
-        },
-        "required": ["a", "b"]
-      }
-    }]
-  }'
-```
-
 ## 🚨 Error Handling
 
-### Common Function Calling Errors
+### Common Errors
 
-**400 Bad Request - Invalid Function Schema:**
+**Invalid Function Schema:**
 ```json
 {
-  "error": {
-    "message": "Invalid function schema",
-    "type": "invalid_request_error",
-    "code": "invalid_function_schema"
-  }
+  "error": "Invalid function schema"
 }
 ```
 
-**400 Bad Request - Function Not Found:**
+**Function Not Found:**
 ```json
 {
-  "error": {
-    "message": "Function 'unknown_function' not found",
-    "type": "invalid_request_error",
-    "code": "function_not_found"
-  }
+  "error": "Function 'unknown_function' not found"
 }
 ```
-
-### Best Practices for Error Handling
-
-1. **Validate Function Schemas**: Ensure your function definitions are valid JSON Schema
-2. **Handle Missing Functions**: Provide fallback behavior when functions fail
-3. **Log Function Calls**: Track which functions are being called for debugging
-4. **Rate Limiting**: Be aware of function call limits
 
 ## 💡 Best Practices
 
-### Function Design
-
-- **Clear Names**: Use descriptive function names that indicate purpose
-- **Detailed Descriptions**: Explain what the function does and when to use it
-- **Parameter Validation**: Define required vs optional parameters clearly
-- **Error Handling**: Design functions to handle edge cases gracefully
-
-### Performance Optimization
-
-- **Minimize Parameters**: Only include necessary parameters
-- **Batch Operations**: Combine multiple operations when possible
-- **Caching**: Cache function results when appropriate
-- **Async Operations**: Use non-blocking calls for long-running operations
-
-### Security Considerations
-
-- **Input Validation**: Always validate function parameters
-- **Rate Limiting**: Implement appropriate rate limits
-- **Access Control**: Restrict function access based on user permissions
-- **Audit Logging**: Log all function calls for security monitoring
-
-## 🔍 Debugging Function Calls
-
-### Enable Debug Mode
-
-Add debug information to see what the AI is thinking:
-
-```json
-{
-  "model": "small-1",
-  "messages": [{"role": "user", "content": "Calculate 10 + 5"}],
-  "functions": [...],
-  "debug": true
-}
-```
-
-### Common Debugging Steps
-
-1. **Check Function Schema**: Ensure JSON Schema is valid
-2. **Verify Parameters**: Confirm required parameters are provided
-3. **Test Function Logic**: Test functions independently
-4. **Review AI Reasoning**: Check the `thinking` field in responses
-
-## 📚 Advanced Examples
-
-### Complex Data Processing
-
-```json
-{
-  "name": "process_data",
-  "description": "Process and analyze a dataset",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "data": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {"type": "string"},
-            "value": {"type": "number"},
-            "category": {"type": "string"}
-          }
-        }
-      },
-      "operations": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": ["sum", "average", "count", "filter"]
-        }
-      },
-      "filters": {
-        "type": "object",
-        "properties": {
-          "category": {"type": "string"},
-          "min_value": {"type": "number"},
-          "max_value": {"type": "number"}
-        }
-      }
-    },
-    "required": ["data", "operations"]
-  }
-}
-```
-
-### API Integration
-
-```json
-{
-  "name": "call_external_api",
-  "description": "Make a request to an external API",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "url": {"type": "string", "format": "uri"},
-      "method": {
-        "type": "string",
-        "enum": ["GET", "POST", "PUT", "DELETE"],
-        "default": "GET"
-      },
-      "headers": {
-        "type": "object",
-        "additionalProperties": {"type": "string"}
-      },
-      "body": {"type": "string"},
-      "timeout": {"type": "number", "default": 30}
-    },
-    "required": ["url"]
-  }
-}
-```
+1. **Clear Names**: Use descriptive function names
+2. **Detailed Descriptions**: Explain what the function does
+3. **Parameter Validation**: Define required vs optional clearly
+4. **Test Functions**: Ensure functions work independently
 
 ## 🎯 What's Next?
 
@@ -441,16 +165,16 @@ Add debug information to see what the AI is thinking:
   <Card title="Mathematical Operations" icon="calculator" href="/guides/mathematical-operations">
     Learn about built-in math capabilities.
   </Card>
-  <Card title="API Integrations" icon="link" href="/guides/connecting-api-endpoints">
-    Connect to external services and APIs.
-  </Card>
   <Card title="Examples" icon="file-code" href="/examples/function-calling">
-    See more function calling examples in action.
+    See function calling in action.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/chat/completion">
+    Complete API documentation.
   </Card>
 </div>
 
 <div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
-  <strong>Need Help?</strong> Check out our <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for complete working examples, or join our <a href="https://discord.com/invite/pNmdkxgBe2" style={{color: '#FF6200'}}>Discord community</a> for support.
+  <strong>Need Help?</strong> Check our <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for examples.
 </div>
 
 
