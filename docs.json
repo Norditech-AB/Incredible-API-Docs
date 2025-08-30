@@ -21,13 +21,6 @@
               "quickstart",
               "guides/core-concepts"
             ]
-          },
-          {
-            "group": "Setup & Authentication",
-            "pages": [
-              "guides/authentication",
-              "guides/models-overview"
-            ]
           }
         ]
       },
