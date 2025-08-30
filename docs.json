@@ -58,6 +58,16 @@
         "tab": "Examples",
         "groups": [
           {
+            "group": "Business Examples",
+            "pages": [
+              "examples/index",
+              "examples/ai-research-assistant",
+              "examples/ai-content-agency",
+              "examples/ai-customer-support",
+              "examples/ai-code-generator"
+            ]
+          },
+          {
             "group": "Getting Started",
             "pages": [
               "examples/hello-incredible",
