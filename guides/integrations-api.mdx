@@ -1,0 +1,279 @@
+---
+title: 'Integrations API'
+description: 'Connect to third-party services through unified integration endpoints'
+---
+
+The Incredible API provides a unified interface for integrating with third-party services like Gmail, Perplexity, and more.
+
+## 🔗 Available Integrations
+
+### List All Integrations
+
+Get a list of all available integrations:
+
+<CodeGroup>
+  ```bash Shell
+curl -X GET "https://api.incredible.one/v1/integrations" \
+  -H "Content-Type: application/json"
+  ```
+
+  ```python Python
+import requests
+
+response = requests.get("https://api.incredible.one/v1/integrations")
+integrations = response.json()
+print(integrations)
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/integrations");
+const integrations = await response.json();
+console.log(integrations);
+  ```
+</CodeGroup>
+
+**Response:**
+```json
+[
+  {
+    "id": "gmail",
+    "name": "Gmail",
+    "description": "Gmail integration for sending and managing emails",
+    "logo_url": "https://example.com/gmail-logo.png",
+    "app_url": "https://mail.google.com",
+    "features": [
+      {
+        "name": "gmail_send_email",
+        "description": "Send an email via Gmail"
+      }
+    ],
+    "auth_method": "OAUTH2"
+  }
+]
+```
+
+### Get Integration Details
+
+Get detailed information about a specific integration:
+
+<CodeGroup>
+  ```bash Shell
+curl -X GET "https://api.incredible.one/v1/integrations/gmail" \
+  -H "Content-Type: application/json"
+  ```
+
+  ```python Python
+import requests
+
+response = requests.get("https://api.incredible.one/v1/integrations/gmail")
+integration = response.json()
+print(integration)
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/integrations/gmail");
+const integration = await response.json();
+console.log(integration);
+  ```
+</CodeGroup>
+
+## 🔐 Connecting to Integrations
+
+### OAuth 2.0 Connection
+
+For services like Gmail that use OAuth:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "callback_url": "https://myapp.com/oauth-callback"
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/integrations/gmail/connect",
+    json={
+        "user_id": "user123",
+        "callback_url": "https://myapp.com/oauth-callback"
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/integrations/gmail/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: "user123",
+    callback_url: "https://myapp.com/oauth-callback"
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**OAuth Response:**
+```json
+{
+  "redirect_url": "https://accounts.google.com/oauth/authorize?...",
+  "instructions": "Redirect user to the provided URL to complete authorization"
+}
+```
+
+### API Key Connection
+
+For services like Perplexity that use API keys:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/integrations/perplexity/connect" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "api_key": "pplx-abc123..."
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/integrations/perplexity/connect",
+    json={
+        "user_id": "user123",
+        "api_key": "pplx-abc123..."
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/integrations/perplexity/connect", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: "user123",
+    api_key: "pplx-abc123..."
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**API Key Response:**
+```json
+{
+  "success": true,
+  "user_id": "user123",
+  "integration_id": "perplexity"
+}
+```
+
+## 🚀 Using Integrations
+
+### Execute Integration Features
+
+Once connected, execute specific features:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/integrations/gmail/execute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "feature_name": "gmail_send_email",
+    "inputs": {
+      "recipient_email": "recipient@example.com",
+      "subject": "Hello from Incredible API",
+      "body": "This is a test email sent via the Incredible API."
+    }
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/integrations/gmail/execute",
+    json={
+        "user_id": "user123",
+        "feature_name": "gmail_send_email",
+        "inputs": {
+            "recipient_email": "recipient@example.com",
+            "subject": "Hello from Incredible API",
+            "body": "This is a test email sent via the Incredible API."
+        }
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/integrations/gmail/execute", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: "user123",
+    feature_name: "gmail_send_email",
+    inputs: {
+      recipient_email: "recipient@example.com",
+      subject: "Hello from Incredible API",
+      body: "This is a test email sent via the Incredible API."
+    }
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "success": true,
+  "result": {
+    "message_id": "msg_123",
+    "status": "sent"
+  },
+  "integration_id": "gmail",
+  "feature_name": "gmail_send_email",
+  "user_id": "user123"
+}
+```
+
+## 🔧 Supported Authentication Methods
+
+The Integrations API supports multiple authentication schemes:
+
+- **API_KEY**: Simple API key authentication
+- **OAUTH2**: OAuth 2.0 authentication flow
+- **OAUTH1**: OAuth 1.0 authentication flow
+- **BASIC**: Username/password combination
+- **BEARER_TOKEN**: Bearer token authentication
+
+## 📚 What's Next?
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
+    Learn to use custom functions.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples">
+    See integrations in action.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference">
+    Complete API documentation.
+  </Card>
+</div>
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Need Help?</strong> Check our <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for examples.
+</div>

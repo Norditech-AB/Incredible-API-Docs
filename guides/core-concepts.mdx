@@ -3,90 +3,55 @@ title: "Core Concepts"
 description: "Understanding what makes Incredible API different"
 ---
 
-The Incredible API is an **agentic AI** that can execute code and perform tasks, not just generate text. Here's what makes it unique:
+## 🎯 **What Makes Incredible Different**
 
-## 🤖 What is Agentic AI?
-
-**Traditional LLMs** (like ChatGPT):
-- Generate text based on training data
-- Cannot execute code or perform actions
-- Limited to providing information
-
-**Incredible (Agentic AI)**:
-- Can run actual Python code
-- Executes functions and tools
-- Performs real-world tasks
-- Maintains context across conversations
-
-## 🔧 How It Works
+Incredible API combines three powerful capabilities that set it apart from traditional AI APIs:
 
 ### 1. **Code Execution**
-Incredible can run Python code to solve problems:
-
-```
-User: "What's the weather in New York?"
-Incredible: *Actually calls a weather API and returns real data*
-```
+Unlike standard LLMs that only generate text, Incredible can execute actual code and perform real actions. This means it can:
+- Run calculations and mathematical operations
+- Process data and perform analysis
+- Execute custom functions you define
+- Interact with external systems and APIs
 
 ### 2. **Function Calling**
-Define custom functions that Incredible can use:
+Incredible can intelligently choose and call functions based on your requests:
+- Define custom functions with JSON schemas
+- Let the AI decide when and how to use them
+- Handle complex workflows with multiple function calls
+- Maintain context across function executions
 
-```json
-{
-  "name": "calculate_distance",
-  "description": "Calculate distance between two points",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "lat1": {"type": "number"},
-      "lon1": {"type": "number"},
-      "lat2": {"type": "number"},
-      "lon2": {"type": "number"}
-    },
-    "required": ["lat1", "lon1", "lat2", "lon2"]
-  }
-}
-```
+### 3. **Integrations API**
+Built-in connections to popular third-party services:
+- **Gmail**: Send emails and manage mailboxes
+- **Perplexity**: Access real-time search and information
+- **Custom Integrations**: Connect to any service via unified endpoints
+- **Multiple Auth Methods**: OAuth2, API keys, and more
 
-### 3. **Context Awareness**
-Incredible remembers previous interactions and builds on them:
+## 🚀 **When to Use Incredible**
 
-```
-User: "Get the weather in New York"
-Assistant: "Current temperature: 72°F, sunny"
-User: "What should I wear?"
-Assistant: "With 72°F and sunny conditions, I'd recommend light clothing and sunscreen."
-```
+Choose Incredible when you need:
+- **Real Actions**: Not just text generation, but actual task execution
+- **Complex Workflows**: Multi-step processes that require decision-making
+- **External Integrations**: Connect to other services and APIs
+- **Agentic Behavior**: AI that can plan, execute, and adapt
 
-## 🎯 When to Use Incredible
-
-**Perfect for:**
-- Data analysis and processing
-- API integrations
-- Mathematical calculations
-- Multi-step workflows
-
-**Not ideal for:**
-- Simple Q&A
-- Creative writing
-- Static information lookup
-
-## 🎯 What's Next?
+## 📚 **What's Next?**
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Try your first request.
+    Get up and running in minutes.
   </Card>
   <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
-    Learn to define functions.
+    Learn to use custom functions.
   </Card>
-  <Card title="Examples" icon="file-code" href="/examples">
-    See it in action.
+  <Card title="Integrations API" icon="link" href="/guides/integrations-api">
+    Connect to third-party services.
   </Card>
 </div>
 
 <div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
-  <strong>Key Takeaway:</strong> Incredible doesn't just talk about doing things—it actually does them by running code and calling functions.
+  <strong>Key Takeaway:</strong> Incredible API transforms AI from a text generator into an intelligent agent that can execute real tasks and integrate with external services.
 </div>
 
 

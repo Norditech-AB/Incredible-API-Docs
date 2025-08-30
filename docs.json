@@ -49,7 +49,8 @@
             "group": "Advanced Topics",
             "pages": [
               "guides/application-state-management",
-              "guides/best-practices"
+              "guides/best-practices",
+              "guides/integrations-api"
             ]
           }
         ]
