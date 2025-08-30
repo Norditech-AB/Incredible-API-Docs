@@ -16,19 +16,56 @@ The Incredible API provides access to dozens of third-party services through int
 
 The agent has access to **50+ integrations** including:
 
-- **Communication**: Gmail, Slack, Discord, WhatsApp
-- **Productivity**: Google Calendar, Notion, Confluence, SharePoint
-- **Business**: QuickBooks, HubSpot, Salesforce, Stripe
-- **Creative**: Canva, Figma, Abyssale, All-Images AI
-- **Development**: GitHub, GitLab, Jira, Linear
-- **Analytics**: Mixpanel, Google Analytics, Amplitude
-- **Social Media**: TikTok, LinkedIn, Twitter, Instagram
+### **Communication & Collaboration**
+- **Slack**: Send messages, create channels, manage users, search conversations
+- **Discord**: Post updates, manage servers, moderate channels
+- **Gmail**: Send emails, manage mailboxes, organize conversations
+- **WhatsApp**: Send messages, manage contacts, create groups
+
+### **Productivity & Documents**
+- **Google Docs**: Create, edit, format documents, insert tables and images
+- **Notion**: Manage databases, create pages, organize knowledge
+- **Confluence**: Create spaces, manage content, collaborate
+- **SharePoint**: Manage sites, create lists, organize files
+
+### **Business & Finance**
+- **QuickBooks**: Manage accounts, customers, vendors, generate reports
+- **HubSpot**: Manage contacts, deals, marketing campaigns
+- **Salesforce**: Track leads, manage opportunities, generate reports
+- **Stripe**: Process payments, manage subscriptions, handle refunds
+
+### **Development & DevOps**
+- **GitHub**: Manage repositories, create issues, review PRs, manage projects
+- **GitLab**: Handle projects, manage CI/CD, track issues
+- **Jira**: Create tickets, manage projects, track progress
+- **Linear**: Manage issues, track projects, organize work
+
+### **Creative & Design**
+- **Canva**: Create designs, manage templates, organize assets
+- **Figma**: Design interfaces, collaborate on projects, manage files
+- **Abyssale**: Generate images, create videos, manage projects
+- **All-Images AI**: Generate AI images, manage collections
+
+### **Analytics & Data**
+- **Mixpanel**: Analyze user behavior, create funnels, track events
+- **Google Analytics**: Monitor website performance, analyze traffic
+- **Amplitude**: User analytics, cohort analysis, behavioral insights
+
+### **Marketing & Sales**
+- **Lemlist**: Email outreach campaigns, lead management, automation
+- **Kit**: Creator tools, email marketing, subscriber management
+- **Attio**: CRM, relationship management, deal tracking
+
+### **Social Media & Content**
+- **TikTok**: Upload videos, manage content, track performance
+- **LinkedIn**: Post updates, manage connections, track engagement
+- **Twitter**: Post tweets, manage followers, analyze performance
 
 ## 🚀 **Real Examples**
 
-### Example 1: Send an Email
+### Example 1: Customer Onboarding Automation
 
-Instead of learning Gmail's API, just ask the agent:
+Instead of manually sending welcome emails and creating calendar invites:
 
 <CodeGroup>
   ```bash Shell
@@ -39,7 +76,7 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
     "messages": [
       {
         "role": "user", 
-        "content": "Send an email to john@example.com with subject 'Meeting Tomorrow' and body 'Hi John, let'\''s meet tomorrow at 2 PM to discuss the project.'"
+        "content": "We just signed up a new customer: John Smith (john@acme.com). Send them a welcome email with our getting started guide, then schedule an onboarding call for next Tuesday at 2 PM. Also add them to our customer Slack channel."
       }
     ]
   }'
@@ -55,7 +92,7 @@ response = requests.post(
         "messages": [
             {
                 "role": "user",
-                "content": "Send an email to john@example.com with subject 'Meeting Tomorrow' and body 'Hi John, let's meet tomorrow at 2 PM to discuss the project.'"
+                "content": "We just signed up a new customer: John Smith (john@acme.com). Send them a welcome email with our getting started guide, then schedule an onboarding call for next Tuesday at 2 PM. Also add them to our customer Slack channel."
             }
         ]
     }
@@ -72,7 +109,7 @@ const response = await fetch("https://api.incredible.one/v1/chat-completion", {
     messages: [
       {
         role: "user",
-        content: "Send an email to john@example.com with subject 'Meeting Tomorrow' and body 'Hi John, let's meet tomorrow at 2 PM to discuss the project.'"
+        content: "We just signed up a new customer: John Smith (john@acme.com). Send them a welcome email with our getting started guide, then schedule an onboarding call for next Tuesday at 2 PM. Also add them to our customer Slack channel."
       }
     ]
   })
@@ -82,13 +119,15 @@ console.log(data);
   ```
 </CodeGroup>
 
-**What Happens:**
-1. Agent recognizes you want to send an email
-2. Automatically selects Gmail integration tools
-3. Handles authentication and API calls
-4. Returns confirmation of email sent
+**What the Agent Does:**
+1. Sends personalized welcome email via Gmail
+2. Creates calendar event and sends invite via Google Calendar
+3. Adds John to customer Slack channel
+4. Confirms all actions completed successfully
 
-### Example 2: Schedule a Meeting
+### Example 2: Project Status Report
+
+Instead of manually gathering data from multiple sources:
 
 <CodeGroup>
   ```bash Shell
@@ -99,7 +138,7 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
     "messages": [
       {
         "role": "user", 
-        "content": "Schedule a meeting tomorrow at 3 PM with Sarah and Mike to discuss Q4 planning. Make it 1 hour long."
+        "content": "Create a project status report for Q4. Pull data from our GitHub repositories, Jira tickets, and Mixpanel analytics. Include: open issues count, recent commits, user engagement metrics, and upcoming milestones. Format it nicely in Google Docs and share it with the team on Slack."
       }
     ]
   }'
@@ -115,7 +154,7 @@ response = requests.post(
         "messages": [
             {
                 "role": "user",
-                "content": "Schedule a meeting tomorrow at 3 PM with Sarah and Mike to discuss Q4 planning. Make it 1 hour long."
+                "content": "Create a project status report for Q4. Pull data from our GitHub repositories, Jira tickets, and Mixpanel analytics. Include: open issues count, recent commits, user engagement metrics, and upcoming milestones. Format it nicely in Google Docs and share it with the team on Slack."
             }
         ]
     }
@@ -132,24 +171,26 @@ const response = await fetch("https://api.incredible.one/v1/chat-completion", {
     messages: [
       {
         role: "user",
-        content: "Schedule a meeting tomorrow at 3 PM with Sarah and Mike to discuss Q4 planning. Make it 1 hour long."
+        content: "Create a project status report for Q4. Pull data from our GitHub repositories, Jira tickets, and Mixpanel analytics. Include: open issues count, recent commits, user engagement metrics, and upcoming milestones. Format it nicely in Google Docs and share it with the team on Slack."
       }
     ]
   })
 });
 const data = await response.json();
 console.log(data);
-console.log(data);
   ```
 </CodeGroup>
 
-**What Happens:**
-1. Agent understands you want to schedule a meeting
-2. Uses Google Calendar integration to create the event
-3. Automatically finds Sarah and Mike's contact info
-4. Sends calendar invites and confirms scheduling
+**What the Agent Does:**
+1. Queries GitHub for repository statistics and recent commits
+2. Fetches Jira data for open issues and project milestones
+3. Analyzes Mixpanel data for user engagement trends
+4. Creates formatted report in Google Docs
+5. Posts summary and link to team Slack channel
 
-### Example 3: Create a Document
+### Example 3: Lead Follow-up Campaign
+
+Instead of manually managing sales outreach:
 
 <CodeGroup>
   ```bash Shell
@@ -160,7 +201,7 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
     "messages": [
       {
         "role": "user", 
-        "content": "Create a Google Doc titled 'Project Summary' with the content: 'This project aims to improve user experience through better integration design. Key milestones include user research, design iteration, and implementation.'"
+        "content": "We have 25 leads from last week'\''s webinar who haven'\''t responded. Create a follow-up campaign in Lemlist: send them a personalized email with the webinar recording, schedule a demo call for next week, and track their engagement. Also update their status in HubSpot."
       }
     ]
   }'
@@ -176,7 +217,7 @@ response = requests.post(
         "messages": [
             {
                 "role": "user",
-                "content": "Create a Google Doc titled 'Project Summary' with the content: 'This project aims to improve user experience through better integration design. Key milestones include user research, design iteration, and implementation.'"
+                "content": "We have 25 leads from last week's webinar who haven't responded. Create a follow-up campaign in Lemlist: send them a personalized email with the webinar recording, schedule a demo call for next week, and track their engagement. Also update their status in HubSpot."
             }
         ]
     }
@@ -193,7 +234,7 @@ const response = await fetch("https://api.incredible.one/v1/chat-completion", {
     messages: [
       {
         role: "user",
-        content: "Create a Google Doc titled 'Project Summary' with the content: 'This project aims to improve user experience through better integration design. Key milestones include user research, design iteration, and implementation.'"
+        content: "We have 25 leads from last week's webinar who haven't responded. Create a follow-up campaign in Lemlist: send them a personalized email with the webinar recording, schedule a demo call for next week, and track their engagement. Also update their status in HubSpot."
       }
     ]
   })
@@ -203,11 +244,73 @@ console.log(data);
   ```
 </CodeGroup>
 
-**What Happens:**
-1. Agent recognizes you want to create a document
-2. Uses Google Docs integration to create the file
-3. Formats content properly and sets the title
-4. Returns the document ID and sharing link
+**What the Agent Does:**
+1. Creates email campaign in Lemlist with personalized content
+2. Schedules follow-up sequences and demo call invitations
+3. Updates lead status and engagement tracking in HubSpot
+4. Sets up automated follow-up based on response patterns
+
+### Example 4: Content Creation & Distribution
+
+Instead of manually creating and sharing content:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [
+      {
+        "role": "user", 
+        "content": "Create a social media post about our new product launch. Generate an eye-catching image using Abyssale, write engaging copy for LinkedIn and Twitter, schedule the posts, and also share the news in our company Slack channel."
+      }
+    ]
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    json={
+        "model": "small-1",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Create a social media post about our new product launch. Generate an eye-catching image using Abyssale, write engaging copy for LinkedIn and Twitter, schedule the posts, and also share the news in our company Slack channel."
+            }
+        ]
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [
+      {
+        role: "user",
+        content: "Create a social media post about our new product launch. Generate an eye-catching image using Abyssale, write engaging copy for LinkedIn and Twitter, schedule the posts, and also share the news in our company Slack channel."
+      }
+    ]
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**What the Agent Does:**
+1. Generates product launch image using Abyssale
+2. Writes platform-specific copy for LinkedIn and Twitter
+3. Schedules posts with optimal timing
+4. Shares announcement in company Slack channel
 
 ## 🎨 **Advanced Workflows**
 
@@ -237,55 +340,40 @@ User: "Analyze our Mixpanel data for the last 30 days and create a report showin
 3. Creates a formatted report in Google Docs
 4. Shares insights and recommendations
 
-## 🔧 **Integration Categories**
+### Customer Success Automation
 
-### **Communication & Collaboration**
-- **Slack**: Send messages, create channels, manage users
-- **Discord**: Post updates, manage servers, moderate channels
-- **Gmail**: Send emails, manage mailboxes, organize conversations
-- **WhatsApp**: Send messages, manage contacts, create groups
+```
+User: "Check which customers haven't logged in for 30+ days, send them a re-engagement email, and schedule follow-up calls for high-value accounts"
+```
 
-### **Productivity & Documents**
-- **Google Docs**: Create, edit, format documents
-- **Notion**: Manage databases, create pages, organize knowledge
-- **Confluence**: Create spaces, manage content, collaborate
-- **SharePoint**: Manage sites, create lists, organize files
-
-### **Business & Finance**
-- **QuickBooks**: Manage accounts, customers, vendors
-- **HubSpot**: Manage contacts, deals, marketing campaigns
-- **Salesforce**: Track leads, manage opportunities, generate reports
-- **Stripe**: Process payments, manage subscriptions, handle refunds
-
-### **Development & DevOps**
-- **GitHub**: Manage repositories, create issues, review PRs
-- **GitLab**: Handle projects, manage CI/CD, track issues
-- **Jira**: Create tickets, manage projects, track progress
-- **Linear**: Manage issues, track projects, organize work
-
-### **Creative & Design**
-- **Canva**: Create designs, manage templates, organize assets
-- **Figma**: Design interfaces, collaborate on projects, manage files
-- **Abyssale**: Generate images, create videos, manage projects
-- **All-Images AI**: Generate AI images, manage collections
+**Agent automatically:**
+1. Analyzes user activity data
+2. Identifies inactive customers
+3. Sends personalized re-engagement emails
+4. Schedules follow-up calls for priority accounts
+5. Updates CRM with engagement status
 
 ## 💡 **Best Practices**
 
 ### **Be Specific**
 ❌ "Send an email"
-✅ "Send an email to john@example.com with subject 'Project Update' and body 'Hi John, here's the latest project status...'"
+✅ "Send a welcome email to john@example.com with our onboarding guide and schedule a 30-minute intro call for next Tuesday"
 
 ### **Use Natural Language**
 ❌ "Create Gmail integration with SMTP settings"
-✅ "Send a welcome email to new customers"
+✅ "Send a personalized follow-up email to webinar attendees who haven't responded"
 
 ### **Let the Agent Decide**
 ❌ "Use the Gmail API to send an email"
-✅ "Send an email to the team about the meeting"
+✅ "Notify the team about the new product launch and schedule a demo"
 
 ### **Combine Multiple Actions**
 ❌ "Create a document, then send it separately"
-✅ "Create a project report and share it with the team"
+✅ "Create a quarterly report with data from GitHub, Jira, and Mixpanel, then share it with stakeholders and schedule a review meeting"
+
+### **Think in Workflows**
+❌ "Update the CRM, then send an email, then schedule a call"
+✅ "Follow up with our top 10 leads from last month's campaign"
 
 ## 📚 **What's Next?**
 
