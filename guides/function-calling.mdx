@@ -9,6 +9,8 @@ Function calling allows Incredible to execute custom code and tools. Here's how 
 
 ### Simple Example
 
+<Tabs>
+  <Tab title="cURL">
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
@@ -29,6 +31,60 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
     }]
   }'
 ```
+  </Tab>
+  <Tab title="Python">
+```python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    json={
+        "model": "small-1",
+        "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
+        "functions": [{
+            "name": "add_numbers",
+            "description": "Add two numbers together",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number"},
+                    "b": {"type": "number"}
+                },
+                "required": ["a", "b"]
+            }
+        }]
+    }
+)
+print(response.json())
+```
+  </Tab>
+  <Tab title="JavaScript">
+```javascript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [{ role: "user", content: "Calculate 25 + 17" }],
+    functions: [{
+      name: "add_numbers",
+      description: "Add two numbers together",
+      parameters: {
+        type: "object",
+        properties: {
+          a: { type: "number" },
+          b: { type: "number" }
+        },
+        required: ["a", "b"]
+      }
+    }]
+  })
+});
+const data = await response.json();
+console.log(data);
+```
+  </Tab>
+</Tabs>
 
 **Response:**
 ```json
