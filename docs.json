@@ -12,23 +12,18 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Getting Started",
+        "tab": "Guides",
         "groups": [
           {
-            "group": "Introduction",
+            "group": "Getting Started",
             "pages": [
               "index",
               "quickstart",
               "guides/core-concepts"
             ]
-          }
-        ]
-      },
-      {
-        "tab": "Guides",
-        "groups": [
+          },
           {
-            "group": "Core Features",
+            "group": "Taking Actions",
             "pages": [
               "guides/taking-actions-overview",
               "guides/function-calling",
