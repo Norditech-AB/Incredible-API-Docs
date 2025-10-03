@@ -55,3 +55,25 @@ console.log(data);
 View source on GitHub → [0_hello_world.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/0_hello_world.py)
 </Note>
 
+## Add a system instruction
+
+Guide the assistant with a system message and adjust generation controls:
+
+```json
+{
+  "model": "small-1",
+  "stream": false,
+  "messages": [
+    { "role": "system", "content": "You are a concise assistant." },
+    { "role": "user", "content": "Summarize the Incredible API in one sentence." }
+  ],
+  "temperature": 0.4,
+  "top_p": 0.9,
+  "max_output_tokens": 120
+}
+```
+
+<Note>
+Need tokens as they generate? Try → <a href="/examples/streaming-chat">Streaming Chat</a>
+</Note>
+

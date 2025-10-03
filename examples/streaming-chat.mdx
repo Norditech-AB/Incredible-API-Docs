@@ -5,7 +5,7 @@ description: "See responses arrive in real time using stream=true"
 
 <CodeGroup>
   ```bash Shell
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
+curl -N -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "small-1",
@@ -51,6 +51,24 @@ while (true) {
 }
   ```
 </CodeGroup>
+
+### Tips
+
+- Streaming responses are sent as Server‑Sent Events and end with a final `[DONE]` line.
+- In browsers, you can cancel mid‑generation using an `AbortController`.
+
+```javascript
+const controller = new AbortController();
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ model: "small-1", stream: true, messages: [{ role: "user", content: "Explain computers in ~30 words." }] }),
+  signal: controller.signal
+});
+
+// Cancel after 1 second
+setTimeout(() => controller.abort(), 1000);
+```
 
 <Note>
 View source on GitHub → [4_streaming_chat.py](https://github.com/Norditech-AB/Incredible-API-Cookbook/blob/main/01-getting-started/4_streaming_chat.py)

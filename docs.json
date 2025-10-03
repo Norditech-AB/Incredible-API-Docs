@@ -19,7 +19,8 @@
             "pages": [
               "index",
               "quickstart",
-              "guides/core-concepts"
+              "guides/core-concepts",
+              "guides/models-overview"
             ]
           },
           {
@@ -31,6 +32,12 @@
               "guides/mathematical-operations",
               "guides/connecting-api-endpoints",
               "guides/streaming-responses"
+            ]
+          },
+          {
+            "group": "SDKs",
+            "pages": [
+              "guides/python-sdk"
             ]
           },
           {

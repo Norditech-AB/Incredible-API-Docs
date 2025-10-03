@@ -7,7 +7,6 @@ description: "Try different AI models and compare responses"
 # Small model
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,
@@ -17,7 +16,6 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
 # Tiny (example; may not be available)
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "tiny-1",
     "stream": false,
@@ -27,7 +25,6 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
 # Big (example)
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "big-1",
     "stream": false,

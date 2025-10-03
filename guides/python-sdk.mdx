@@ -1,0 +1,265 @@
+---
+title: Python SDK
+description: Use the Incredible API through the official Python client.
+sidebarTitle: Python SDK
+section: SDKs
+---
+
+# Incredible Python SDK
+
+Use the officially supported Python client to call the [Incredible API](https://docs.incredible.one/) from your projects. The SDK wraps the REST endpoints, adds helper utilities for tool chaining, and stays compatible with our live API behavior (no API key required at the moment).
+
+> **Models**: This guide uses `small-1`, but you can swap in any public model from the Model Overview page.
+
+---
+
+## Installation
+
+### PyPI (recommended)
+
+```bash
+pip install incredible-python
+```
+
+### TestPyPI (pre-release testing)
+
+```bash
+pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple \
+  incredible-python==0.1.1
+```
+
+---
+
+## Quick Start
+
+```python
+from incredible_python import Incredible
+
+client = Incredible()
+
+response = client.messages.create(
+    model="small-1",
+    max_tokens=150,
+    messages=[{"role": "user", "content": "Give me 3 productivity tips."}],
+)
+
+print(response.content)
+print("Token usage:", response.token_usage)
+```
+
+### Notes
+
+- **Authentication**: The current API does not require a key. When that changes, pass `api_key=` or set `INCREDIBLE_API_KEY`.
+- **Base URL overrides**: `Incredible(base_url="https://your-proxy.example.com")` if you route through a proxy.
+
+---
+
+## Token Usage
+
+Every response includes token usage metadata:
+
+```python
+usage = response.token_usage
+# {'input_tokens': 5339, 'output_tokens': 92}
+```
+
+A convenience copy also lives at `response.usage` if you ever need the legacy field.
+
+---
+
+## Tool Calling & Workflow Execution
+
+The SDK contains helpers that translate model-issued function calls into executable Python functions and back into the messages expected by the API. This mirrors our cookbook examples but removes the boilerplate.
+
+```python
+from incredible_python import Incredible, helpers
+
+client = Incredible()
+
+functions = [
+    {
+        "name": "calculate_operation",
+        "description": "Perform basic math",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "operation": {"type": "string", "enum": ["add", "subtract", "multiply", "divide"]},
+                "a": {"type": "number"},
+                "b": {"type": "number"},
+            },
+            "required": ["operation", "a", "b"],
+        },
+    },
+    {
+        "name": "lookup_contact",
+        "description": "Fetch CRM contact details",
+        "parameters": {
+            "type": "object",
+            "properties": {"email": {"type": "string"}},
+            "required": ["email"],
+        },
+    },
+]
+
+registry = {
+    "calculate_operation": lambda operation, a, b: eval(
+        f"{a} { {'add': '+', 'subtract': '-', 'multiply': '*', 'divide': '/'}[operation] } {b}"
+    ),
+    "lookup_contact": lambda email: {"email": email, "name": "Taylor Example", "status": "active"},
+}
+
+messages = [{"role": "user", "content": "Add 7 and 35, then look up taylor@example.com"}]
+
+initial = client.messages.create(
+    model="small-1",
+    max_tokens=256,
+    messages=messages,
+    functions=functions,
+)
+
+plan = helpers.build_tool_execution_plan(initial.raw)
+if plan:
+    results = helpers.execute_plan(plan, registry=registry)
+    follow_up = helpers.build_follow_up_messages(messages, plan, results)
+
+    final = client.messages.create(
+        model="small-1",
+        max_tokens=256,
+        messages=follow_up,
+        functions=functions,
+    )
+
+    print(final.content)
+    print("Token usage:", final.token_usage)
+```
+
+Helpers provided:
+
+| Helper | Purpose |
+| --- | --- |
+| `build_tool_execution_plan(raw_response)` | Parses model-issued tool calls into an executable plan. |
+| `execute_plan(plan, registry)` | Runs Python callables based on the plan and returns their results. |
+| `build_follow_up_messages(original_messages, plan, results)` | Produces the `function_call` / `function_call_result` messages to send back to the model. |
+
+---
+
+## Streaming
+
+> **Caution**: Streaming support is still evolving. The current API returns SSE lines that differ from the OpenAI format, so the helper may require adjustments.
+
+```python
+stream = client.messages.stream(
+    model="small-1",
+    max_tokens=150,
+    messages=[{"role": "user", "content": "Stream a haiku about focus."}],
+)
+for event in stream.iter_lines():
+    content_block = event.get("content")
+    if isinstance(content_block, dict) and content_block.get("type") == "content_chunk":
+        print(content_block.get("content", ""), end="", flush=True)
+```
+
+If you see `'str' object has no attribute 'decode'`, the live API changed its streaming format; continue polling until the official streaming upgrade lands.
+
+---
+
+## Integrations API
+
+List, inspect, connect, and execute Incredible integrations directly:
+
+```python
+integrations = client.integrations.list()
+for integration in integrations[:10]:
+    print(integration["id"], integration["name"])
+
+details = client.integrations.retrieve("perplexity")
+print(details["features"][0]["name"])
+
+connection = client.integrations.connect(
+    "perplexity",
+    user_id="user_123",
+    api_key="perplexity-secret",
+)
+if connection.requires_oauth:
+    print("Open this URL to authorize:", connection.redirect_url)
+
+execution = client.integrations.execute(
+    "perplexity",
+    user_id="user_123",
+    feature_name="PERPLEXITY_SEARCH",
+    inputs={"query": "Latest AI news"},
+)
+print(execution)
+```
+
+**Connection results** come back as an `IntegrationConnectionResult` object, with `success`, `redirect_url`, and `instructions` fields so you can direct users through OAuth or API-key flows.
+
+---
+
+## Example Projects
+
+- `examples/demo.py`: An end-to-end script that hits chat, tool execution, streaming, and integrations.
+- `examples/testpypi_demo/basic_demo.py`: Minimal example installing the SDK from TestPyPI and running a quick chat.
+
+To run the TestPyPI demo:
+
+```bash
+cd examples/testpypi_demo
+python -m venv .venv-demo
+source .venv-demo/bin/activate    # Windows: .venv-demo\Scripts\activate
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple \
+            incredible-python==0.1.1
+python basic_demo.py
+```
+
+---
+
+## Known Limitations
+
+- **`messages.count_tokens`**: The live API has not enabled `/v1/messages/count_tokens` yet. The SDK keeps the method for forward compatibility; for now it returns 404 with an informative error message.
+- **Streaming**: SSE handling may change; plan for a future SDK update that formalizes streaming support.
+- **Large Context Data**: For multi-megabyte payloads (HTML, documents), **always register a tool** that fetches the data instead of injecting it directly into `messages`. The live API's context window will overflow if you paste large raw content.
+
+---
+
+## Release History
+
+| Version | Date | Notes |
+| --- | --- | --- |
+| 0.1.1 | 2025-10-01 | Published to TestPyPI/PyPI, tool execution helpers, integration flow, token usage attached to responses. |
+| 0.1.0 | 2025-09-25 | Initial SDK release (basic chat + function calling). |
+
+---
+
+## See Also
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Introduction" icon="book" href="/">
+    Overview and quickstart.
+  </Card>
+  <Card title="Core Concepts" icon="lightbulb" href="/guides/core-concepts">
+    What makes Incredible different.
+  </Card>
+  <Card title="Models Overview" icon="brain" href="/guides/models-overview">
+    Available models and capabilities.
+  </Card>
+  <Card title="Taking Actions" icon="wrench" href="/guides/function-calling">
+    Implement tool use.
+  </Card>
+  <Card title="Streaming Responses" icon="book" href="/guides/streaming-responses">
+    Handle SSE and streaming helpers.
+  </Card>
+  <Card title="Cookbook" icon="github" href="https://github.com/Norditech-AB/Incredible-API-Cookbook">
+    Examples and boilerplates.
+  </Card>
+  
+</div>
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', gap: '16px', marginTop: '16px' }}>
+  <Card title="Examples & cookbooks on GitHub" icon="github" href="https://github.com/Norditech-AB/Incredible-API-Cookbook">
+    Browse example projects and recipes.
+  </Card>
+</div>
