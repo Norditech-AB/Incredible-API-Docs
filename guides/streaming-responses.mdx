@@ -35,31 +35,35 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
 Example response
 
 ```jsx
-[
-  {
-    "content": {
-      "type": "text_chunk",
-      "content": "Hello"
-    }
-  },
-  {
-    "content": {
-      "type": "function_call",
-      "function_call_id": "...",
-      "function_calls": [
-        {
-          "name": "get_weather",
-          "arguments": {
-            "location": "San Francisco, CA"
-          }
-        }
-      ]
-    }
-  },
-  {
-    "content": "[DONE]"
-  }
-]
+data: {"content": {"type": "thinking_chunk", "content": "The"}}
+
+data: {"content": {"type": "thinking_chunk", "content": " user"}}
+
+...
+
+data: {"content": {"type": "thinking_chunk", "content": " parameter"}}
+
+data: {"content": {"type": "thinking_chunk", "content": "."}}
+
+data: {"content": {"type": "end_of_thinking", "id": "d044ba7c-a973-4c6e-adc4-10241ad03cb3"}}
+
+data: {"content": {"type": "text_chunk", "content": "I"}}
+
+data: {"content": {"type": "text_chunk", "content": "'ll"}}
+
+...
+
+data: {"content": {"type": "text_chunk", "content": " you"}}
+
+data: {"content": {"type": "text_chunk", "content": ".\n"}}
+
+data: {"content": {"type": "starting_function_call"}}
+
+data: {"content": {"type": "token_usage", "input_tokens": 5061, "output_tokens": 232}}
+
+data: {"content": {"type": "function_call", "function_call_id": "9db3163e-c088-483d-bd89-1af8f9996ba5", "function_calls": [{"name": "get_weather", "input": {"location": "San Francisco, CA"}}], "action_description": "Getting San Francisco weather"}}
+
+data: {"content": "[DONE]"}
 
 ```
 

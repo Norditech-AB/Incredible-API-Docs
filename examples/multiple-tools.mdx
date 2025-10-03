@@ -10,7 +10,6 @@ This mirrors the Cookbook’s multi-tool flow. The model returns a `function_cal
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,
@@ -45,7 +44,6 @@ The response will include a `type: "function_call"` for the chosen tool.
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,

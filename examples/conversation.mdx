@@ -9,7 +9,6 @@ Send the whole conversation each turn so the model keeps context.
 # 1) Ask the first question
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,
@@ -22,7 +21,6 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
 # Replace ASSISTANT_REPLY with the text from result.response[0].content
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,

@@ -4,6 +4,39 @@ description: "List available integrations so you can populate pickers, drive onb
 openapi: 'GET /v1/integrations'
 ---
 
+## Overview
+
+Returns all available integrations with key metadata you can use to render UI and decide how to connect. Typical use cases:
+
+- Populate an integrations gallery or dropdown
+- Show which services are supported and their auth types
+- Drive onboarding flows before connecting and executing features
+
+## Request
+
+No parameters are required. This endpoint returns a full list.
+
+<CodeGroup>
+
+```bash
+curl -X GET "https://api.incredible.one/v1/integrations"
+```
+
+```python
+import requests
+
+res = requests.get("https://api.incredible.one/v1/integrations")
+print(res.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/integrations");
+console.log(await res.json());
+```
+
+</CodeGroup>
+
+## Response
 
 <ResponseExample>
 
@@ -18,12 +51,7 @@ openapi: 'GET /v1/integrations'
     "features": [
       {
         "name": "GMAIL_SEND_EMAIL",
-        "description": "Send an email via Gmail",
-        "parameters": {
-          "to": "string",
-          "subject": "string",
-          "body": "string"
-        }
+        "description": "Send an email via Gmail"
       }
     ],
     "auth_method": "OAUTH2"
@@ -37,11 +65,7 @@ openapi: 'GET /v1/integrations'
     "features": [
       {
         "name": "PERPLEXITY_SEARCH",
-        "description": "Perform a search query",
-        "parameters": {
-          "query": "string",
-          "focus": "string"
-        }
+        "description": "Perform a search query"
       }
     ],
     "auth_method": "API_KEY"
@@ -50,3 +74,45 @@ openapi: 'GET /v1/integrations'
 ```
 
 </ResponseExample>
+
+## Field reference
+
+- id string — Unique identifier (e.g., `gmail`, `perplexity`).
+- name string — Human‑readable name.
+- description string — What the integration does.
+- logo_url string — URL to the app logo to display in your UI.
+- app_url string — Link to the app’s homepage.
+- features array — List of available features/functions; each item has:
+  - name string — Feature identifier (e.g., `GMAIL_SEND_EMAIL`).
+  - description string — What the feature does.
+- auth_method string — Authentication type: `OAUTH2`, `API_KEY`, `BASIC_AUTH`, or `NONE`.
+
+## Error responses
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Unauthorized",
+  "instructions": "Provide a valid API token in the Authorization header"
+}
+```
+
+</ResponseExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "error": "Internal server error",
+  "details": "Upstream provider unreachable. Try again later."
+}
+```
+
+</ResponseExample>
+
+## Next steps
+
+- Get details for a specific integration: /api-reference/endpoint/get-integration
+- Connect a user to an integration: /api-reference/endpoint/connect-integration
+- Execute a feature: /api-reference/endpoint/execute-feature

@@ -4,3 +4,50 @@ description: "Generate answers as a live Server‑Sent Events (SSE) stream — i
 openapi: "POST /v1/chat-completion"
 ---
 
+## Request (SSE)
+
+Set `stream: true` to receive a `text/event-stream` response.
+
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "model": "small-1",
+    "stream": true,
+    "messages": [
+      { "role": "user", "content": "What is the weather in Stockholm?" }
+    ]
+  }'
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "text/event-stream"
+  },
+  body: JSON.stringify({
+    model: "small-1",
+    stream: true,
+    messages: [{ role: "user", content: "What is the weather in Stockholm?" }]
+  })
+});
+// Read the ReadableStream and parse SSE lines
+```
+
+</CodeGroup>
+
+## Response Format
+
+```text
+data: {"content": {"type": "text_chunk", "content": "Hello"}}
+data: {"content": {"type": "function_call", "function_call_id": "...", "function_calls": []}}
+data: {"content": "[DONE]"}
+```
+
+If you prefer a single JSON response, see Chat Completion.
+

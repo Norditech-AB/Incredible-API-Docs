@@ -1,12 +1,64 @@
 ---
 title: "Chat Completion"
-description: "Ask a question and get a response. Use stream=true to receive an SSE stream, or stream=false for a single JSON response."
+description: "Ask a question and get a response. Use stream=true for SSE streaming, or omit stream for a single JSON response."
 openapi: "POST /v1/chat-completion"
 ---
 
-### Responses
+## Request
 
-#### stream = true
+Send a POST request with your prompt and options. Set `stream: true` to receive Server‑Sent Events (SSE), or omit `stream` for a single JSON response (default).
+
+<CodeGroup>
+
+```bash
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [
+      { "role": "user", "content": "Hello, Incredible!" }
+    ]
+  }'
+```
+
+```python
+import requests
+
+payload = {
+  "model": "small-1",
+  "messages": [
+    {"role": "user", "content": "Hello, Incredible!"}
+  ]
+}
+
+res = requests.post("https://api.incredible.one/v1/chat-completion", json=payload)
+print(res.json())
+```
+
+```javascript
+const res = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [{ role: "user", content: "Hello, Incredible!" }]
+  })
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
+
+## Request Body
+
+- **model** string — Model identifier (e.g., `small-1`).
+- **messages** array — Conversation history; at least one user message is required.
+- **system** string (optional) — System prompt defining assistant behavior.
+- **stream** boolean (optional) — Set `true` for SSE streaming; omit to get a single JSON response (default `false`).
+
+## Responses
+
+### stream = true (SSE)
 
 ```text
 data: {"content": {"type": "text_chunk", "content": "Hello"}}
@@ -14,7 +66,9 @@ data: {"content": {"type": "function_call", "function_call_id": "...", "function
 data: {"content": "[DONE]"}
 ```
 
-#### stream = false
+See also: Chat Completion (Streaming).
+
+### Non‑streaming (default, JSON)
 
 ```json
 {

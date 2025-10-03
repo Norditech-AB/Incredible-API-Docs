@@ -1,24 +1,480 @@
 ---
 title: "Function Calling"
-description: "Custom functions and tools"
+description: "Learn how to use custom functions with Incredible API"
 ---
 
-Provide `functions` in your chat request to enable structured tool use.
+Function calling allows Incredible to execute custom code and tools. Here's how to use it:
 
-```bash
+## 🚀 Basic Function Calling
+
+### Simple Example
+
+<CodeGroup>
+  ```bash Shell
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
-    "stream": false,
-    "messages": [{"role": "user", "content": "Add 25 and 17"}],
+    "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
     "functions": [{
       "name": "add_numbers",
-      "description": "Add two numbers",
-      "parameters": {"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}},"required":["a","b"]}
+      "description": "Add two numbers together",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
     }]
   }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    json={
+        "model": "small-1",
+        "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
+        "functions": [{
+            "name": "add_numbers",
+            "description": "Add two numbers together",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number"},
+                    "b": {"type": "number"}
+                },
+                "required": ["a", "b"]
+            }
+        }]
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [{ role: "user", content: "Calculate 25 + 17" }],
+    functions: [{
+      name: "add_numbers",
+      description: "Add two numbers together",
+      parameters: {
+        type: "object",
+        properties: {
+          a: { type: "number" },
+          b: { type: "number" }
+        },
+        required: ["a", "b"]
+      }
+    }]
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "result": {
+    "response": [
+      {
+        "content": "I'll use the available function to add those two numbers for you.",
+        "role": "assistant"
+      },
+      {
+        "function_call_id": "ce9ea390-450f-4a7f-8872-2f0aa69c3467",
+        "function_calls": [
+          {
+            "input": {"a": 25, "b": 17},
+            "name": "add_numbers"
+          }
+        ],
+        "type": "function_call"
+      }
+    ]
+  }
+}
+```
+
+## 🔧 Function Schema
+
+### Required Fields
+
+```json
+{
+  "name": "function_name",
+  "description": "What this function does",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "param1": {
+        "type": "string|number|boolean|array|object",
+        "description": "Parameter description"
+      }
+    },
+    "required": ["param1"]
+  }
+}
+```
+
+### Parameter Types
+
+- **`string`**: Text values
+- **`number`**: Numeric values
+- **`boolean`**: True/false values
+- **`array`**: Lists of values
+- **`object`**: Structured data
+
+## 🎭 Multiple Functions
+
+Provide multiple functions and let Incredible choose:
+
+```json
+{
+  "functions": [
+    {
+      "name": "get_weather",
+      "description": "Get current weather for a location",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {"type": "string"}
+        },
+        "required": ["location"]
+      }
+    },
+    {
+      "name": "calculate_distance",
+      "description": "Calculate distance between two points",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "lat1": {"type": "number"},
+          "lon1": {"type": "number"},
+          "lat2": {"type": "number"},
+          "lon2": {"type": "number"}
+        },
+        "required": ["lat1", "lon1", "lat2", "lon2"]
+      }
+    }
+  ]
+}
+```
+
+## 🔄 Function Calling in Conversations
+
+Include function results in subsequent messages:
+
+```json
+{
+  "messages": [
+    {"role": "user", "content": "What's the weather in New York?"},
+    {"role": "assistant", "content": "Let me check the weather for you."},
+    {"role": "function", "name": "get_weather", "content": "{\"temperature\": 72, \"condition\": \"sunny\"}"},
+    {"role": "user", "content": "What about tomorrow?"}
+  ]
+}
+```
+
+## 🚨 Error Handling
+
+### Common Errors
+
+**Invalid Function Schema:**
+```json
+{
+  "error": "Invalid function schema"
+}
+```
+
+**Function Not Found:**
+```json
+{
+  "error": "Function 'unknown_function' not found"
+}
+```
+
+## 💡 Best Practices
+
+1. **Clear Names**: Use descriptive function names
+2. **Detailed Descriptions**: Explain what the function does
+3. **Parameter Validation**: Define required vs optional clearly
+4. **Test Functions**: Ensure functions work independently
+
+## 🎯 What's Next?
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Mathematical Operations" icon="calculator" href="/guides/mathematical-operations">
+    Learn about built-in math capabilities.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples/function-calling">
+    See function calling in action.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/chat/completion">
+    Complete API documentation.
+  </Card>
+</div>
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Need Help?</strong> Check our <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a> for examples.
+</div>
+
+## 🔄 Complete Function Calling Workflow
+
+Function calling follows a specific workflow. Here's the complete process:
+
+### Step 1: AI Decides to Call Function
+
+The AI announces a function call in its response:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
+    "functions": [{
+      "name": "add_numbers",
+      "description": "Add two numbers together",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
+    }]
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    json={
+        "model": "small-1",
+        "messages": [{"role": "user", "content": "Calculate 25 + 17"}],
+        "functions": [{
+            "name": "add_numbers",
+            "description": "Add two numbers together",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number"},
+                    "b": {"type": "number"}
+                },
+                "required": ["a", "b"]
+            }
+        }]
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [{ role: "user", content: "Calculate 25 + 17" }],
+    functions: [{
+      name: "add_numbers",
+      description: "Add two numbers together",
+      parameters: {
+        type: "object",
+        properties: {
+          a: { type: "number" },
+          b: { type: "number" }
+        },
+        required: ["a", "b"]
+      }
+    }]
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**Response with Function Call:**
+```json
+{
+  "result": {
+    "thinking": "The user wants to calculate 25 + 17. I have an add_numbers function available.",
+    "response": [
+      {
+        "role": "assistant",
+        "content": "I'll calculate that for you using the add_numbers function."
+      },
+      {
+        "type": "function_call",
+        "function_call_id": "abc-123",
+        "function_calls": [
+          {
+            "name": "add_numbers",
+            "input": {"a": 25, "b": 17}
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Step 2: Client Executes Function
+
+Execute the function locally with the provided parameters:
+
+```python
+def add_numbers(a, b):
+    return a + b
+
+result = add_numbers(25, 17)  # Returns 42
+```
+
+### Step 3: Client Sends Results
+
+Send the function results back to continue the conversation:
+
+<CodeGroup>
+  ```bash Shell
+curl -X POST "https://api.incredible.one/v1/chat-completion" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "small-1",
+    "messages": [
+      {"role": "user", "content": "Calculate 25 + 17"},
+      {"role": "assistant", "content": "I'\''ll calculate that for you using the add_numbers function."},
+      {
+        "type": "function_call",
+        "function_call_id": "abc-123",
+        "function_calls": [{"name": "add_numbers", "input": {"a": 25, "b": 17}}]
+      },
+      {
+        "type": "function_call_result",
+        "function_call_id": "abc-123",
+        "function_call_results": [42]
+      }
+    ],
+    "functions": [{
+      "name": "add_numbers",
+      "description": "Add two numbers together",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "a": {"type": "number"},
+          "b": {"type": "number"}
+        },
+        "required": ["a", "b"]
+      }
+    }]
+  }'
+  ```
+
+  ```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/chat-completion",
+    json={
+        "model": "small-1",
+        "messages": [
+            {"role": "user", "content": "Calculate 25 + 17"},
+            {"role": "assistant", "content": "I'll calculate that for you using the add_numbers function."},
+            {
+                "type": "function_call",
+                "function_call_id": "abc-123",
+                "function_calls": [{"name": "add_numbers", "input": {"a": 25, "b": 17}}]
+            },
+            {
+                "type": "function_call_result",
+                "function_call_id": "abc-123",
+                "function_call_results": [42]
+            }
+        ],
+        "functions": [{
+            "name": "add_numbers",
+            "description": "Add two numbers together",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number"},
+                    "b": {"type": "number"}
+                },
+                "required": ["a", "b"]
+            }
+        }]
+    }
+)
+print(response.json())
+  ```
+
+  ```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/chat-completion", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "small-1",
+    messages: [
+      { role: "user", content: "Calculate 25 + 17" },
+      { role: "assistant", content: "I'll calculate that for you using the add_numbers function." },
+      {
+        type: "function_call",
+        function_call_id: "abc-123",
+        function_calls: [{ name: "add_numbers", input: { a: 25, b: 17 } }]
+      },
+      {
+        type: "function_call_result",
+        function_call_id: "abc-123",
+        function_call_results: [42]
+      }
+    ],
+    functions: [{
+      name: "add_numbers",
+      description: "Add two numbers together",
+      parameters: {
+        type: "object",
+        properties: {
+          a: { type: "number" },
+          b: { type: "number" }
+        },
+        required: ["a", "b"]
+      }
+    }]
+  })
+});
+const data = await response.json();
+console.log(data);
+  ```
+</CodeGroup>
+
+**Final Response:**
+```json
+{
+  "result": {
+    "thinking": "The user provided the result of the addition. Now I can give them the final answer.",
+    "response": [
+      {
+        "role": "assistant",
+        "content": "The sum of 25 and 17 is 42."
+      }
+    ]
+  }
+}
 ```
 
 

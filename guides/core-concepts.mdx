@@ -1,11 +1,55 @@
 ---
 title: "Core Concepts"
-description: "Agents, integrations, and functions"
+description: "Understanding what makes Incredible API different"
 ---
 
-- **Agents**: Long‑lived automations driven by prompts and schedules.
-- **Integrations**: Connected apps (e.g., Gmail) that expose executable features.
-- **Features**: Concrete actions an integration can perform (e.g., `gmail_send_email`).
-- **Chat Completion**: Core endpoint that generates text and orchestrates tool use.
+## 🎯 **What Makes Incredible Different**
+
+Incredible API combines three powerful capabilities that set it apart from traditional AI APIs:
+
+### 1. **Code Execution**
+Unlike standard LLMs that only generate text, Incredible can execute actual code and perform real actions. This means it can:
+- Run calculations and mathematical operations
+- Process data and perform analysis
+- Execute custom functions you define
+- Interact with external systems and APIs
+
+### 2. **Function Calling**
+Incredible can intelligently choose and call functions based on your requests:
+- Define custom functions with JSON schemas
+- Let the AI decide when and how to use them
+- Handle complex workflows with multiple function calls
+- Maintain context across function executions
+
+### 3. **Integrations API**
+Built-in connections to popular third-party services:
+- **Gmail**: Send emails and manage mailboxes
+- **Perplexity**: Access real-time search and information
+- **Custom Integrations**: Connect to any service via unified endpoints
+- **Multiple Auth Methods**: OAuth2, API keys, and more
+
+## 🚀 **When to Use Incredible**
+
+Choose Incredible when you need:
+- **Real Actions**: Not just text generation, but actual task execution
+- **Complex Workflows**: Multi-step processes that require decision-making
+- **External Integrations**: Connect to other services and APIs
+- **Agentic Behavior**: AI that can plan, execute, and adapt
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Taking Actions" icon="wrench" href="/guides/taking-actions-overview">
+    Learn how models call functions to act.
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples/hello-incredible">
+    Explore step-by-step examples of what you can do with the API.
+  </Card>
+  <Card title="Integrations API" icon="link" href="/guides/integrations-api">
+    Connect to third-party services.
+  </Card>
+</div>
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Key Takeaway:</strong> Incredible API transforms AI from a text generator into an intelligent agent that can execute real tasks and integrate with external services.
+</div>
 
 

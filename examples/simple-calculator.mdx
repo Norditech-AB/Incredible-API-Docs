@@ -10,7 +10,6 @@ This mirrors the current Cookbook. The assistant first asks to call your functio
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,
@@ -37,7 +36,6 @@ The response includes a `type: "function_call"` with `function_call_id` and argu
 ```bash
 curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $INCREDIBLE_API_KEY" \
   -d '{
     "model": "small-1",
     "stream": false,

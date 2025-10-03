@@ -17,8 +17,9 @@
           {
             "group": "Getting Started",
             "pages": [
-              "api-reference/introduction",
+              "index",
               "quickstart",
+              "guides/core-concepts",
               "guides/models-overview"
             ]
           },
@@ -26,16 +27,25 @@
             "group": "Taking Actions",
             "pages": [
               "guides/taking-actions-overview",
+              "guides/function-calling",
               "guides/how-to-implement-function-calling",
               "guides/mathematical-operations",
               "guides/connecting-api-endpoints",
-              "guides/application-state-management"
+              "guides/streaming-responses"
             ]
           },
           {
-            "group": "Capabilities",
+            "group": "SDKs",
             "pages": [
-              "guides/streaming-responses"
+              "guides/python-sdk"
+            ]
+          },
+          {
+            "group": "Advanced Topics",
+            "pages": [
+              "guides/application-state-management",
+              "guides/best-practices",
+              "guides/integrations-api"
             ]
           }
         ]
@@ -44,30 +54,44 @@
         "tab": "Examples",
         "groups": [
           {
-            "group": "Examples",
+            "group": "Getting Started",
             "pages": [
               "examples/hello-incredible",
               "examples/basic-chat",
+              "examples/streaming-chat"
+            ]
+          },
+          {
+            "group": "Function Calling",
+            "pages": [
+              "examples/function-calling",
+              "examples/simple-calculator",
+              "examples/multiple-tools"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "examples/gmail-integration",
+              "examples/perplexity-integration"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
               "examples/multiple-models",
               "examples/conversation",
-              "examples/streaming-chat",
-              "examples/function-calling",
-              "examples/gmail-integration",
-              "examples/perplexity-integration",
-              "examples/simple-calculator",
-              "examples/multiple-tools",
               "examples/json-extraction",
               "examples/advanced-workflow"
             ]
           }
         ]
       },
-      
       {
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Chat Completion",
+            "group": "Core Endpoints",
             "pages": [
               "api-reference/chat/completion"
             ]
