@@ -37,7 +37,8 @@
           {
             "group": "SDKs",
             "pages": [
-              "guides/python-sdk"
+              "guides/python-sdk",
+              "guides/typescript-sdk"
             ]
           },
           {
