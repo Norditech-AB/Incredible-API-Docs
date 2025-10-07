@@ -1,0 +1,353 @@
+---
+title: TypeScript SDK
+description: Use the Incredible API from TypeScript/JavaScript projects.
+sidebarTitle: TypeScript SDK
+section: SDKs
+---
+
+# @incredible/sdk
+
+TypeScript SDK used for the [Incredible API](https://incredible.one). Supports Anthropic client SDK interface. Swap a single import and keep the rest of your code—function calling, streaming, token counting, and cookbook workflows included.
+
+---
+
+## Table of contents
+1. [Features](#features)
+2. [Installation](#installation)
+3. [Configuration](#configuration)
+4. [Quick start](#quick-start)
+5. [Messages API](#messages-api)
+6. [Function calling](#function-calling)
+   - [Manual control](#manual-control)
+   - [Automated helper flow](#automated-helper-flow)
+   - [Beta tool runner](#beta-tool-runner)
+7. [Streaming responses](#streaming-responses)
+8. [Token counting](#token-counting)
+9. [Cookbook compatibility](#cookbook-compatibility)
+10. [Integrations API](#integrations-api)
+11. [Error handling & debugging](#error-handling--debugging)
+12. [Helpers reference](#helpers-reference)
+13. [Examples](#examples)
+14. [Development & contributing](#development--contributing)
+
+---
+
+## Features
+- **Anthropic-compatible client** – constructor options and method signatures match Anthropic’s SDK.
+- **Tool calling** – send `functions`/`tools`, receive structured tool-use events, and feed results back automatically.
+- **Streaming** – async iterators that emit the same chunks Anthropic’s SSE API provides.
+- **Helper utilities** – cookbook-style helpers to build `function_call` / `function_call_result` messages.
+- **Token counting** – mirror Anthropic’s `countTokens` endpoint (forward-compatible).
+- **Cookbook ready** – every scenario in `Incredible-API-Cookbook-main/` runs unchanged with this SDK.
+
+---
+
+## Installation
+```bash
+npm install @incredible/sdk
+# yarn add @incredible/sdk
+# pnpm add @incredible/sdk
+```
+
+---
+
+## Configuration
+
+| Option        | Env var                  | Default                       |
+| ------------- | ------------------------ | ----------------------------- |
+| `apiKey`      | `INCREDIBLE_API_KEY`     | *(optional today)*            |
+| `baseUrl`     | `INCREDIBLE_BASE_URL`    | `https://api.incredible.one`  |
+| `timeoutMs`   | —                        | `60_000`                      |
+| `maxRetries`  | —                        | `2`                           |
+
+```ts
+import { IncredibleClient } from '@incredible/sdk';
+
+const client = new IncredibleClient({
+  apiKey: process.env.INCREDIBLE_API_KEY,
+  baseUrl: process.env INCREDIBLE_BASE_URL,
+  timeoutMs: 60_000,
+  maxRetries: 2,
+});
+```
+
+If you omit `model`, the SDK defaults to `small-1` (the only public model at the moment).
+
+---
+
+## Quick start
+```ts
+import { IncredibleClient } from '@incredible/sdk';
+
+const client = new IncredibleClient();
+
+const response = await client.messages.create({
+  model: 'small-1',
+  max_tokens: 128,
+  messages: [{ role: 'user', content: 'Give me three startup ideas.' }],
+});
+
+console.log(response.content.map((block) => block.text).join('\n'));
+```
+
+`response` exposes Anthropic-style fields (`tool_calls`, `stop_reason`, `usage`, etc.) and the raw payload (`response.raw`).
+
+---
+
+## Messages API
+```ts
+const response = await client.messages.create({
+  model: 'small-1',
+  max_tokens: 256,
+  temperature: 0.3,
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'List three fun activities in Stockholm.' },
+  ],
+});
+
+response.content
+  .filter((block) => block.type === 'text')
+  .forEach((block) => console.log(block.text));
+
+console.log('Token usage', response.token_usage);
+```
+
+---
+
+## Function calling
+
+Register tools using Anthropic’s schema (`parameters` / `input_schema`). The SDK converts them into Incredible’s JSON automatically and normalises the response back into Anthropic-style `tool_use` blocks.
+
+### Manual control
+```ts
+import { IncredibleClient } from '@incredible/sdk';
+
+const client = new IncredibleClient();
+
+const functions = [
+  {
+    name: 'calculate_sum',
+    description: 'Add two numbers together',
+    parameters: {
+      type: 'object',
+      properties: {
+        a: { type: 'number' },
+        b: { type: 'number' },
+      },
+      required: ['a', 'b'],
+    },
+  },
+];
+
+const initial = await client.messages.create({
+  model: 'small-1',
+  max_tokens: 64,
+  messages: [{ role: 'user', content: 'What is 127 + 349?' }],
+  functions,
+});
+
+for (const call of initial.tool_calls ?? []) {
+  const result = call.arguments.a + call.arguments.b;
+
+  const followUp = [
+    { role: 'user', content: 'What is 127 + 349?' },
+    {
+      type: 'function_call',
+      function_call_id: call.id,
+      function_calls: [{ name: call.name, input: call.arguments }],
+    },
+    {
+      type: 'function_call_result',
+      function_call_id: call.id,
+      function_call_results: [result],
+    },
+  ];
+
+  const final = await client.messages.create({
+    model: 'small-1',
+    max_tokens: 128,
+    messages: followUp,
+    functions,
+  });
+
+  console.log(final.content);
+}
+```
+
+### Automated helper flow
+Let the helpers parse tool calls, execute your registry, and build follow-up messages.
+
+```ts
+import { IncredibleClient } from '@incredible/sdk';
+import { helpers } from '@incredible/sdk/helpers';
+
+const registry = new Map([
+  ['calculate_sum', async ({ a, b }: { a: number; b: number }) => a + b],
+]);
+
+const messages = [{ role: 'user', content: 'Add 42 and 11.' }];
+
+const initial = await client.messages.create({
+  model: 'small-1',
+  max_tokens: 64,
+  messages,
+  functions,
+});
+
+const plan = helpers.buildToolExecutionPlan(initial);
+if (plan && !plan.isEmpty()) {
+  const results = await Promise.all(
+    plan.toolCalls.map(async (call) => {
+      const fn = registry.get(call.name);
+      if (!fn) throw new Error(`No tool named ${call.name}`);
+      return fn(call.arguments as any);
+    }),
+  );
+
+  const followUp = helpers.buildFollowUpMessages(messages, plan, results);
+  const final = await client.messages.create({
+    model: 'small-1',
+    max_tokens: 128,
+    messages: followUp,
+    functions,
+  });
+
+  console.log(final.content);
+}
+```
+
+### Beta tool runner
+If you already use Anthropic’s `beta.messages.toolRunner`, you can swap in `IncredibleClient` and keep the rest.
+
+```ts
+import { IncredibleClient } from '@incredible/sdk';
+import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
+import { z } from 'zod';
+
+const client = new IncredibleClient();
+
+const response = await client.beta.messages.toolRunner({
+  messages: [{ role: 'user', content: 'What is the weather in SF?' }],
+  tools: [
+    betaZodTool({
+      name: 'getWeather',
+      description: 'Get the weather at a specific location',
+      inputSchema: z.object({
+        location: z.string().describe('The city and state, e.g. San Francisco, CA'),
+      }),
+      run: ({ location }) => `The weather is foggy with a temperature of 20°C in ${location}.`,
+    }),
+  ],
+  model: 'claude-3-5-sonnet-latest',
+  max_tokens: 1024,
+});
+
+console.log(response.content);
+```
+
+The SDK adapts Anthropic’s beta tool payloads to Incredible’s API on the way in and out.
+
+---
+
+## Streaming responses
+```ts
+const stream = await client.messages.stream({
+  model: 'small-1',
+  max_tokens: 256,
+  messages: [{ role: 'user', content: 'Stream a short poem about the ocean.' }],
+});
+
+for await (const chunk of stream) {
+  if (chunk.type === 'text') process.stdout.write(chunk.text);
+}
+```
+
+---
+
+## Token counting
+```ts
+const usage = await client.messages.countTokens({
+  model: 'small-1',
+  messages: [{ role: 'user', content: 'Summarise this 1,000 word article.' }],
+  max_tokens: 1,
+});
+
+console.log(usage.token_usage);
+```
+
+> **Note:** `/v1/messages/count_tokens` is not yet live on the Incredible API. Expect a 404 until it ships.
+
+---
+
+## Cookbook compatibility
+
+Validated against every scenario in **Incredible-API-Cookbook-main**:
+
+- ✅ `01-getting-started/` – chat, streaming, integrations.
+- ✅ `02-function-calling/` – multi-tool workflows, JSON extraction, RPG demos, etc.
+
+---
+
+## Integrations API
+```ts
+const integrations = await client.integrations.list();
+console.log(integrations.map((integration) => integration.name));
+
+await client.integrations.connect('apollo', {
+  api_key: process.env.APOLLO_API_KEY!,
+  user_id: process.env.APOLLO_USER_ID,
+});
+
+const results = await client.integrations.execute('apollo', {
+  feature_name: 'APOLLO_PEOPLE_SEARCH',
+  inputs: { query: 'Sales Director Sweden' },
+});
+
+console.log(results);
+```
+
+---
+
+## Error handling & debugging
+- The HTTP client throws typed `Error` instances; the Incredible API error payload is attached when available.
+- Inspect `response.raw` if you want the exact wire-level payload.
+- `tool_calls` and `tool_results` help trace agentic workflows.
+- For 5xx responses, log the request body—especially the `function_call_result` block—to cross-check with the cookbook examples.
+
+---
+
+## Helpers reference
+```
+makeToolCall(name, arguments, options?)
+makeToolCalls([...])
+makeToolResult(callId, result)
+buildToolExecutionPlan(response)
+buildFollowUpMessages(messages, plan, results)
+ToolExecutionPlan, ToolExecution
+```
+
+Helpers live under `@incredible/sdk/helpers` and mirror the names in the Python SDK.
+
+---
+
+## Examples
+- `examples/basic-usage` – chat, token counting, tool chaining, streaming, integrations.
+- `examples/integration-demo` – Apollo CRM flow with connect + execute.
+
+```bash
+pnpm --filter basic-usage run dev
+pnpm --filter integration-demo run dev
+```
+
+---
+
+## Development & contributing
+
+```bash
+pnpm install
+pnpm run build
+pnpm test
+```
+
+Pull requests and issues are welcome. If you spot a gap compared to the Python SDK or Anthro
