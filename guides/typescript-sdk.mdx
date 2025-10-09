@@ -5,7 +5,7 @@ sidebarTitle: TypeScript SDK
 section: SDKs
 ---
 
-# @incredible/sdk
+# @incredible-ai/sdk
 
 TypeScript SDK used for the [Incredible API](https://incredible.one). Supports Anthropic client SDK interface. Swap a single import and keep the rest of your code—function calling, streaming, token counting, and cookbook workflows included.
 
@@ -44,9 +44,9 @@ TypeScript SDK used for the [Incredible API](https://incredible.one). Supports A
 
 ## Installation
 ```bash
-npm install @incredible/sdk
-# yarn add @incredible/sdk
-# pnpm add @incredible/sdk
+npm install @incredible-ai/sdk
+# yarn add @incredible-ai/sdk
+# pnpm add @incredible-ai/sdk
 ```
 
 ---
@@ -61,7 +61,7 @@ npm install @incredible/sdk
 | `maxRetries`  | —                        | `2`                           |
 
 ```ts
-import { IncredibleClient } from '@incredible/sdk';
+import { IncredibleClient } from '@incredible-ai/sdk';
 
 const client = new IncredibleClient({
   apiKey: process.env.INCREDIBLE_API_KEY,
@@ -77,7 +77,7 @@ If you omit `model`, the SDK defaults to `small-1` (the only public model at the
 
 ## Quick start
 ```ts
-import { IncredibleClient } from '@incredible/sdk';
+import { IncredibleClient } from '@incredible-ai/sdk';
 
 const client = new IncredibleClient();
 
@@ -121,7 +121,7 @@ Register tools using Anthropic’s schema (`parameters` / `input_schema`). The S
 
 ### Manual control
 ```ts
-import { IncredibleClient } from '@incredible/sdk';
+import { IncredibleClient } from '@incredible-ai/sdk';
 
 const client = new IncredibleClient();
 
@@ -179,8 +179,8 @@ for (const call of initial.tool_calls ?? []) {
 Let the helpers parse tool calls, execute your registry, and build follow-up messages.
 
 ```ts
-import { IncredibleClient } from '@incredible/sdk';
-import { helpers } from '@incredible/sdk/helpers';
+import { IncredibleClient } from '@incredible-ai/sdk';
+import { helpers } from '@incredible-ai/sdk/helpers';
 
 const registry = new Map([
   ['calculate_sum', async ({ a, b }: { a: number; b: number }) => a + b],
@@ -221,7 +221,7 @@ if (plan && !plan.isEmpty()) {
 If you already use Anthropic’s `beta.messages.toolRunner`, you can swap in `IncredibleClient` and keep the rest.
 
 ```ts
-import { IncredibleClient } from '@incredible/sdk';
+import { IncredibleClient } from '@incredible-ai/sdk';
 import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 
@@ -327,7 +327,7 @@ buildFollowUpMessages(messages, plan, results)
 ToolExecutionPlan, ToolExecution
 ```
 
-Helpers live under `@incredible/sdk/helpers` and mirror the names in the Python SDK.
+Helpers live under `@incredible-ai/sdk/helpers` and mirror the names in the Python SDK.
 
 ---
 
