@@ -1,0 +1,220 @@
+# Integrating LiteLLM with Incredible's OpenAI-Compatible API
+
+This document describes how to connect [LiteLLM](https://github.com/BerriAI/litellm) to Incredible's OpenAI-compatible agentic models. It covers:
+
+- Standard chat completions
+- Streaming responses
+- Role-conditioned conversations
+
+Copy the examples into your own project and adapt them as needed.
+
+## Prerequisites
+
+1. **Python environment**
+   - Python 3.11 or newer is recommended.
+   - Optional but encouraged: create and activate a virtual environment (`python -m venv .venv`).
+
+2. **Install LiteLLM**
+   ```bash
+   pip install --upgrade litellm
+   ```
+
+3. **Configure Incredible API access**
+   ```bash
+   export INCREDIBLE_API_BASE="https://api.incredible.one/v1"
+   export INCREDIBLE_API_KEY="sk-your-incredible-key"
+   ```
+   Replace the values with the base URL and key for your deployment. If you front the API with a tunnel, set `INCREDIBLE_API_BASE` to that tunnel URL instead.
+
+---
+
+## Example 1 – Standard Chat Completion
+
+```python
+from litellm import completion
+import os
+
+API_BASE = os.environ.get("INCREDIBLE_API_BASE", "https://api.incredible.one/v1")
+API_KEY = os.environ.get("INCREDIBLE_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("Set INCREDIBLE_API_KEY before running this example")
+
+response = completion(
+    model="openai/small-1",
+    api_base=API_BASE,
+    api_key=API_KEY,
+    messages=[{"role": "user", "content": "Hello, world"}],
+    temperature=0.2,
+)
+print(response)
+```
+
+The call returns a `ModelResponse` with the assistant’s reply and token usage metadata. Adjust OpenAI-compatible parameters (temperature, max tokens, etc.) as needed.
+
+---
+
+## Example 2 – Streaming Responses
+
+```python
+from litellm import completion
+import os
+
+API_BASE = os.environ.get("INCREDIBLE_API_BASE", "https://api.incredible.one/v1")
+API_KEY = os.environ.get("INCREDIBLE_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("Set INCREDIBLE_API_KEY before running this example")
+
+stream = completion(
+    model="openai/small-1",
+    api_base=API_BASE,
+    api_key=API_KEY,
+    messages=[{"role": "user", "content": "Please stream a short greeting."}],
+    temperature=0.2,
+    stream=True,
+)
+
+chunk_index = 0
+assembled_text = []
+for chunk in stream:
+    chunk_index += 1
+    choices = chunk.get("choices") or []
+    if not choices:
+        continue
+    delta = choices[0].get("delta") or {}
+    content_piece = delta.get("content")
+    if not content_piece:
+        continue
+    assembled_text.append(content_piece)
+    print(f"Chunk {chunk_index}: {content_piece!r}")
+
+print("\nFinal assembled text:\n" + "".join(assembled_text))
+```
+
+This assumes your Incredible endpoint implements OpenAI’s Server-Sent Events (`text/event-stream`) format. Each chunk corresponds to the progressive delta LiteLLM exposes via the OpenAI streaming API.
+
+---
+
+## Example 3 – Role-Conditioned Conversations
+
+```python
+from litellm import completion
+import os
+
+API_BASE = os.environ.get("INCREDIBLE_API_BASE", "https://api.incredible.one/v1")
+API_KEY = os.environ.get("INCREDIBLE_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("Set INCREDIBLE_API_KEY before running this example")
+
+examples = [
+    (
+        "Friendly persona",
+        [
+            {
+                "role": "system",
+                "content": (
+                    "You are an enthusiastic assistant that always keeps answers concise, friendly,"
+                    " and formatted with exactly two bullet points using bolded headings, followed by"
+                    " a one-sentence closing remark."
+                ),
+            },
+            {"role": "user", "content": "Hello there!"},
+            {
+                "role": "assistant",
+                "content": "Hi! It's great to meet you. How can I support your planning or analysis today?",
+            },
+            {
+                "role": "user",
+                "content": "Give me two bullet points about why streaming demos are useful.",
+            },
+        ],
+        0.2,
+    ),
+    (
+        "Terse response",
+        [
+            {
+                "role": "system",
+                "content": (
+                    "You must answer every request in exactly one word."
+                    " The word must be lowercase, contain no punctuation, and convey the best possible answer."
+                    " If the request cannot be satisfied with a single word, reply with 'unknown'."
+                ),
+            },
+            {
+                "role": "user",
+                "content": "Give me two bullet points about why streaming demos are useful.",
+            },
+        ],
+        0.0,
+    ),
+    (
+        "Assistant-context",
+        [
+            {
+                "role": "system",
+                "content": "You are a factual assistant who trusts previous assistant messages as ground truth.",
+            },
+            {
+                "role": "assistant",
+                "content": "Status update: The system just deployed version 1.2.7 successfully.",
+            },
+            {
+                "role": "user",
+                "content": "What version is currently live?",
+            },
+        ],
+        0.2,
+    ),
+]
+
+for label, messages, temperature in examples:
+    response = completion(
+        model="openai/small-1",
+        api_base=API_BASE,
+        api_key=API_KEY,
+        messages=messages,
+        temperature=temperature,
+    )
+    choice = response.choices[0]
+    print(f"\n{label} role: {choice.message.role}")
+    print(f"{label} content:\n{choice.message.content}")
+```
+
+Observations:
+- The “Friendly persona” sample follows the formatting rules in the system prompt.
+- The “Terse response” sample typically returns a single lowercase word (`unknown` when appropriate).
+- The “Assistant-context” sample confirms version `1.2.7` as the live deployment, showing the assistant trusts earlier assistant messages.
+
+---
+
+## Operational Tips
+
+1. **Environment variables**
+   - Keep `INCREDIBLE_API_BASE` and `INCREDIBLE_API_KEY` outside your code (for example, in shell exports or a secrets manager).
+
+2. **Error handling**
+   - LiteLLM raises concrete exception classes (`litellm.exceptions.*`); wrap calls in try/except and inspect the error message or status code as needed.
+
+3. **Custom adapters**
+   - If your endpoint diverges from OpenAI’s schema, register a custom handler via `litellm.register_completion_handler(...)` to adapt requests/responses.
+
+4. **Resilience**
+   - Implement retry logic (or leverage LiteLLM’s built-in mechanisms) for handling `429` and `5xx` responses.
+
+5. **Server behavior**
+   - When routing traffic through a tunnel or gateway, ensure headers, host allowlists, and SSE buffering align with OpenAI expectations to avoid `403` or streaming interruptions.
+
+---
+
+## Summary
+
+By configuring LiteLLM with the OpenAI-compatible settings above, you can route requests to Incredible’s models with minimal effort. The examples illustrate how to:
+
+- Submit standard chat completions (`completion()`)
+- Stream incremental output (`stream=True`)
+- Enforce behavior through system/user/assistant roles
+
+Adapt these snippets or extend them with tool-calling, function calls, or custom handlers to match your production needs. Once validated, you can incorporate this guidance into your official documentation to help others integrate LiteLLM with Incredible’s LLMs.

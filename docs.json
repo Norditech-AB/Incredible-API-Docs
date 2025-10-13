@@ -38,7 +38,8 @@
             "group": "SDKs",
             "pages": [
               "guides/python-sdk",
-              "guides/typescript-sdk"
+              "guides/typescript-sdk",
+              "guides/liteLLM"
             ]
           },
           {
