@@ -39,7 +39,7 @@
             "pages": [
               "guides/python-sdk",
               "guides/typescript-sdk",
-              "guides/liteLLM"
+              "guides/litellm-sdk"
             ]
           },
           {
