@@ -31,7 +31,9 @@ Copy the examples into your own project and adapt them as needed.
    export INCREDIBLE_API_BASE="https://api.incredible.one/v1"
    export INCREDIBLE_API_KEY="sk-your-incredible-key"
    ```
-   Replace the values with the base URL and key for your deployment. If you front the API with a tunnel, set `INCREDIBLE_API_BASE` to that tunnel URL instead.
+   If you front the API with a tunnel, set `INCREDIBLE_API_BASE` to the tunnel URL instead.
+
+> **Tip:** Some security configurations (e.g., Cloudflare WAF) expect browser-style user agents. The examples below add `extra_headers={"User-Agent": "Mozilla/5.0"}` to each LiteLLM call to ensure smooth delivery.
 
 ---
 
@@ -53,11 +55,10 @@ response = completion(
     api_key=API_KEY,
     messages=[{"role": "user", "content": "Hello, world"}],
     temperature=0.2,
+    extra_headers={"User-Agent": "Mozilla/5.0"},
 )
 print(response)
 ```
-
-The call returns a `ModelResponse` with the assistant’s reply and token usage metadata. Adjust OpenAI-compatible parameters (temperature, max tokens, etc.) as needed.
 
 ---
 
@@ -80,6 +81,7 @@ stream = completion(
     messages=[{"role": "user", "content": "Please stream a short greeting."}],
     temperature=0.2,
     stream=True,
+    extra_headers={"User-Agent": "Mozilla/5.0"},
 )
 
 chunk_index = 0
@@ -98,8 +100,6 @@ for chunk in stream:
 
 print("\nFinal assembled text:\n" + "".join(assembled_text))
 ```
-
-This assumes your Incredible endpoint implements OpenAI’s Server-Sent Events (`text/event-stream`) format. Each chunk corresponds to the progressive delta LiteLLM exposes via the OpenAI streaming API.
 
 ---
 
@@ -184,44 +184,40 @@ for label, messages, temperature in examples:
         api_key=API_KEY,
         messages=messages,
         temperature=temperature,
+        extra_headers={"User-Agent": "Mozilla/5.0"},
     )
     choice = response.choices[0]
     print(f"\n{label} role: {choice.message.role}")
     print(f"{label} content:\n{choice.message.content}")
 ```
 
-Observations:
-- The “Friendly persona” sample follows the formatting rules in the system prompt.
-- The “Terse response” sample typically returns a single lowercase word (`unknown` when appropriate).
-- The “Assistant-context” sample confirms version `1.2.7` as the live deployment, showing the assistant trusts earlier assistant messages.
-
 ---
 
 ## Operational Tips
 
 1. **Environment variables**
-   - Keep `INCREDIBLE_API_BASE` and `INCREDIBLE_API_KEY` outside your code (for example, in shell exports or a secrets manager).
+   - Keep `INCREDIBLE_API_BASE` and `INCREDIBLE_API_KEY` outside your code (shell exports or a secrets manager).
 
 2. **Error handling**
-   - LiteLLM raises concrete exception classes (`litellm.exceptions.*`); wrap calls in try/except and inspect the error message or status code as needed.
+   - LiteLLM raises concrete exception classes (`litellm.exceptions.*`). Wrap calls in try/except and inspect status codes or messages as needed.
 
 3. **Custom adapters**
-   - If your endpoint diverges from OpenAI’s schema, register a custom handler via `litellm.register_completion_handler(...)` to adapt requests/responses.
+   - If your endpoint diverges from OpenAI’s schema, register a custom handler via `litellm.register_completion_handler(...)`.
 
 4. **Resilience**
-   - Implement retry logic (or leverage LiteLLM’s built-in mechanisms) for handling `429` and `5xx` responses.
+   - Implement retry logic (or use LiteLLM’s built-in mechanisms) for handling `429` and `5xx` responses.
 
 5. **Server behavior**
-   - When routing traffic through a tunnel or gateway, ensure headers, host allowlists, and SSE buffering align with OpenAI expectations to avoid `403` or streaming interruptions.
+   - When routing through a tunnel or gateway, ensure headers, host allowlists, and SSE buffering align with OpenAI expectations to avoid `403` or streaming interruptions.
 
 ---
 
 ## Summary
 
-By configuring LiteLLM with the OpenAI-compatible settings above, you can route requests to Incredible’s models with minimal effort. The examples illustrate how to:
+By configuring LiteLLM with the OpenAI-compatible settings above—and adding a browser-style `User-Agent` header—you can route requests to Incredible’s models with minimal effort. The examples illustrate how to:
 
 - Submit standard chat completions (`completion()`)
 - Stream incremental output (`stream=True`)
 - Enforce behavior through system/user/assistant roles
 
-Adapt these snippets or extend them with tool-calling, function calls, or custom handlers to match your production needs. Once validated, you can incorporate this guidance into your official documentation to help others integrate LiteLLM with Incredible’s LLMs.
+Adapt these snippets or extend them with tool-calling, function calls, or custom handlers to match your production needs. Once validated, incorporate this guidance into your official documentation to help others integrate LiteLLM with Incredible’s LLMs.
