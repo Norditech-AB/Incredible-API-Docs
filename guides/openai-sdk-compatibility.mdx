@@ -16,24 +16,26 @@ Two minimal examples show how to call Incredible’s OpenAI-compatible models us
 from openai import OpenAI
 
 client = OpenAI(
-base_url="https://api.incredible.one/v1",
-api_key="<INCREDIBLE_API_KEY>",
-default_headers={
-"User-Agent": "Mozilla/5.0",
-},
+    base_url="https://api.incredible.one/v1",
+    api_key="<INCREDIBLE_API_KEY>",
+    default_headers={
+        "User-Agent": "Mozilla/5.0",
+    },
 )
 
 response = client.chat.completions.create(
-model="small-1",
-messages=[{"role": "user", "content": "Hello, world"}],
-temperature=0.3,
+    model="small-1",
+    messages=[
+        {"role": "user", "content": "Hello, world"}
+    ],
+    temperature=0.3,
 )
 
-choice = response.choices[0]
-if not choice.message.content:
-raise RuntimeError("No completion choices returned")
+if not response.choices or not response.choices[0].message.content:
+    raise RuntimeError("No completion choices returned")
 
-print(choice.message.content)
+print(response.choices[0].message.content)
+
 
 ````
 
@@ -42,26 +44,26 @@ import OpenAI from "openai";
 
 const apiKey = process.env.INCREDIBLE_API_KEY ?? "your-incredible-api-key";
 if (!apiKey) {
-throw new Error("Set INCREDIBLE_API_KEY");
+  throw new Error("Set INCREDIBLE_API_KEY");
 }
 
 const client = new OpenAI({
-baseURL: "https://api.incredible.one/v1",
-apiKey,
-defaultHeaders: {
-  "User-Agent": "Mozilla/5.0",
-},
+  baseURL: "https://api.incredible.one/v1",
+  apiKey,
+  defaultHeaders: {
+    "User-Agent": "Mozilla/5.0",
+  },
 });
 
 const response = await client.chat.completions.create({
-model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
-messages: [{ role: "user", content: "Hello, world" }],
-temperature: 0.3,
+  model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
+  messages: [{ role: "user", content: "Hello, world" }],
+  temperature: 0.3,
 });
 
 const choice = response.choices[0];
 if (!choice?.message?.content) {
-throw new Error("No completion choices returned");
+  throw new Error("No completion choices returned");
 }
 
 console.log(choice.message.content);
@@ -76,24 +78,26 @@ console.log(choice.message.content);
 from openai import OpenAI
 
 client = OpenAI(
-base_url="https://api.incredible.one/v1",
-api_key="<INCREDIBLE_API_KEY>",
-default_headers={
-"User-Agent": "Mozilla/5.0",
-},
+    base_url="https://api.incredible.one/v1",
+    api_key="<INCREDIBLE_API_KEY>",
+    default_headers={
+        "User-Agent": "Mozilla/5.0",
+    },
 )
 
 stream = client.chat.completions.create(
-model="small-1",
-messages=[{"role": "user", "content": "Stream a short greeting."}],
-temperature=0.2,
-stream=True,
+    model="small-1",
+    messages=[
+        {"role": "user", "content": "Stream a short greeting."}
+    ],
+    temperature=0.2,
+    stream=True,
 )
 
 for chunk in stream:
-delta = chunk.choices[0].delta
-if delta.content:
-print(delta.content, end="")
+    delta = chunk.choices[0].delta
+    if delta and delta.content:
+        print(delta.content, end="")
 
 ````
 
@@ -102,29 +106,29 @@ import OpenAI from "openai";
 
 const apiKey = process.env.INCREDIBLE_API_KEY ?? "your-incredible-api-key";
 if (!apiKey) {
-throw new Error("Set INCREDIBLE_API_KEY");
+  throw new Error("Set INCREDIBLE_API_KEY");
 }
 
 const client = new OpenAI({
-baseURL: "https://api.incredible.one/v1",
-apiKey,
-defaultHeaders: {
-  "User-Agent": "Mozilla/5.0",
-},
+  baseURL: "https://api.incredible.one/v1",
+  apiKey,
+  defaultHeaders: {
+    "User-Agent": "Mozilla/5.0",
+  },
 });
 
 const stream = await client.chat.completions.create({
-model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
-messages: [{ role: "user", content: "Stream a short greeting." }],
-temperature: 0.2,
-stream: true,
+  model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
+  messages: [{ role: "user", content: "Stream a short greeting." }],
+  temperature: 0.2,
+  stream: true,
 });
 
 for await (const chunk of stream) {
-const delta = chunk.choices[0]?.delta;
-if (delta?.content) {
-  process.stdout.write(delta.content);
-}
+  const delta = chunk.choices[0]?.delta;
+  if (delta?.content) {
+    process.stdout.write(delta.content);
+  }
 }
 ````
 
