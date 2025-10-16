@@ -39,7 +39,8 @@
             "pages": [
               "guides/python-sdk",
               "guides/typescript-sdk",
-              "guides/litellm-sdk"
+              "guides/litellm-sdk",
+              "guides/openai-sdk-compatibility"
             ]
           },
           {
