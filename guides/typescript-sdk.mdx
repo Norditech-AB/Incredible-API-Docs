@@ -33,9 +33,9 @@ TypeScript SDK used for the [Incredible API](https://incredible.one). Supports A
 ---
 
 ## Features
-- **Anthropic-compatible client** – constructor options and method signatures match Anthropic’s SDK.
+- **Anthropic-compatible client** – constructor options, method signatures, and stream contract now match Anthropic’s SDK (including the `MessageStream` EventEmitter interface).
 - **Tool calling** – send `functions`/`tools`, receive structured tool-use events, and feed results back automatically.
-- **Streaming** – async iterators that emit the same chunks Anthropic’s SSE API provides.
+- **Streaming parity** – async iterators plus `stream.on(...)`/`stream.once(...)` hooks that emit Anthropic-style events (`message_start`, `content_block_delta`, `tool_call`, `message_delta`, `message_stop`, etc.).
 - **Helper utilities** – cookbook-style helpers to build `function_call` / `function_call_result` messages.
 - **Token counting** – mirror Anthropic’s `countTokens` endpoint (forward-compatible).
 - **Cookbook ready** – every scenario in `Incredible-API-Cookbook-main/` runs unchanged with this SDK.
@@ -65,7 +65,7 @@ import { IncredibleClient } from '@incredible-ai/sdk';
 
 const client = new IncredibleClient({
   apiKey: process.env.INCREDIBLE_API_KEY,
-  baseUrl: process.env INCREDIBLE_BASE_URL,
+  baseUrl: process.env.INCREDIBLE_BASE_URL,
   timeoutMs: 60_000,
   maxRetries: 2,
 });
@@ -258,8 +258,38 @@ const stream = await client.messages.stream({
   messages: [{ role: 'user', content: 'Stream a short poem about the ocean.' }],
 });
 
-for await (const chunk of stream) {
-  if (chunk.type === 'text') process.stdout.write(chunk.text);
+stream.on('message_start', (event) => {
+  console.log('stream started for', event.message.model);
+});
+
+stream.on('content_block_delta', (event) => {
+  if (event.delta.type === 'text_delta') {
+    process.stdout.write(event.delta.text);
+  }
+});
+
+stream.once('message_stop', () => {
+  console.log('\nstream completed');
+});
+
+const finalMessage = await stream.finalMessage();
+console.log('final stop_reason:', finalMessage.stop_reason); // e.g. "end_turn"
+console.log('usage tokens:', finalMessage.usage);
+```
+
+> **Tip:** `stream.receivedMessages` accumulates every resolved message (including tool-use turns) just like Anthropic’s SDK.
+
+### Streaming metadata parity
+
+- `finalMessage()` synthesises Anthropic-style metadata even when the Incredible API omits it (`id`, `stop_reason`, `usage`, `service_tier`, etc.).
+- Event payloads mirror Anthropic’s SSE schema so existing Anthropic workflows keep working unchanged.
+- If you prefer async iteration, the helper events fire in parallel—you can mix `for await` loops with `stream.on(...)` listeners.
+
+```ts
+for await (const event of stream) {
+  if (event.type === 'tool_call') {
+    console.log('tool requested:', event.content.name);
+  }
 }
 ```
 
@@ -332,22 +362,4 @@ Helpers live under `@incredible-ai/sdk/helpers` and mirror the names in the Pyth
 ---
 
 ## Examples
-- `examples/basic-usage` – chat, token counting, tool chaining, streaming, integrations.
-- `examples/integration-demo` – Apollo CRM flow with connect + execute.
-
-```bash
-pnpm --filter basic-usage run dev
-pnpm --filter integration-demo run dev
-```
-
----
-
-## Development & contributing
-
-```bash
-pnpm install
-pnpm run build
-pnpm test
-```
-
-Pull requests and issues are welcome. If you spot a gap compared to the Python SDK or Anthro
+- `examples/basic-usage`

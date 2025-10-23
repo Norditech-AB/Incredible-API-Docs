@@ -1,0 +1,402 @@
+---
+title: LangChain / LangGraph
+description: Use LangChain with Incredible via the OpenAI-compatible Chat Completions API.
+sidebarTitle: LangChain / LangGraph
+section: SDKs
+---
+
+# LangChain + Incredible: Drop-In Compatibility
+
+LangChain’s OpenAI integration works with any backend that speaks the OpenAI Chat Completions protocol. The Incredible API is intentionally compatible, so you can point LangChain’s `ChatOpenAI` client at `https://api.incredible.one/v1` and run the exact same code.
+
+---
+
+```python
+from langchain_openai import ChatOpenAI
+
+# OpenAI defaults
+openai_llm = ChatOpenAI(
+    api_key=os.environ["OPENAI_API_KEY"],
+    base_url="https://api.openai.com/v1",
+    model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
+)
+
+# Incredible: same client, just point at the Incredible endpoint
+incredible_llm = ChatOpenAI(
+    model="small-1",
+    api_key=os.environ["INCREDIBLE_API_KEY"],
+    base_url="https://api.incredible.one/v1",
+    extra_headers={"User-Agent": "Mozilla/5.0"},
+)
+
+print(openai_llm.invoke("Say hi").content)
+print(incredible_llm.invoke("Say hi").content)
+```
+
+To swap providers, change only the environment variables:
+
+```bash
+# OpenAI
+export OPENAI_API_KEY="sk-openai-..."
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+
+# Incredible
+export INCREDIBLE_API_KEY="sk-incredible-..."
+# optional: export OPENAI_MODEL or INCREDIBLE_MODEL_ID if you want to override the default "small-1"
+```
+
+No other code changes are required. The rest of the examples below showcase the Incredible-specific scripts so you can highlight them in docs or tutorials.
+
+---
+
+## Incredible LangChain Examples
+
+### 1. Simple Completion
+
+```python
+import os
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="small-1",
+    api_key=os.environ["INCREDIBLE_API_KEY"],
+    base_url="https://api.incredible.one/v1",
+    extra_headers={"User-Agent": "Mozilla/5.0"},
+)
+
+response = llm.invoke("Share one mindfulness tip for a busy professional.")
+print(response.content)
+```
+
+### 2. Streaming Completion
+
+```python
+import os
+from langchain_core.messages import HumanMessage
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="small-1",
+    api_key=os.environ["INCREDIBLE_API_KEY"],
+    base_url="https://api.incredible.one/v1",
+    extra_headers={"User-Agent": "Mozilla/5.0"},
+)
+
+prompt = HumanMessage(content="Describe a scenic hiking trail in one short paragraph.")
+
+for chunk in llm.stream([prompt]):
+    if chunk.content:
+        print(chunk.content, end="", flush=True)
+
+print()
+```
+
+### 3. Tool Calling with Streaming
+
+```python
+import os
+from typing import Dict, List
+
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+
+
+@tool
+def get_weather(city: str) -> str:
+    normalized = city.strip().title() if city else "Unknown City"
+    return (
+        f"Weather for {normalized}: 18°C, light breeze, partly cloudy."
+        " Suggested outfit: layers with a light jacket."
+    )
+
+
+def main() -> None:
+    llm = ChatOpenAI(
+        model="small-1",
+        api_key=os.environ["INCREDIBLE_API_KEY"],
+        base_url="https://api.incredible.one/v1",
+        extra_headers={"User-Agent": "Mozilla/5.0"},
+    )
+
+    llm_with_tools = llm.bind_tools([get_weather])
+    messages: List[HumanMessage] = [
+        HumanMessage(content="Check today's weather in Stockholm and suggest an outfit."),
+    ]
+
+    print("Assistant:", end=" ", flush=True)
+
+    ai_content: List[str] = []
+    call_buffers: Dict[str, Dict[str, List[str]]] = {}
+    call_order: List[str] = []
+
+    for chunk in llm_with_tools.stream(messages):
+        if chunk.content:
+            print(chunk.content, end="", flush=True)
+            ai_content.append(chunk.content)
+        elif chunk.tool_calls:
+            tool_names = ", ".join(call.get("name") or "<unknown>" for call in chunk.tool_calls)
+            print(f"[requesting tool: {tool_names}]", end=" ", flush=True)
+
+        for call in chunk.tool_calls:
+            call_id = call.get("id")
+            if not call_id:
+                continue
+            call_order.append(call_id)
+            call_buffers.setdefault(call_id, {"args_parts": []})
+
+        for tool_chunk in getattr(chunk, "tool_call_chunks", []) or []:
+            call_id = tool_chunk.get("id")
+            if not call_id:
+                continue
+            call_buffers.setdefault(call_id, {"args_parts": []})
+            call_buffers[call_id]["args_parts"].append(tool_chunk.get("args") or "")
+
+    print()
+
+    ai_message = AIMessage(
+        content="".join(ai_content),
+        tool_calls=[
+            {"id": call_id, "name": get_weather.name, "args": {"city": "Stockholm"}}
+            for call_id in call_order
+        ],
+    )
+    messages.append(ai_message)
+
+    tool_output = get_weather.invoke({"city": "Stockholm"})
+    print(f"\n[Tool:{get_weather.name}] {tool_output}\n")
+
+    messages.append(ToolMessage(content=tool_output, tool_call_id=call_order[-1]))
+
+    print("Assistant:", end=" ", flush=True)
+    for chunk in llm_with_tools.stream(messages):
+        if chunk.content:
+            print(chunk.content, end="", flush=True)
+
+    print()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## Incredible LangGraph Examples
+
+### 4. Simple LangGraph Completion
+
+```python
+import os
+from typing import List, TypedDict
+
+from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
+
+
+class ConversationState(TypedDict):
+    messages: List[BaseMessage]
+
+
+def main() -> None:
+    llm = ChatOpenAI(
+        model="small-1",
+        api_key=os.environ["INCREDIBLE_API_KEY"],
+        base_url="https://api.incredible.one/v1",
+        extra_headers={"User-Agent": "Mozilla/5.0"},
+    )
+
+    graph = StateGraph(ConversationState)
+
+    def call_model(state: ConversationState) -> ConversationState:
+        reply = llm.invoke(state["messages"])
+        return {"messages": state["messages"] + [reply]}
+
+    graph.add_node("chat", call_model)
+    graph.set_entry_point("chat")
+    graph.add_edge("chat", END)
+
+    app = graph.compile()
+
+    result = app.invoke(
+        {"messages": [HumanMessage(content="Summarize a classic Swedish dessert in two sentences.")]}
+    )
+
+    print(result["messages"][-1].content)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### 5. Streaming LangGraph Completion
+
+```python
+import os
+from collections import defaultdict
+from typing import Dict, List, TypedDict
+
+from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
+
+
+class ConversationState(TypedDict):
+    messages: List[BaseMessage]
+
+
+def main() -> None:
+    llm = ChatOpenAI(
+        model="small-1",
+        api_key=os.environ["INCREDIBLE_API_KEY"],
+        base_url="https://api.incredible.one/v1",
+        extra_headers={"User-Agent": "Mozilla/5.0"},
+    )
+
+    graph = StateGraph(ConversationState)
+
+    def call_model(state: ConversationState):
+        response_stream = llm.stream(state["messages"])
+        accumulated = list(state["messages"])
+        for chunk in response_stream:
+            if chunk.content:
+                accumulated.append(chunk)
+                yield {"messages": accumulated}
+
+    graph.add_node("chat", call_model, stream=True)
+    graph.set_entry_point("chat")
+    graph.add_edge("chat", END)
+
+    app = graph.compile()
+
+    printed: Dict[str, int] = defaultdict(int)
+    initial_state = {
+        "messages": [HumanMessage(content="List three highlights of Stockholm for tourists.")]
+    }
+
+    for event in app.stream(initial_state):
+        for node_name, node_state in event.items():
+            messages = node_state.get("messages", []) if isinstance(node_state, dict) else []
+            if len(messages) <= 1:
+                continue
+            chunks = messages[1:]
+            already = printed[node_name]
+            for chunk in chunks[already:]:
+                if chunk.content:
+                    print(chunk.content, end="", flush=True)
+            printed[node_name] = len(chunks)
+
+    print()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### 6. Tool-Enabled LangGraph Flow
+
+```python
+import os
+from collections import defaultdict
+from typing import Dict, Iterator, List, TypedDict
+
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, StateGraph
+
+
+class ConversationState(TypedDict):
+    messages: List[BaseMessage]
+
+
+@tool
+def get_weather(city: str) -> str:
+    normalized = city.strip().title() if city else "Unknown City"
+    return (
+        f"Weather for {normalized}: 18°C, light breeze, partly cloudy."
+        " Suggested outfit: layers with a light jacket."
+    )
+
+
+def build_app(llm: ChatOpenAI):
+    def call_model(state: ConversationState) -> Iterator[ConversationState]:
+        llm_with_tools = llm.bind_tools([get_weather])
+        response_stream = llm_with_tools.stream(state["messages"])
+        streamed: List[AIMessage] = []
+        for chunk in response_stream:
+            streamed.append(chunk)
+            yield {"messages": state["messages"] + streamed}
+        final_message = llm_with_tools.invoke(state["messages"])
+        accumulated = list(state["messages"]) + [final_message]
+        yield {"messages": accumulated}
+        return {"messages": accumulated}
+
+    def call_tool(state: ConversationState) -> ConversationState:
+        last_message = state["messages"][-1]
+        if not isinstance(last_message, AIMessage) or not last_message.tool_calls:
+            return state
+        tool_call = last_message.tool_calls[0]
+        outcome = get_weather.invoke(tool_call.get("args") or {})
+        tool_message = ToolMessage(content=outcome, tool_call_id=tool_call.get("id"))
+        return {"messages": state["messages"] + [tool_message]}
+
+    graph = StateGraph(ConversationState)
+    graph.add_node("chat", call_model, stream=True)
+    graph.add_node("tools", call_tool)
+    graph.set_entry_point("chat")
+
+    def route(state: ConversationState) -> str:
+        last_message = state["messages"][-1]
+        if isinstance(last_message, AIMessage) and last_message.tool_calls:
+            return "tools"
+        return END
+
+    graph.add_conditional_edges("chat", route, {"tools": "tools", END: END})
+    graph.add_edge("tools", "chat")
+    return graph.compile()
+
+
+def main() -> None:
+    llm = ChatOpenAI(
+        model="small-1",
+        api_key=os.environ["INCREDIBLE_API_KEY"],
+        base_url="https://api.incredible.one/v1",
+        extra_headers={"User-Agent": "Mozilla/5.0"},
+    )
+
+    app = build_app(llm)
+    printed: Dict[str, int] = defaultdict(int)
+    initial_state = {
+        "messages": [HumanMessage(content="Check today's weather in Stockholm and suggest an outfit.")]
+    }
+
+    for event in app.stream(initial_state):
+        for node_name, node_state in event.items():
+            if not isinstance(node_state, dict):
+                continue
+            messages = node_state.get("messages", [])
+            if len(messages) <= 1:
+                continue
+            chunks = messages[1:]
+            for chunk in chunks[printed[node_name]:]:
+                content = getattr(chunk, "content", "")
+                if not content:
+                    continue
+                prefix = f"[{node_name}]"
+                if isinstance(chunk, ToolMessage):
+                    print(f"\n{prefix} tool response ({chunk.tool_call_id}): {content}\n")
+                else:
+                    print(f"{prefix} {content}", end="", flush=True)
+            printed[node_name] = len(chunks)
+
+    print()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+Each snippet runs against Incredible when `OPENAI_BASE_URL` is `https://api.incredible.one/v1`; swap that value back to `https://api.openai.com/v1` to show the OpenAI version. No other code changes are necessary.
+
