@@ -1,0 +1,226 @@
+---
+title: "Playwright MCP Integration"
+description: "Communicate with local MCP server using Playwright for web automation"
+---
+
+This example demonstrates how to integrate the Incredible TypeScript SDK with a local Model Context Protocol (MCP) server using Playwright for web automation. The demo shows how to bridge Incredible's Messages API with MCP tools for browser automation.
+
+## Key Features
+
+- **MCP Integration**: Connect to local Playwright MCP server
+- **Web Automation**: Use Playwright tools through MCP for browser automation
+- **Function Calling**: Bridge MCP tools with Anthropic's tool-calling system
+- **Local Development**: Work with local MCP servers for development and testing
+
+## Prerequisites
+
+- Node.js 18+
+- Incredible API key
+- Playwright MCP server running locally
+- Optional: ngrok tunnel for remote MCP access
+
+## Setup
+
+1. Install dependencies:
+```bash
+npm install @incredible-ai/sdk @modelcontextprotocol/sdk @playwright/mcp dotenv tsx typescript
+```
+
+2. Create environment file:
+```bash
+cp .env.example .env
+```
+
+3. Configure your environment:
+```env
+INCREDIBLE_API_KEY=ik_your_incredible_api_key
+ANTHROPIC_MODEL=claude-3-7-sonnet-20250219
+PLAYWRIGHT_MCP_SSE_URL=http://localhost:3001
+PLAYWRIGHT_MCP_TOKEN=your_token_if_needed
+```
+
+4. Start the Playwright MCP server:
+```bash
+npx @playwright/mcp@latest --port 3001 --host 0.0.0.0 --allowed-hosts "*"
+```
+
+## Code Example
+
+```typescript
+import { IncredibleClient } from "@incredible-ai/sdk";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import type { MessageParam, ToolUseBlock } from "@anthropic-ai/sdk";
+
+// MCP Client Setup
+export async function connectPlaywrightMcp() {
+  const transport = new StdioClientTransport({
+    command: "npx",
+    args: ["@playwright/mcp@latest"],
+    stderr: "inherit"
+  });
+
+  const client = new Client({ 
+    name: "playwright-agentic-cli", 
+    version: "0.1.0" 
+  });
+  
+  await client.connect(transport);
+  return { client, transport };
+}
+
+// Tool Conversion
+export function toAnthropicTools(tools: McpTool[]): AnthropicTool[] {
+  return tools.map((tool) => ({
+    name: tool.name,
+    description: tool.description ?? tool.title ?? "",
+    input_schema: (tool.inputSchema as AnthropicTool["input_schema"]) ?? {
+      type: "object",
+      properties: {},
+      additionalProperties: true
+    }
+  }));
+}
+
+// Main Chat Function
+export async function chat(messages: ChatInput[]): Promise<Message> {
+  const { client: mcp, transport } = await connectPlaywrightMcp();
+  const incredibleClient = new IncredibleClient({ 
+    apiKey: process.env.INCREDIBLE_API_KEY 
+  });
+
+  try {
+    // Get available MCP tools
+    const toolListing = await mcp.listTools();
+    const tools = toAnthropicTools(toolListing.tools as McpTool[]);
+
+    // First API call
+    let response = await incredibleClient.messages.create({
+      model: process.env.ANTHROPIC_MODEL ?? "claude-3-7-sonnet-20250219",
+      max_tokens: 1024,
+      tools,
+      messages: messages as MessageParam[]
+    });
+
+    // Extract tool uses
+    const toolUses = response.content.filter(
+      (block): block is ToolUseBlock => block.type === "tool_use"
+    );
+
+    if (!toolUses.length) {
+      return response;
+    }
+
+    // Execute MCP tools
+    const toolResults: MessageParam[] = [];
+    for (const call of toolUses) {
+      const args = (call.input ?? {}) as Record<string, unknown>;
+      const result = await mcp.callTool({ 
+        name: call.name, 
+        arguments: args 
+      });
+      
+      // Log MCP results
+      await logMcpResult(call.name, result);
+      
+      // Format result for Anthropic
+      const entries = Array.isArray(result.content) ? result.content : [];
+      const text = entries
+        .map((entry) =>
+          entry && typeof entry === "object" && "text" in entry && typeof entry.text === "string"
+            ? entry.text
+            : JSON.stringify(entry)
+        )
+        .join("\n");
+
+      toolResults.push({
+        role: "user",
+        content: [{
+          type: "tool_result",
+          tool_use_id: call.id,
+          content: text
+        }]
+      });
+    }
+
+    // Second API call with tool results
+    response = await incredibleClient.messages.create({
+      model: process.env.ANTHROPIC_MODEL ?? "claude-3-7-sonnet-20250219",
+      max_tokens: 1024,
+      tools,
+      messages: [
+        ...messages,
+        { role: "assistant", content: response.content } as MessageParam,
+        ...toolResults
+      ]
+    });
+
+    return response;
+  } finally {
+    await transport.close();
+  }
+}
+
+// Demo Usage
+async function runDemo() {
+  const response = await chat([{
+    role: "user",
+    content: "Visit https://example.com, report the page title and capture the first paragraph text."
+  }]);
+
+  console.log(JSON.stringify(response.content, null, 2));
+}
+```
+
+## Running the Demo
+
+```bash
+npx tsx src/demo.ts
+```
+
+The script will:
+1. Connect to the Playwright MCP server
+2. Convert MCP tools to Anthropic-compatible format
+3. Send a web automation request to the AI
+4. Execute Playwright tools through MCP
+5. Return the results
+
+## Key Concepts
+
+### MCP Integration
+The Model Context Protocol allows you to connect AI systems with external tools and data sources through a standardized interface.
+
+### Tool Bridging
+MCP tools are converted to Anthropic-compatible tool definitions, allowing seamless integration with function calling.
+
+### Local Development
+MCP servers run locally, making it easy to develop and test integrations without external dependencies.
+
+### Web Automation
+Playwright MCP provides powerful browser automation capabilities that can be orchestrated through AI.
+
+## MCP Server Management
+
+The Playwright MCP server can be configured with various options:
+
+```bash
+# Basic setup
+npx @playwright/mcp@latest
+
+# With custom port and host
+npx @playwright/mcp@latest --port 3001 --host 0.0.0.0
+
+# With allowed hosts for remote access
+npx @playwright/mcp@latest --port 3001 --host 0.0.0.0 --allowed-hosts "*"
+```
+
+## Logging and Debugging
+
+The demo includes comprehensive logging:
+- MCP tool invocations are logged to `mcp_logs/` directory
+- Each tool call creates a timestamped JSON file
+- Error handling and transport management included
+
+<Note>
+View complete source code on GitHub → [playwright_demo_package](https://github.com/Norditech-AB/Incredible-API-Cookbook/tree/main/playwright_demo_package)
+</Note>
