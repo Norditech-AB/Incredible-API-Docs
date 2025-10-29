@@ -77,7 +77,14 @@
             "group": "Integrations",
             "pages": [
               "examples/gmail-integration",
-              "examples/perplexity-integration"
+              "examples/perplexity-integration",
+              "examples/google-sheets-integration"
+            ]
+          },
+          {
+            "group": "MCPs",
+            "pages": [
+              "examples/playwright-mcp"
             ]
           },
           {
