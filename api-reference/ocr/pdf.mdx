@@ -1,0 +1,287 @@
+---
+title: 'OCR PDF'
+description: "Extract text from PDF documents. Automatically detects text-based vs scanned PDFs and processes accordingly."
+openapi: 'POST /ocr/pdf'
+---
+
+## Overview
+
+Extract text from PDF documents with intelligent detection. The API automatically determines whether your PDF contains selectable text or is a scanned document, then uses the optimal extraction method:
+
+- **Text-based PDFs**: Fast direct text extraction (no OCR needed)
+- **Scanned PDFs**: Full OCR processing with Mistral Document AI
+- **Mixed PDFs**: Handled intelligently based on content type
+
+## Authentication
+
+All OCR endpoints require authentication via Bearer token in the Authorization header.
+
+```bash
+Authorization: Bearer ik_your_api_key_here
+```
+
+## Request
+
+You can submit PDFs via either file upload or base64-encoded JSON.
+
+### Method 1: File Upload (multipart/form-data)
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/ocr/pdf" \
+  -H "Authorization: Bearer ik_your_api_key_here" \
+  -F "file=@/path/to/document.pdf" \
+```
+
+```python Python
+import requests
+
+# Upload PDF file
+with open("document.pdf", "rb") as f:
+    response = requests.post(
+        "https://api.incredible.one/ocr/pdf",
+        headers={"Authorization": "Bearer ik_your_api_key_here"},
+        files={"file": f},
+    )
+
+result = response.json()
+if result["success"]:
+    print(f"Processed {result['pages_processed']} pages using {result['method']}")
+    print(f"\nExtracted text:")
+    print(result["text"])
+    
+    # Access individual pages
+    print("\n\nPage-by-page results:")
+    for page in result.get("pages", []):
+        if page.get("success"):
+            print(f"\nPage {page['page_number']}:")
+            print(page["text"])
+            
+            # Access raw OCR response for this page (if available)
+            if "raw_response" in page:
+                print(f"Raw OCR data available for page {page['page_number']}")
+        else:
+            print(f"\nPage {page['page_number']}: Failed - {page.get('error')}")
+else:
+    print("Error:", result["error"])
+```
+
+```javascript JavaScript
+const formData = new FormData();
+formData.append('file', pdfFile);
+
+const response = await fetch('https://api.incredible.one/ocr/pdf', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ik_your_api_key_here'
+  },
+  body: formData
+});
+
+const result = await response.json();
+if (result.success) {
+  console.log(`Processed ${result.pages_processed} pages`);
+  console.log('Extracted text:', result.text);
+  
+  // Access per-page results
+  result.pages.forEach(page => {
+    console.log(`Page ${page.page_number}:`, page.text);
+  });
+} else {
+  console.error('Error:', result.error);
+}
+```
+
+</CodeGroup>
+
+### Method 2: Base64 JSON
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/ocr/pdf" \
+  -H "Authorization: Bearer ik_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pdf": "JVBERi0xLjcKCjEgMCBvYmoKPDwvVHlwZS...",
+  }'
+```
+
+```python Python
+import requests
+import base64
+
+# Read and encode PDF
+with open("document.pdf", "rb") as f:
+    pdf_data = base64.b64encode(f.read()).decode("utf-8")
+
+# Make request
+response = requests.post(
+    "https://api.incredible.one/ocr/pdf",
+    headers={
+        "Authorization": "Bearer ik_your_api_key_here",
+        "Content-Type": "application/json"
+    },
+    json={
+        "pdf": pdf_data,
+    }
+)
+
+result = response.json()
+print(result)
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+| Parameter | Type | Description |
+|-----------|------|---------|
+| `file` or `pdf` | file/base64 | PDF file or base64-encoded PDF data |
+
+## Responses
+
+### Success Response (OCR Processing)
+
+```json
+{
+  "success": true,
+  "text": "Extracted text from page 1...\n\nExtracted text from page 2...",
+  "method": "mistral_document_ai",
+  "pages_processed": 2,
+  "total_pages": 10,
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Extracted text from page 1...",
+      "success": true,
+      "raw_response": {
+        "pages": [
+          {
+            "index": 0,
+            "markdown": "...",
+            "text": "..."
+          }
+        ],
+        "model": "mistral-document-ai-2505"
+      }
+    },
+    {
+      "page_number": 2,
+      "text": "Extracted text from page 2...",
+      "success": true,
+      "raw_response": {
+        "pages": [...]
+      }
+    }
+  ]
+}
+```
+
+### Success Response (Text Extraction)
+
+```json
+{
+  "success": true,
+  "text": "Extracted text from all pages...",
+  "method": "text_extraction",
+  "pages_processed": 5,
+  "total_pages": 5,
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Extracted text from page 1...",
+      "success": true
+    },
+    {
+      "page_number": 2,
+      "text": "Extracted text from page 2...",
+      "success": true
+    }
+  ]
+}
+```
+
+**Note:** Text-based PDFs (using `text_extraction` method) don't include `raw_response` since they don't use OCR processing.
+
+## Field Reference
+
+### Top-Level Fields
+
+- **success** boolean — Whether text extraction succeeded overall.
+- **text** string — Concatenated text from all processed pages (pages separated by `\n\n`).
+- **method** string — Extraction method: `"mistral_document_ai"` (OCR) or `"text_extraction"` (direct).
+- **pages_processed** integer — Number of pages actually processed.
+- **total_pages** integer — Total number of pages in the PDF.
+- **pages** array — Per-page results (see below).
+
+### Per-Page Fields
+
+- **page_number** integer — 1-indexed page number.
+- **text** string — Extracted text from this page.
+- **success** boolean — Whether extraction succeeded for this page.
+- **error** string (optional) — Error message if extraction failed for this page.
+- **raw_response** object (optional) — Complete raw response from Mistral Document AI for this page (only for OCR-processed pages).
+
+### Raw Response Object
+
+The `raw_response` field contains the complete, unprocessed response from Mistral Document AI:
+
+- All fields returned by the API (not just `markdown`)
+- Original structure and formatting
+- Metadata and additional information
+- Useful for advanced processing or debugging
+
+## Page Management
+
+### How Pages Are Processed
+
+The OCR API processes PDF pages **sequentially** (one at a time):
+
+1. **Text-based PDFs**: Pages are extracted directly using fast text extraction
+2. **Scanned PDFs**: Each page is converted to an image (at specified DPI) and processed through OCR individually
+
+### Accessing Per-Page Results
+
+Use the `pages` array to access individual page results programmatically:
+
+```python
+for page in result["pages"]:
+    print(f"Page {page['page_number']}: {page['text']}")
+```
+
+## Error Responses
+
+### Authentication Required
+
+```json
+{
+  "error": "Authentication required",
+  "message": "API key must be provided in Authorization header as 'Bearer ik_your_api_key'"
+}
+```
+
+**Status Code:** `401 Unauthorized`
+
+### Invalid API Key
+
+```json
+{
+  "error": "Invalid API key",
+  "message": "The provided API key is invalid, inactive, or expired"
+}
+```
+
+**Status Code:** `503 Service Unavailable`
+
+### Processing Error
+
+```json
+{
+  "success": false,
+  "error": "Missing 'pdf' or 'file' field in request body"
+}
+```
+
+**Status Code:** `422 Unprocessable Entity`

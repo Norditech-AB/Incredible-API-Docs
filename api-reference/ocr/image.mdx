@@ -1,0 +1,244 @@
+---
+title: 'OCR Image'
+description: "Extract text from images using Mistral Document AI. Supports PNG, JPEG, GIF, WebP and other common formats."
+openapi: 'POST /ocr/image'
+---
+
+## Overview
+
+Extract text from a single image using state-of-the-art OCR powered by Azure Mistral Document AI. Perfect for receipts, invoices, screenshots, scanned documents, and more.
+
+## Authentication
+
+All OCR endpoints require authentication via Bearer token in the Authorization header.
+
+```bash
+Authorization: Bearer ik_your_api_key_here
+```
+
+## Request
+
+You can submit images via either file upload or base64-encoded JSON.
+
+### Method 1: File Upload (multipart/form-data)
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/ocr/image" \
+  -H "Authorization: Bearer ik_your_api_key_here" \
+  -F "file=@/path/to/receipt.png"
+```
+
+```python Python
+import requests
+
+with open("receipt.png", "rb") as f:
+    response = requests.post(
+        "https://api.incredible.one/ocr/image",
+        headers={"Authorization": "Bearer ik_your_api_key_here"},
+        files={"file": f}
+    )
+
+result = response.json()
+if result["success"]:
+    print("Extracted text:")
+    print(result["text"])
+else:
+    print("Error:", result["error"])
+```
+
+```javascript JavaScript
+const formData = new FormData();
+formData.append('file', imageFile);
+
+const response = await fetch('https://api.incredible.one/ocr/image', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ik_your_api_key_here'
+  },
+  body: formData
+});
+
+const result = await response.json();
+if (result.success) {
+  console.log('Extracted text:', result.text);
+} else {
+  console.error('Error:', result.error);
+}
+```
+
+</CodeGroup>
+
+### Method 2: Base64 JSON
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/ocr/image" \
+  -H "Authorization: Bearer ik_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "iVBORw0KGgoAAAANSUhEUgAAAAUA..."
+  }'
+```
+
+```python Python
+import requests
+import base64
+
+# Read and encode image
+with open("receipt.png", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+# Make request
+response = requests.post(
+    "https://api.incredible.one/ocr/image",
+    headers={
+        "Authorization": "Bearer ik_your_api_key_here",
+        "Content-Type": "application/json"
+    },
+    json={"image": image_data}
+)
+
+result = response.json()
+if result["success"]:
+    print("Extracted text:")
+    print(result["text"])
+    
+    # Access raw OCR response
+    if "raw_response" in result:
+        print("\nRaw OCR response available")
+else:
+    print("Error:", result["error"])
+```
+
+```javascript JavaScript
+// Convert file to base64
+const reader = new FileReader();
+reader.readAsDataURL(imageFile);
+reader.onload = async () => {
+  const base64 = reader.result.split(',')[1];
+  
+  const response = await fetch('https://api.incredible.one/ocr/image', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ik_your_api_key_here',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ image: base64 })
+  });
+  
+  const result = await response.json();
+  console.log(result);
+};
+```
+
+</CodeGroup>
+
+## Request Body (JSON Method)
+
+- **image** string — Base64-encoded image data (with or without data URI prefix)
+
+## Responses
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "text": "Extracted text from the image...",
+  "method": "mistral_document_ai",
+  "raw_response": {
+    "pages": [
+      {
+        "index": 0,
+        "markdown": "Extracted text in markdown format...",
+        "text": "...",
+        "bounding_box": {...},
+        "image_url": "..."
+      }
+    ],
+    "id": "...",
+    "object": "document",
+    "model": "mistral-document-ai-2505"
+  }
+}
+```
+
+### No Text Found
+
+```json
+{
+  "success": false,
+  "error": "No text could be extracted from the image",
+  "text": "",
+  "method": "mistral_document_ai",
+  "raw_response": {
+    "pages": [...]
+  }
+}
+```
+
+## Field Reference
+
+- **success** boolean — Whether text extraction succeeded.
+- **text** string — Extracted text from the image (processed from markdown).
+- **method** string — Always `"mistral_document_ai"` for OCR processing.
+- **raw_response** object — Complete unprocessed response from Mistral Document AI, including:
+  - **pages** array — Array of page data (single page for images)
+    - **index** number — Page index (0 for images)
+    - **markdown** string — Extracted text in markdown format
+    - **text** string — Plain text version
+    - Additional metadata fields
+  - **model** string — Model used (e.g., `mistral-document-ai-2505`)
+
+## Supported Image Formats
+
+- PNG
+- JPEG/JPG
+- GIF
+- WebP
+
+## Error Responses
+
+### Authentication Required
+
+```json
+{
+  "error": "Authentication required",
+  "message": "API key must be provided in Authorization header as 'Bearer ik_your_api_key'"
+}
+```
+
+**Status Code:** `401 Unauthorized`
+
+### Invalid API Key
+
+```json
+{
+  "error": "Invalid API key",
+  "message": "The provided API key is invalid, inactive, or expired"
+}
+```
+
+**Status Code:** `503 Service Unavailable`
+
+### Invalid Request
+
+```json
+{
+  "success": false,
+  "error": "Missing 'image' or 'file' field in request body"
+}
+```
+
+**Status Code:** `400 Bad Request`
+
+## Performance Tips
+
+1. **Image Quality**: Higher resolution images produce better OCR results
+2. **File Format**: PNG and JPEG work best
+3. **File Size**: Keep images under 10MB for optimal performance
+4. **Parallel Processing**: For multiple images, make parallel requests
+

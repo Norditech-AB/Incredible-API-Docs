@@ -19,16 +19,13 @@
             "pages": [
               "index",
               "quickstart",
-              "guides/core-concepts",
-              "guides/models-overview"
+              "guides/core-concepts"
             ]
           },
           {
             "group": "Taking Actions",
             "pages": [
-              "guides/taking-actions-overview",
               "guides/function-calling",
-              "guides/how-to-implement-function-calling",
               "guides/mathematical-operations",
               "guides/connecting-api-endpoints",
               "guides/streaming-responses"
@@ -42,14 +39,6 @@
               "guides/litellm-sdk",
               "guides/openai-sdk-compatibility",
               "guides/langchain-sdk"
-            ]
-          },
-          {
-            "group": "Advanced Topics",
-            "pages": [
-              "guides/application-state-management",
-              "guides/best-practices",
-              "guides/integrations-api"
             ]
           }
         ]
@@ -74,14 +63,6 @@
             ]
           },
           {
-            "group": "Integrations",
-            "pages": [
-              "examples/gmail-integration",
-              "examples/perplexity-integration",
-              "examples/google-sheets-integration"
-            ]
-          },
-          {
             "group": "MCPs",
             "pages": [
               "examples/playwright-mcp"
@@ -90,10 +71,8 @@
           {
             "group": "Advanced",
             "pages": [
-              "examples/multiple-models",
               "examples/conversation",
-              "examples/json-extraction",
-              "examples/advanced-workflow"
+              "examples/json-extraction"
             ]
           }
         ]
@@ -104,7 +83,25 @@
           {
             "group": "Core Endpoints",
             "pages": [
+              "api-reference/models",
               "api-reference/chat/completion"
+            ]
+          },
+          {
+            "group": "Files",
+            "pages": [
+              "api-reference/files/overview",
+              "api-reference/files/upload-url",
+              "api-reference/files/upload-file",
+              "api-reference/files/confirm-upload",
+              "api-reference/files/metadata"
+            ]
+          },
+          {
+            "group": "OCR",
+            "pages": [
+              "api-reference/ocr/image",
+              "api-reference/ocr/pdf"
             ]
           },
           {
@@ -141,7 +138,7 @@
     "primary": {
       "type": "button",
       "label": "Get Started",
-      "href": "https://www.incredible.one"
+      "href": "https://platform.incredible.one"
     }
   },
   "contextual": {

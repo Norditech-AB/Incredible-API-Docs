@@ -1,0 +1,400 @@
+---
+title: "Get Files Metadata"
+description: "Retrieve metadata and processing information for multiple files by their file IDs."
+openapi: "POST /v1/files/metadata"
+---
+
+## Overview
+
+Retrieve metadata and processing information for one or more files that have been uploaded and confirmed. This endpoint returns the same metadata generated during the confirmation process, allowing you to access file details anytime.
+
+## Authentication
+
+```bash
+Authorization: Bearer ik_your_api_key_here
+```
+
+## Request
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/files/metadata" \
+  -H "Authorization: Bearer ik_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["550e8400-e29b-41d4-a716-446655440000", "660e8400-e29b-41d4-a716-446655440001"],
+    "user_id": "user-uuid-here"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/files/metadata",
+    headers={
+        "Authorization": "Bearer ik_your_api_key_here",
+        "Content-Type": "application/json"
+    },
+    json={
+        "file_ids": [
+            "550e8400-e29b-41d4-a716-446655440000",
+            "660e8400-e29b-41d4-a716-446655440001"
+        ],
+        "user_id": "user-uuid-here"
+    }
+)
+
+files = response.json()
+for file in files:
+    print(f"{file['filename']}: {file['processing_summary']}")
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.incredible.one/v1/files/metadata', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ik_your_api_key_here',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    file_ids: [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '660e8400-e29b-41d4-a716-446655440001'
+    ],
+    user_id: 'user-uuid-here'
+  })
+});
+
+const files = await response.json();
+files.forEach(file => {
+  console.log(`${file.filename}: ${file.processing_summary}`);
+});
+```
+
+</CodeGroup>
+
+## Request Body
+
+- **file_ids** array of strings (required) — Array of file IDs (UUIDs) to retrieve metadata for
+- **user_id** string (required) — User ID associated with the files (for access control)
+
+## Response
+
+Returns an array of file metadata objects:
+
+```json
+[
+  {
+    "file_id": "550e8400-e29b-41d4-a716-446655440000",
+    "filename": "data.csv",
+    "file_size": 2048,
+    "processed_at": "2024-01-01T12:00:00Z",
+    "metadata": {
+      "columns": ["name", "age", "city"],
+      "row_count": 150,
+      "data_types": {
+        "name": "string",
+        "age": "integer",
+        "city": "string"
+      }
+    },
+    "processing_summary": "CSV with 3 columns (name, age, city), 150 rows"
+  },
+  {
+    "file_id": "660e8400-e29b-41d4-a716-446655440001",
+    "filename": "report.pdf",
+    "file_size": 45678,
+    "processed_at": "2024-01-01T12:05:00Z",
+    "metadata": {
+      "page_count": 12,
+      "text_length": 8432,
+      "text_preview": "First 500 characters of extracted text..."
+    },
+    "processing_summary": "PDF with 12 pages, 8432 characters extracted via OCR"
+  }
+]
+```
+
+## Field Reference
+
+Each file object contains:
+
+- **file_id** string — UUID of the file
+- **filename** string — Original filename
+- **file_size** number — File size in bytes
+- **processed_at** string — ISO 8601 timestamp when file was processed
+- **metadata** object — File-type-specific metadata (structure varies by file type)
+- **processing_summary** string — Human-readable summary of file contents
+
+## Metadata by File Type
+
+### CSV Metadata
+
+```json
+{
+  "columns": ["name", "age", "email"],
+  "row_count": 500,
+  "data_types": {
+    "name": "string",
+    "age": "integer",
+    "email": "string"
+  },
+  "preview": [
+    {"name": "Alice", "age": 30, "email": "alice@example.com"}
+  ]
+}
+```
+
+### PDF Metadata
+
+```json
+{
+  "page_count": 15,
+  "text_length": 12450,
+  "extracted_text": "Full text content...",
+  "text_preview": "First 500 characters..."
+}
+```
+
+### Excel Metadata
+
+```json
+{
+  "sheet_names": ["Sales", "Expenses", "Summary"],
+  "sheets": {
+    "Sales": {
+      "columns": ["date", "product", "amount"],
+      "row_count": 120
+    },
+    "Expenses": {
+      "columns": ["date", "category", "amount"],
+      "row_count": 80
+    }
+  }
+}
+```
+
+### Image Metadata
+
+```json
+{
+  "width": 1920,
+  "height": 1080,
+  "format": "PNG",
+  "mode": "RGBA",
+  "size_kb": 125
+}
+```
+
+### JSON Metadata
+
+```json
+{
+  "top_level_keys": ["config", "data", "metadata"],
+  "structure_depth": 4,
+  "total_keys": 67,
+  "preview": {"config": {"timeout": 30}}
+}
+```
+
+## Error Responses
+
+### File Not Found
+
+```json
+{
+  "error": "File not found",
+  "file_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Status Code:** `404 Not Found`
+
+**Note:** If requesting multiple files and some are not found, only the found files are returned (no error).
+
+### No File IDs Provided
+
+```json
+{
+  "error": "file_ids array is required and must not be empty"
+}
+```
+
+**Status Code:** `400 Bad Request`
+
+### Authentication Required
+
+```json
+{
+  "error": "Authentication required",
+  "message": "API key must be provided in Authorization header"
+}
+```
+
+**Status Code:** `401 Unauthorized`
+
+### Access Denied
+
+```json
+{
+  "error": "Access denied",
+  "message": "User does not have access to requested files"
+}
+```
+
+**Status Code:** `403 Forbidden`
+
+**Note:** Users can only access their own files.
+
+## Use Cases
+
+### 1. Display File List in UI
+
+```python
+def get_user_files(api_key, user_id, file_ids):
+    """
+    Retrieve and format file metadata for display.
+    """
+    response = requests.post(
+        "https://api.incredible.one/v1/files/metadata",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={"file_ids": file_ids, "user_id": user_id}
+    )
+    
+    files = response.json()
+    
+    # Format for display
+    for file in files:
+        print(f"📄 {file['filename']}")
+        print(f"   Size: {file['file_size'] / 1024:.1f} KB")
+        print(f"   Uploaded: {file['processed_at']}")
+        print(f"   {file['processing_summary']}")
+        print()
+    
+    return files
+```
+
+### 2. Validate Files Before Chat
+
+```python
+def validate_files_for_chat(api_key, user_id, file_ids):
+    """
+    Check if files are processed and ready for chat.
+    """
+    response = requests.post(
+        "https://api.incredible.one/v1/files/metadata",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={"file_ids": file_ids, "user_id": user_id}
+    )
+    
+    files = response.json()
+    
+    if len(files) != len(file_ids):
+        missing = set(file_ids) - {f['file_id'] for f in files}
+        print(f"Warning: Files not found: {missing}")
+    
+    # Check all have metadata
+    ready = all('metadata' in f for f in files)
+    
+    if ready:
+        print(f"✓ All {len(files)} files are ready for chat")
+    else:
+        print("✗ Some files are not fully processed yet")
+    
+    return ready
+```
+
+### 3. Build Context for Chat
+
+```python
+def build_file_context(api_key, user_id, file_ids):
+    """
+    Create a context string describing available files.
+    """
+    response = requests.post(
+        "https://api.incredible.one/v1/files/metadata",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={"file_ids": file_ids, "user_id": user_id}
+    )
+    
+    files = response.json()
+    
+    context = "Available files:\n"
+    for file in files:
+        context += f"- {file['filename']}: {file['processing_summary']}\n"
+    
+    return context
+
+# Use in chat
+context = build_file_context(api_key, user_id, file_ids)
+message = f"{context}\n\nAnalyze these files and create a summary report."
+```
+
+## Response Examples
+
+### Multiple Files Response
+
+```json
+[
+  {
+    "file_id": "550e8400-e29b-41d4-a716-446655440000",
+    "filename": "sales_q1.csv",
+    "file_size": 3456,
+    "processed_at": "2024-01-15T10:30:00Z",
+    "metadata": {
+      "columns": ["date", "product", "revenue"],
+      "row_count": 90
+    },
+    "processing_summary": "CSV with 3 columns (date, product, revenue), 90 rows"
+  },
+  {
+    "file_id": "660e8400-e29b-41d4-a716-446655440001",
+    "filename": "sales_q2.csv",
+    "file_size": 3567,
+    "processed_at": "2024-01-15T10:31:00Z",
+    "metadata": {
+      "columns": ["date", "product", "revenue"],
+      "row_count": 91
+    },
+    "processing_summary": "CSV with 3 columns (date, product, revenue), 91 rows"
+  },
+  {
+    "file_id": "770e8400-e29b-41d4-a716-446655440002",
+    "filename": "analysis_report.pdf",
+    "file_size": 125678,
+    "processed_at": "2024-01-15T10:35:00Z",
+    "metadata": {
+      "page_count": 8,
+      "text_length": 5432
+    },
+    "processing_summary": "PDF with 8 pages, 5432 characters extracted via OCR"
+  }
+]
+```
+
+### Empty Array (No Files Found)
+
+```json
+[]
+```
+
+**Status Code:** `200 OK`
+
+**Note:** An empty array is returned if none of the requested file IDs are found or accessible.
+
+## Best Practices
+
+1. **Cache metadata:** Store metadata locally to avoid repeated requests
+2. **Batch requests:** Request metadata for multiple files in a single call
+3. **Error handling:** Check for empty arrays or missing files
+4. **User isolation:** Always include the correct `user_id` for security
+5. **Display summaries:** Use `processing_summary` for user-friendly descriptions
+
+## Related Endpoints
+
+- [Generate Upload URL](/api-reference/files/upload-url) - Start the upload process
+- [Confirm Upload](/api-reference/files/confirm-upload) - Process files and generate initial metadata
+- [Chat Completion API](/api-reference/chat/completion) - Use files in chat completions
+

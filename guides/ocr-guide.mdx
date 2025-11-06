@@ -1,0 +1,301 @@
+---
+title: "OCR Guide"
+description: "Extract text from images and PDFs using Mistral Document AI"
+---
+
+## Overview
+
+The Incredible API provides powerful OCR (Optical Character Recognition) capabilities powered by Azure Mistral Document AI. Extract text from images and PDF documents with state-of-the-art accuracy.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Image OCR" icon="image" href="/api-reference/ocr/image">
+    Extract text from PNG, JPEG, GIF, WebP and other image formats.
+  </Card>
+  <Card title="PDF OCR" icon="file-pdf" href="/api-reference/ocr/pdf">
+    Intelligent PDF processing with automatic text/scan detection.
+  </Card>
+  <Card title="Health Check" icon="heart-pulse" href="/api-reference/ocr/health">
+    Verify OCR service configuration and availability.
+  </Card>
+  <Card title="Multiple Languages" icon="language">
+    Support for multiple languages and character sets.
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+### Image OCR
+
+Extract text from an image in seconds:
+
+```python
+import requests
+
+with open("receipt.png", "rb") as f:
+    response = requests.post(
+        "https://api.incredible.one/ocr/image",
+        headers={"Authorization": "Bearer ik_your_api_key_here"},
+        files={"file": f}
+    )
+
+result = response.json()
+if result["success"]:
+    print(result["text"])
+```
+
+### PDF OCR
+
+Process PDFs with intelligent text detection:
+
+```python
+import requests
+
+with open("document.pdf", "rb") as f:
+    response = requests.post(
+        "https://api.incredible.one/ocr/pdf",
+        headers={"Authorization": "Bearer ik_your_api_key_here"},
+        files={"file": f},
+        data={"max_pages": "10", "dpi": "200"}
+    )
+
+result = response.json()
+if result["success"]:
+    print(f"Method: {result['method']}")
+    print(f"Pages: {result['pages_processed']}/{result['total_pages']}")
+    print(result["text"])
+```
+
+## Intelligent PDF Processing
+
+The OCR API automatically detects the type of PDF you're processing:
+
+### Text-Based PDFs
+- **Fast extraction**: Direct text extraction without OCR
+- **Perfect accuracy**: No OCR errors on digital text
+- **Instant results**: No image processing needed
+
+### Scanned PDFs
+- **Full OCR**: Mistral Document AI processing
+- **High accuracy**: State-of-the-art text recognition
+- **Structure preservation**: Maintains document layout
+
+The API intelligently switches between methods, giving you the best of both worlds.
+
+## Authentication
+
+All OCR endpoints require authentication:
+
+```bash
+Authorization: Bearer ik_your_api_key_here
+```
+
+Get your API key from the [Incredible dashboard](https://incredible.one).
+
+## Use Cases
+
+### Receipts & Invoices
+Extract amounts, dates, vendor information from receipts and invoices for expense tracking and accounting automation.
+
+```python
+# Extract receipt data
+response = requests.post(
+    "https://api.incredible.one/ocr/image",
+    headers={"Authorization": "Bearer ik_your_api_key"},
+    files={"file": open("receipt.png", "rb")}
+)
+text = response.json()["text"]
+# Parse amounts, dates, vendors from text
+```
+
+### Document Digitization
+Convert scanned documents, contracts, and forms into searchable text for archival and retrieval systems.
+
+### Screenshot Analysis
+Extract text from screenshots of websites, applications, or error messages for debugging and documentation.
+
+### Table Extraction
+Parse structured data from tables in images and PDFs for data analysis and reporting.
+
+## Advanced Features
+
+### Per-Page Processing
+
+Access individual page results for granular control:
+
+```python
+result = response.json()
+for page in result["pages"]:
+    print(f"Page {page['page_number']}: {page['text']}")
+    if page.get("success"):
+        # Process successful page
+        pass
+    else:
+        print(f"Error: {page.get('error')}")
+```
+
+### Raw OCR Response
+
+Access the complete Mistral Document AI response for advanced processing:
+
+```python
+result = response.json()
+if "raw_response" in result:
+    raw = result["raw_response"]
+    # Access markdown, bounding boxes, metadata
+    for page in raw["pages"]:
+        markdown = page["markdown"]
+        # Process markdown with formatting preserved
+```
+
+### DPI Control
+
+Adjust image resolution for quality vs. speed tradeoffs:
+
+```python
+# High quality for small text
+response = requests.post(
+    "https://api.incredible.one/ocr/pdf",
+    files={"file": pdf_file},
+    data={"dpi": "300"}  # Higher quality, slower
+)
+
+# Fast processing for standard documents
+response = requests.post(
+    "https://api.incredible.one/ocr/pdf",
+    files={"file": pdf_file},
+    data={"dpi": "150"}  # Faster, lower quality
+)
+```
+
+### Page Limiting
+
+Process only the pages you need:
+
+```python
+# Extract first 5 pages only
+response = requests.post(
+    "https://api.incredible.one/ocr/pdf",
+    files={"file": pdf_file},
+    data={"max_pages": "5"}
+)
+```
+
+## Best Practices
+
+### Image Quality
+- Use high-resolution images (300 DPI or higher) for best results
+- Ensure good lighting and contrast
+- Avoid blurry or distorted images
+- PNG and JPEG formats work best
+
+### PDF Optimization
+- Use `max_pages` for testing large documents
+- Adjust DPI based on content (200 for standard, 300 for small text)
+- Process pages in batches for very large documents
+
+### Error Handling
+Always check the `success` field and handle errors gracefully:
+
+```python
+result = response.json()
+if result.get("success"):
+    text = result["text"]
+    # Process text
+else:
+    error = result.get("error", "Unknown error")
+    print(f"OCR failed: {error}")
+```
+
+### Parallel Processing
+For multiple images, make parallel requests:
+
+```python
+import concurrent.futures
+
+def process_image(image_path):
+    with open(image_path, "rb") as f:
+        response = requests.post(
+            "https://api.incredible.one/ocr/image",
+            headers={"Authorization": "Bearer ik_your_api_key"},
+            files={"file": f}
+        )
+    return response.json()
+
+# Process multiple images in parallel
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    results = list(executor.map(process_image, image_paths))
+```
+
+## Technical Details
+
+### Supported Formats
+
+**Images:**
+- PNG
+- JPEG/JPG
+- GIF
+- WebP
+- Other PIL/Pillow-supported formats
+
+**PDFs:**
+- Text-based PDFs (direct extraction)
+- Scanned PDFs (OCR processing)
+- Mixed PDFs (intelligent handling)
+
+### Limits & Performance
+
+- **Max file size**: 512MB
+- **Timeout**: 60 seconds per request
+- **Rate limits**: Respects Azure Mistral Document AI quota
+- **Languages**: Multiple languages supported
+
+### Model Information
+
+- **Provider**: Azure Mistral Document AI
+- **Model**: `mistral-document-ai-2505`
+- **Accuracy**: State-of-the-art OCR performance
+- **Features**: Text extraction, markdown formatting, structure preservation
+
+## Configuration
+
+The OCR service requires Azure credentials (configured by your API administrator):
+
+```bash
+AZURE_MISTRAL_DOCUMENT_AI_ENDPOINT=https://your-endpoint.azure.com/v1/document-ai
+AZURE_MISTRAL_DOCUMENT_AI_KEY=your-api-key
+AZURE_MISTRAL_DOCUMENT_AI_MODEL=mistral-document-ai-2505
+```
+
+Check service health:
+
+```bash
+curl https://api.incredible.one/ocr/health
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Image OCR API" icon="code" href="/api-reference/ocr/image">
+    Complete API reference for image OCR
+  </Card>
+  <Card title="PDF OCR API" icon="code" href="/api-reference/ocr/pdf">
+    Complete API reference for PDF OCR
+  </Card>
+  <Card title="Examples" icon="file-code" href="/examples/hello-incredible">
+    Explore OCR examples and use cases
+  </Card>
+  <Card title="Get API Key" icon="key" href="https://incredible.one">
+    Sign up for an API key
+  </Card>
+</CardGroup>
+
+## Support
+
+For issues or questions:
+- Check the [health endpoint](/api-reference/ocr/health) first
+- Review error messages for specific issues
+- Verify your API key is valid and active
+- Contact support if service is misconfigured
+

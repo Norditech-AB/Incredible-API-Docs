@@ -1,0 +1,283 @@
+---
+title: "2. Upload File to Storage"
+description: "Upload your file directly to storage using the pre-signed URL. This step bypasses the API server for fast uploads."
+openapi: "PUT /"
+---
+
+## Overview
+
+After receiving a pre-signed upload URL from the `/upload-url` endpoint, you upload your file directly to storage. This direct-to-storage approach ensures fast uploads without bottlenecking through the API server.
+
+## Important: Use PUT Method with Raw Bytes
+
+**Critical Implementation Details:**
+
+- Use **PUT** method (not POST)
+- Send **raw file bytes** as the request body (not multipart/form-data)
+- Set the appropriate `Content-Type` header
+- Do **not** include authentication headers (the URL is pre-signed)
+
+## Request
+
+<CodeGroup>
+
+```python Python
+import requests
+
+# Assuming you have upload_url from the previous step
+with open('report.pdf', 'rb') as f:
+    file_bytes = f.read()
+
+response = requests.put(
+    upload_url,
+    data=file_bytes,  # ← Use 'data', NOT 'files'
+    headers={"Content-Type": "application/pdf"}
+)
+
+# Check for success
+if response.status_code in [200, 201]:
+    print("Upload successful!")
+else:
+    print(f"Upload failed: {response.status_code}")
+    print(response.text)
+```
+
+```javascript JavaScript
+// Using Fetch API
+const fileBlob = await fetch('report.pdf').then(r => r.blob());
+
+const response = await fetch(uploadUrl, {
+  method: 'PUT',
+  body: fileBlob,
+  headers: {
+    'Content-Type': 'application/pdf'
+  }
+});
+
+if (response.ok) {
+  console.log('Upload successful!');
+} else {
+  console.error('Upload failed:', response.status);
+}
+```
+
+```javascript JavaScript (Browser File Input)
+// From a file input element
+const fileInput = document.getElementById('fileInput');
+const file = fileInput.files[0];
+
+const response = await fetch(uploadUrl, {
+  method: 'PUT',
+  body: file,
+  headers: {
+    'Content-Type': file.type
+  }
+});
+
+if (response.ok) {
+  console.log('Upload successful!');
+} else {
+  console.error('Upload failed:', response.status);
+}
+```
+
+```bash cURL
+curl -X PUT \
+  -H "Content-Type: application/pdf" \
+  --data-binary @report.pdf \
+  "https://storage.supabase.co/object/upload/sign/files/550e8400-...?token=..."
+```
+
+</CodeGroup>
+
+## Request Details
+
+- **Method:** `PUT` (not POST)
+- **URL:** The `upload_url` from the `/upload-url` response
+- **Body:** Raw file bytes
+- **Headers:**
+  - `Content-Type`: The MIME type of your file (e.g., `application/pdf`, `text/csv`, `image/png`)
+
+## Content-Type Headers by File Type
+
+| File Type | Content-Type |
+|-----------|--------------|
+| **PDF** | `application/pdf` |
+| **CSV** | `text/csv` |
+| **Excel** | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| **JSON** | `application/json` |
+| **Plain Text** | `text/plain` |
+| **PNG** | `image/png` |
+| **JPEG** | `image/jpeg` |
+| **GIF** | `image/gif` |
+| **WebP** | `image/webp` |
+
+## Response
+
+### Success
+
+**Status Code:** `200 OK` or `201 Created`
+
+The response body is typically empty or contains storage metadata (not needed for your application).
+
+### Common Errors
+
+#### Upload URL Expired
+
+**Status Code:** `403 Forbidden`
+
+```json
+{
+  "error": "Token has expired"
+}
+```
+
+**Solution:** Request a new upload URL. Pre-signed URLs expire after ~60 seconds.
+
+#### Invalid Method
+
+**Status Code:** `405 Method Not Allowed`
+
+**Solution:** Use PUT method, not POST.
+
+#### File Too Large
+
+**Status Code:** `413 Payload Too Large`
+
+**Solution:** Ensure file is under 50 MB limit.
+
+## Common Implementation Mistakes
+
+### ❌ Wrong: Using multipart/form-data
+
+```python
+# DON'T DO THIS
+with open('file.pdf', 'rb') as f:
+    response = requests.put(
+        upload_url,
+        files={'file': f}  # ❌ Wrong
+    )
+```
+
+### ✅ Correct: Using raw bytes
+
+```python
+# DO THIS
+with open('file.pdf', 'rb') as f:
+    response = requests.put(
+        upload_url,
+        data=f.read()  # ✅ Correct
+    )
+```
+
+### ❌ Wrong: Using POST method
+
+```python
+# DON'T DO THIS
+response = requests.post(upload_url, data=file_bytes)  # ❌ Wrong method
+```
+
+### ✅ Correct: Using PUT method
+
+```python
+# DO THIS
+response = requests.put(upload_url, data=file_bytes)  # ✅ Correct method
+```
+
+### ❌ Wrong: Including authentication
+
+```python
+# DON'T DO THIS
+response = requests.put(
+    upload_url,
+    data=file_bytes,
+    headers={
+        "Authorization": "Bearer ...",  # ❌ Not needed
+        "Content-Type": "application/pdf"
+    }
+)
+```
+
+### ✅ Correct: No authentication (URL is pre-signed)
+
+```python
+# DO THIS
+response = requests.put(
+    upload_url,
+    data=file_bytes,
+    headers={"Content-Type": "application/pdf"}  # ✅ Just Content-Type
+)
+```
+
+## Complete Example with Error Handling
+
+```python
+import requests
+
+def upload_file(upload_url, file_path, content_type):
+    """
+    Upload file to pre-signed URL with proper error handling.
+    """
+    try:
+        with open(file_path, 'rb') as f:
+            file_bytes = f.read()
+        
+        response = requests.put(
+            upload_url,
+            data=file_bytes,
+            headers={"Content-Type": content_type},
+            timeout=60  # 60 second timeout
+        )
+        
+        if response.status_code in [200, 201]:
+            return {"success": True, "size": len(file_bytes)}
+        else:
+            return {
+                "success": False,
+                "error": f"Upload failed with status {response.status_code}",
+                "details": response.text
+            }
+    
+    except FileNotFoundError:
+        return {"success": False, "error": "File not found"}
+    
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "Upload timed out"}
+    
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# Usage
+result = upload_file(
+    upload_url="https://storage.supabase.co/...",
+    file_path="report.pdf",
+    content_type="application/pdf"
+)
+
+if result["success"]:
+    print(f"Uploaded {result['size']} bytes successfully")
+else:
+    print(f"Error: {result['error']}")
+```
+
+## Next Steps
+
+After successfully uploading your file:
+
+1. **Confirm the upload** to trigger automatic file processing
+   → See [Confirm Upload](/api-reference/files/confirm-upload)
+
+2. **Use the file_id** in chat completions
+   → See [Chat Completion API](/api-reference/chat/completion)
+
+3. **Retrieve file metadata** to see processing results
+   → See [Get Files Metadata](/api-reference/files/metadata)
+
+## Performance Tips
+
+1. **File Size:** Validate file size before upload to avoid timeouts
+2. **Timeout:** Set appropriate timeouts (60+ seconds for large files)
+3. **Retry Logic:** Implement retry with exponential backoff for network errors
+4. **Parallel Uploads:** For multiple files, upload them in parallel
+5. **Progress Tracking:** Use streaming libraries to track upload progress for large files
+

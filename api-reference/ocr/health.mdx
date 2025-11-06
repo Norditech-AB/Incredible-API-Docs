@@ -1,0 +1,69 @@
+---
+title: 'OCR Health Check'
+description: "Check if the OCR service is properly configured and ready to process requests."
+openapi: 'GET /ocr/health'
+---
+
+## Overview
+
+The health endpoint allows you to verify that the OCR service is properly configured with the required Azure Mistral Document AI credentials and ready to process image and PDF requests.
+
+## Request
+
+No parameters or authentication required. This endpoint is public for service health monitoring.
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://api.incredible.one/ocr/health"
+```
+
+```python Python
+import requests
+
+res = requests.get("https://api.incredible.one/ocr/health")
+print(res.json())
+```
+
+```javascript JavaScript
+const res = await fetch("https://api.incredible.one/ocr/health");
+console.log(await res.json());
+```
+
+</CodeGroup>
+
+## Response
+
+### Success Response
+
+```json
+{
+  "status": "ok",
+  "ocr_enabled": true,
+  "model": "mistral-document-ai-2505",
+  "message": "OCR service is ready"
+}
+```
+
+### Service Not Configured
+
+```json
+{
+  "status": "error",
+  "ocr_enabled": false,
+  "message": "OCR service not configured. Please set AZURE_MISTRAL_DOCUMENT_AI_ENDPOINT and AZURE_MISTRAL_DOCUMENT_AI_KEY."
+}
+```
+
+## Field Reference
+
+- **status** string — `"ok"` if service is ready, `"error"` if misconfigured.
+- **ocr_enabled** boolean — Whether OCR processing is available.
+- **model** string — The Mistral Document AI model being used (e.g., `mistral-document-ai-2505`).
+- **message** string — Human-readable status message.
+
+## Next Steps
+
+- Extract text from images: [OCR Image](/api-reference/ocr/image)
+- Extract text from PDFs: [OCR PDF](/api-reference/ocr/pdf)
+

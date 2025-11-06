@@ -1,0 +1,532 @@
+---
+title: "Files API Overview"
+description: "Upload and manage files to use with the Incredible agentic model. Direct-to-storage uploads with automatic processing."
+---
+
+## Introduction
+
+Upload files to use with the Incredible agentic model. This system uses **pre-signed upload URLs** for fast, direct client-to-storage uploads that bypass your server, then automatically processes files to extract metadata and content.
+
+<Warning>
+**Best Practice: Upload Once, Reuse Forever**
+
+Upload files **once** during setup or when users first add them. Store the `file_id` and reuse it across unlimited chat requests. Avoid re-uploading the same file repeatedly—this wastes time and resources.
+</Warning>
+
+## Quick Start
+
+**The Flow:**
+
+1. Request an upload URL → get `file_id` and `upload_url`
+2. Upload file directly to storage using the URL (fast, no server bottleneck)
+3. Confirm upload → triggers automatic processing
+4. **Store the `file_id`** and reuse it in unlimited chat requests
+
+**Why This Approach?**
+
+- **Fast uploads:** Files go directly to storage, not through your API server
+- **Upload once, use many times:** After uploading, reference files by ID in unlimited chat requests—no need to re-upload
+- **Automatic processing:** Files are analyzed on confirmation (PDFs get OCR'd, CSVs parsed, images analyzed)
+- **Efficient & cost-effective:** Each file is processed once, then instantly available for all future requests
+
+## Complete Flow Example
+
+### Upload Once, Use Many Times
+
+<CodeGroup>
+
+```python Python
+import requests
+
+filename = "report.pdf"             # filename of the file to upload
+content_type = "application/pdf"    # Example: application/pdf, text/csv, image/png
+
+# ============================================
+# STEP 1-3: Upload Once (Do this ONCE per file)
+# ============================================
+
+# Step 1: Get upload URL
+response = requests.post(
+    "https://api.incredible.one/v1/files/upload-url",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={"filename": filename}
+)
+data = response.json()
+file_id = data["file_id"]
+upload_url = data["upload_url"]
+
+# Step 2: Upload file directly to storage
+with open(filename, 'rb') as f:
+    file_bytes = f.read()
+
+response = requests.put(
+    upload_url,
+    data=file_bytes,
+    headers={"Content-Type": content_type}
+)
+
+# Step 3: Confirm upload (triggers processing)
+requests.post(
+    "https://api.incredible.one/v1/files/confirm-upload",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "file_id": file_id,
+        "filename": filename,
+        "file_size": len(file_bytes)
+    }
+)
+
+# 💾 IMPORTANT: Store file_id in your database!
+# save_to_database(user_id, file_id, "report.pdf")
+
+# ============================================
+# STEP 4: Reuse Forever (Use unlimited times)
+# ============================================
+
+# Use the same file_id in ANY future chat request
+# No need to re-upload!
+
+# Request 1:
+requests.post(
+    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "messages": [
+            {
+                "role": "user",
+                "content": "Summarize this report",
+                "file_ids": [file_id]  # ← Reuse the same file_id
+            }
+        ]
+    }
+)
+
+# Request 2 (hours later):
+requests.post(
+    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "messages": [
+            {
+                "role": "user",
+                "content": "What are the key findings?",
+                "file_ids": [file_id]  # ← Same file_id, no re-upload needed
+            }
+        ]
+    }
+)
+
+# Request 3 (days later):
+requests.post(
+    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "messages": [
+            {
+                "role": "user",
+                "content": "Create a presentation from this",
+                "file_ids": [file_id]  # ← Still the same file_id!
+            }
+        ]
+    }
+)
+```
+
+```javascript JavaScript
+const filename = "report.pdf"             // filename of the file to upload
+const content_type = "application/pdf"    // Example: application/pdf, text/csv, image/png
+
+// ============================================
+// STEP 1-3: Upload Once (Do this ONCE per file)
+// ============================================
+
+// Step 1: Get upload URL
+const uploadUrlResponse = await fetch(
+  'https://api.incredible.one/v1/files/upload-url',
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ filename })
+  }
+);
+const { file_id, upload_url } = await uploadUrlResponse.json();
+
+// Step 2: Upload file directly to storage
+const fileBlob = await fetch(filename).then(r => r.blob());
+await fetch(upload_url, {
+  method: 'PUT',
+  body: fileBlob,
+  headers: { 'Content-Type': content_type }
+});
+
+// Step 3: Confirm upload
+await fetch('https://api.incredible.one/v1/files/confirm-upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    file_id: file_id,
+    filename: filename,
+    file_size: fileBlob.size
+  })
+});
+
+// 💾 IMPORTANT: Store file_id in your database!
+// await saveToDatabase(userId, file_id, 'report.pdf');
+
+// ============================================
+// STEP 4: Reuse Forever (Use unlimited times)
+// ============================================
+
+// Request 1:
+await fetch('https://api.incredible.one/v1/agentic-model/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    messages: [
+      {
+        role: 'user',
+        content: 'Summarize this report',
+        file_ids: [file_id]  // ← Reuse the same file_id
+      }
+    ]
+  })
+});
+
+// Request 2 (later):
+await fetch('https://api.incredible.one/v1/agentic-model/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    messages: [
+      {
+        role: 'user',
+        content: 'Extract key metrics',
+        file_ids: [file_id]  // ← Same file_id!
+      }
+    ]
+  })
+});
+```
+
+```bash cURL
+# ============================================
+# STEP 1-3: Upload Once (Do this ONCE per file)
+# ============================================
+
+# Step 1: Get upload URL
+curl -X POST "https://api.incredible.one/v1/files/upload-url" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "report.pdf"}'
+
+# Returns: {"file_id": "550e8400-...", "upload_url": "https://storage..."}
+# 💾 SAVE THIS file_id!
+
+# Step 2: Upload file directly to storage
+curl -X PUT "https://storage.supabase.co/..." \
+  -H "Content-Type: application/pdf" \
+  --data-binary @report.pdf
+
+# Step 3: Confirm upload
+curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "550e8400-...",
+    "filename": "report.pdf",
+    "file_size": 45678
+  }'
+
+# ============================================
+# STEP 4: Reuse Forever (Use unlimited times)
+# ============================================
+
+# Request 1:
+curl -X POST "https://api.incredible.one/v1/agentic-model/chat/completions" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {
+        "role": "user",
+        "content": "Summarize this report",
+        "file_ids": ["550e8400-..."]
+      }
+    ]
+  }'
+
+# Request 2 (use the same file_id again!):
+curl -X POST "https://api.incredible.one/v1/agentic-model/chat/completions" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {
+        "role": "user",
+        "content": "What are the conclusions?",
+        "file_ids": ["550e8400-..."]
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+## Building a File Library System
+
+Here's how to implement a proper file management system that uploads once and reuses forever:
+
+```python
+# Example: File library implementation
+
+class FileLibrary:
+    """
+    Manages file uploads and reuse for Incredible API.
+    Upload once, store file_id, reuse forever.
+    """
+    
+    def __init__(self, api_key, database):
+        self.api_key = api_key
+        self.db = database
+    
+    def upload_file(self, user_id, file_path, filename):
+        """
+        Upload a file ONCE and store the file_id.
+        Call this only when user first adds a file.
+        """
+        # Check if file already uploaded
+        existing = self.db.get_file_by_name(user_id, filename)
+        if existing:
+            print(f"✓ File already uploaded, reusing file_id: {existing['file_id']}")
+            return existing['file_id']
+        
+        # Step 1: Get upload URL
+        response = requests.post(
+            "https://api.incredible.one/v1/files/upload-url",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={"filename": filename}
+        )
+        data = response.json()
+        file_id = data["file_id"]
+        upload_url = data["upload_url"]
+        
+        # Step 2: Upload to storage
+        with open(file_path, 'rb') as f:
+            file_bytes = f.read()
+        
+        requests.put(upload_url, data=file_bytes)
+        
+        # Step 3: Confirm upload
+        response = requests.post(
+            "https://api.incredible.one/v1/files/confirm-upload",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={
+                "file_id": file_id,
+                "filename": filename,
+                "file_size": len(file_bytes)
+            }
+        )
+        
+        # Step 4: Store file_id in database (CRITICAL!)
+        self.db.save_file({
+            "user_id": user_id,
+            "file_id": file_id,
+            "filename": filename,
+            "file_size": len(file_bytes),
+            "uploaded_at": datetime.now()
+        })
+        
+        print(f"✓ File uploaded successfully: {file_id}")
+        return file_id
+    
+    def get_user_files(self, user_id):
+        """
+        Retrieve all files for a user.
+        Show these in your UI so users can reuse them.
+        """
+        return self.db.get_files_by_user(user_id)
+    
+    def chat_with_files(self, user_id, message, file_ids):
+        """
+        Use stored file_ids in chat - no re-uploading!
+        """
+        response = requests.post(
+            "https://api.incredible.one/v1/chat/completions",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": message,
+                        "file_ids": file_ids  # ← Reuse stored file_ids
+                    }
+                ]
+            }
+        )
+        return response.json()
+
+# Usage Example:
+library = FileLibrary(api_key="ik_...", database=db)
+
+# Upload once (only when user first adds file)
+file_id = library.upload_file(
+    user_id="user123",
+    file_path="report.pdf",
+    filename="Q4_Report.pdf"
+)
+
+# Later: Show user their file library
+user_files = library.get_user_files("user123")
+print("Your files:")
+for file in user_files:
+    print(f"  - {file['filename']} (ID: {file['file_id']})")
+
+# Use file in unlimited chats (no re-upload needed!)
+response1 = library.chat_with_files(
+    user_id="user123",
+    message="Summarize this report",
+    file_ids=[file_id]
+)
+
+response2 = library.chat_with_files(
+    user_id="user123",
+    message="What are the key metrics?",
+    file_ids=[file_id]  # ← Same file_id, instant access!
+)
+```
+
+**Key Implementation Points:**
+
+1. **Check before uploading:** Always check if file already exists in your database
+2. **Store file_ids permanently:** Save them alongside user data
+3. **Show file library to users:** Let them see and select previously uploaded files
+4. **Reuse indefinitely:** Never re-upload the same file
+
+## File Processing
+
+Files are automatically processed when you call `/confirm-upload`. Here's what happens for each file type:
+
+| File Type | Processing | Metadata Extracted |
+|-----------|------------|-------------------|
+| **CSV** | Parse structure | Columns, row count, data types, preview |
+| **Excel** (.xlsx, .xls) | Parse sheets | Sheet names, columns per sheet, row counts |
+| **PDF** | **OCR text extraction** | Page count, extracted text, text length |
+| **Images** (.png, .jpg, .gif, .webp) | Analyze dimensions | Width, height, format, file size |
+| **JSON** | Parse structure | Keys, depth, structure overview |
+| **Text** (.txt, .md) | Read content | Character count, line count, preview |
+
+**PDF OCR:**
+PDFs are processed using OCR (Optical Character Recognition) to extract text content, making scanned documents and images-in-PDFs searchable and usable by the agentic model.
+
+## Supported File Types
+
+✅ **Spreadsheets:** `.csv`, `.xlsx`, `.xls`  
+✅ **Documents:** `.pdf`, `.txt`, `.md`  
+✅ **Data:** `.json`, `.xml`  
+
+**File Size Limits:**
+
+- Maximum file size: 50 MB
+- For larger files, contact support
+
+## Using Files in Chat Completions
+
+After uploading and confirming files **once**, attach them to **any number of messages** using `file_ids`:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Analyze the sales data and create a chart",
+      "file_ids": ["550e8400-...", "660e8400-..."]
+    }
+  ]
+}
+```
+
+<Info>
+**Reuse Files Across Sessions**
+
+The same `file_id` can be used:
+- In multiple messages within a conversation
+- Across different conversations
+- By the same user indefinitely
+- No expiration—files remain available until deleted
+</Info>
+
+**What the Agent Sees:**
+
+- File metadata (columns, row counts, structure)
+- Content previews (first rows of CSV, PDF text excerpts)
+- Full file access in the sandboxed Python environment
+
+**Example Capabilities:**
+
+```python
+# The agent can write Python code like this:
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Files are automatically available in the sandbox
+df = pd.read_csv("data.csv")
+summary = df.describe()
+
+plt.plot(df['date'], df['sales'])
+plt.savefig("chart.png")
+```
+
+The agent can read your files, process data, create visualizations, and generate new files—all automatically.
+
+## Best Practices
+
+1. **🔄 Upload once, reuse forever (MOST IMPORTANT):** 
+   - Upload files **once** when users first add them or during setup
+   - Store the `file_id` in your database or application state
+   - Reuse the same `file_id` across unlimited chat requests
+   - **Never re-upload the same file**—this is inefficient and unnecessary
+   
+2. **💾 Persist file_ids:**
+   - Save `file_id` values in your database alongside user data
+   - Build a file management system in your app to track uploaded files
+   - Display previously uploaded files to users so they can reuse them
+   
+3. **⏱️ Upload proactively:**
+   - Upload files during onboarding or when users first connect data sources
+   - Process files in the background, not during chat sessions
+   - This ensures files are ready instantly when users start conversations
+   
+4. **✓ Wait for confirmation:** Always call `/confirm-upload` before using the file in chat
+
+5. **⏰ Handle upload URL expiry:** Request new URLs if upload takes longer than 60 seconds
+
+6. **📝 Set correct Content-Type:** Helps with proper file processing
+
+7. **📏 Check file size:** Validate size client-side before requesting upload URL
+
+## Security & Privacy
+
+- **Authentication required:** All endpoints require valid API key (except the pre-signed upload URL itself)
+- **File isolation:** Users can only access their own files
+- **Temporary URLs:** Upload URLs expire quickly to prevent unauthorized access
+- **Sandboxed execution:** Files are processed in isolated environments
+- **No file sharing:** Files are private to the uploading user
+
+## Related Documentation
+
+- [Chat Completion API](/api-reference/chat/completion) - Using files in chat completions
+- [OCR API](/api-reference/ocr/image) - PDF text extraction details
+- [Integrations API](/api-reference/endpoint/list-integrations) - Working with integration outputs
+

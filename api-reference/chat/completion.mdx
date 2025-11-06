@@ -16,7 +16,7 @@ curl -X POST "https://api.incredible.one/v1/chat-completion" \
   -d '{
     "model": "small-1",
     "messages": [
-      { "role": "user", "content": "Hello, Incredible!" }
+      { "role": "user", "content": "Hello, Incredible!", "file_ids": ["<id1>", "<id2>", "<id3>", ...] }
     ]
   }'
 ```

@@ -1,0 +1,246 @@
+---
+title: "List Available Models"
+api: "GET https://api.incredible.one/v1/models"
+description: "Retrieve a list of all available Incredible AI models that can be used with the Chat Completions API."
+---
+
+## Response Format
+
+The endpoint returns a JSON object following the OpenRouter API schema with a `data` array containing model metadata.
+
+### Response Structure
+
+```json
+{
+  "data": [
+    {
+      "id": "string",
+      "canonical_slug": "string",
+      "hugging_face_id": "string",
+      "name": "string",
+      "created": "number (Unix timestamp)",
+      "description": "string",
+      "context_length": "number",
+      "architecture": {
+        "modality": "string",
+        "input_modalities": ["string"],
+        "output_modalities": ["string"],
+        "tokenizer": "string",
+        "instruct_type": "string | null"
+      },
+      "pricing": {
+        "prompt": "string (USD per token)",
+        "completion": "string (USD per token)",
+        "request": "string (USD per request)",
+        "image": "string (USD per image)",
+        "web_search": "string (USD per search)",
+        "internal_reasoning": "string (USD per reasoning token)"
+      },
+      "top_provider": {
+        "context_length": "number",
+        "max_completion_tokens": "number | null",
+        "is_moderated": "boolean"
+      },
+      "per_request_limits": "object | null",
+      "supported_parameters": ["string"],
+      "default_parameters": {
+        "temperature": "number | null",
+        "top_p": "number | null",
+        "frequency_penalty": "number | null"
+      }
+    }
+  ]
+}
+```
+
+## Available Models
+
+### small-2
+
+**Model ID:** `small-2`
+
+Incredible's small-2 model finishes complex work across all your tools—no supervision required.
+
+- **Context Length:** 200,000 tokens
+- **Tokenizer:** Minimax
+- **Modality:** text→text
+- **Pricing:**
+  - Prompt: $0.0008 per token
+  - Completion: $0.0045 per token
+- **Supported Parameters:** `tools`, `response_format`
+
+### small-1
+
+**Model ID:** `small-1`
+
+Incredible's small-1 model is aimed for accurately handling complex tool-chaining with large context.
+
+- **Context Length:** 200,000 tokens
+- **Tokenizer:** GLM
+- **Modality:** text→text
+- **Pricing:**
+  - Prompt: $0.001 per token
+  - Completion: $0.005 per token
+- **Supported Parameters:** `tools`, `response_format`
+
+## Example Request
+
+```bash
+curl https://api.incredible.one/v1/models
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "small-2",
+      "canonical_slug": "small-2",
+      "hugging_face_id": "",
+      "name": "Incredible small-2",
+      "created": 1730908800,
+      "description": "Incredible's small-2 model finishes complex work across all your tools—no supervision required.",
+      "context_length": 200000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Minimax",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0008",
+        "completion": "0.0045",
+        "request": "0",
+        "image": "0",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "top_provider": {
+        "context_length": 200000,
+        "max_completion_tokens": null,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "tools",
+        "response_format"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "frequency_penalty": null
+      }
+    },
+    {
+      "id": "small-1",
+      "canonical_slug": "small-1",
+      "hugging_face_id": "",
+      "name": "Incredible small-1",
+      "created": 1730908800,
+      "description": "Incredible's small-1 model is aimed for accurately handling complex tool-chaining with large context.",
+      "context_length": 200000,
+      "architecture": {
+        "modality": "text->text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "GLM",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.001",
+        "completion": "0.005",
+        "request": "0",
+        "image": "0",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "top_provider": {
+        "context_length": 200000,
+        "max_completion_tokens": null,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "tools",
+        "response_format"
+      ],
+      "default_parameters": {
+        "temperature": null,
+        "top_p": null,
+        "frequency_penalty": null
+      }
+    }
+  ]
+}
+```
+
+## Use Cases
+
+- **Model Discovery:** Query available models before making chat completion requests
+- **Dynamic Model Selection:** Build UIs that allow users to choose from available models
+- **Pricing Information:** Display pricing details to help users make informed choices
+- **Capability Checking:** Verify which parameters a specific model supports
+
+## Field Descriptions
+
+### Model Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier for the model (use this in chat completion requests) |
+| `canonical_slug` | string | Canonical slug for the model |
+| `hugging_face_id` | string | Hugging Face model identifier (if applicable) |
+| `name` | string | Human-readable name of the model |
+| `created` | number | Unix timestamp of when the model metadata was generated |
+| `description` | string | Detailed description of the model's capabilities |
+| `context_length` | number | Maximum context window size in tokens |
+
+### Architecture Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `modality` | string | The model's input/output modality (e.g., "text->text") |
+| `input_modalities` | array | Supported input types |
+| `output_modalities` | array | Supported output types |
+| `tokenizer` | string | The tokenizer used by the model |
+| `instruct_type` | string\|null | Instruction format type (if applicable) |
+
+### Pricing Fields
+
+All pricing values are strings representing USD cost per unit.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `prompt` | string | Cost per input token |
+| `completion` | string | Cost per output token |
+| `request` | string | Cost per API request |
+| `image` | string | Cost per image processed |
+| `web_search` | string | Cost per web search operation |
+| `internal_reasoning` | string | Cost per internal reasoning token |
+
+### Supported Parameters
+
+The `supported_parameters` array indicates which optional parameters can be used with this model in chat completion requests:
+
+- `tools` - Model supports function/tool calling
+- `response_format` - Model supports structured output formats
+- `temperature` - Model supports temperature parameter
+- `top_p` - Model supports top_p sampling
+- `frequency_penalty` - Model supports frequency penalty
+- `presence_penalty` - Model supports presence penalty
+- `max_tokens` - Model supports max_tokens limit
+- `tool_choice` - Model supports forced tool selection
+
+## Notes
+
+- The `created` timestamp is generated dynamically at request time
+- All pricing is subject to change; check this endpoint regularly for current rates
+- Models are added and updated regularly; query this endpoint to discover new capabilities
+- The schema follows the OpenRouter API standard for compatibility
+
+## Related Endpoints
+
+- [POST /v1/chat/completions](/api-reference/chat/completion) - Create chat completions using these models
+

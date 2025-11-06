@@ -3,7 +3,19 @@ title: "Function Calling"
 description: "Learn how to use custom functions with Incredible API"
 ---
 
-Function calling allows Incredible to execute custom code and tools. Here's how to use it:
+AI excels at generating text, but real-world tasks often require **actions** beyond words—like calling a weather API for current conditions instead of providing outdated information. Function calling allows Incredible to execute custom code and tools to take these actions.
+
+## What is Live-code Function Calling?
+
+Our agentic models perform function calling by writing code in real-time. This allows them to reference data, perform analysis, and call functions in more sophisticated ways than traditional function calling approaches.
+
+Think of functions as recipes with:
+
+- **Name** and **description** - What the function does
+- **Parameters** - Required and optional inputs
+- **Action** - What the AI can accomplish by calling it
+
+When users make requests, the AI decides whether to respond directly or use available functions to accomplish the task.
 
 ## 🚀 Basic Function Calling
 
@@ -107,6 +119,37 @@ console.log(data);
 ```
 
 ## 🔧 Function Schema
+
+### Understanding Function Definitions
+
+When you define a function, you're providing the AI with a "cookbook" of available tools. Each function definition tells the model what it can do and what inputs it needs.
+
+<table style={{ width: '100%', borderCollapse: 'separate' }}>
+  <thead>
+    <tr>
+      <th style={{ textAlign: 'left', padding: '12px 16px', width: '26%' }}>Field</th>
+      <th style={{ textAlign: 'left', padding: '12px 16px' }}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>model</code></td>
+      <td style={{ padding: '12px 16px' }}>Specifies which AI model will process the request.</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>functions</code></td>
+      <td style={{ padding: '12px 16px' }}>A cookbook of tools. Each function has a name, description, and parameters.</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>parameters</code></td>
+      <td style={{ padding: '12px 16px' }}>Describes the function inputs with types, descriptions, and required fields.</td>
+    </tr>
+    <tr>
+      <td style={{ padding: '12px 16px' }}><code>messages</code></td>
+      <td style={{ padding: '12px 16px' }}>Represents the conversation history between user and assistant.</td>
+    </tr>
+  </tbody>
+</table>
 
 ### Required Fields
 
@@ -335,6 +378,10 @@ console.log(data);
 }
 ```
 
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Understanding function_call_id:</strong> This unique identifier links a function call request to its result. When you execute the function and return results, you must include the same <code>function_call_id</code> so the model can associate the output with the correct request. If multiple functions are called, execute them in order and return their results with the corresponding ID.
+</div>
+
 ### Step 2: Client Executes Function
 
 Execute the function locally with the provided parameters:
@@ -345,6 +392,10 @@ def add_numbers(a, b):
 
 result = add_numbers(25, 17)  # Returns 42
 ```
+
+<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
+  <strong>Important:</strong> The model can perform multiple types of server-side actions, and will include the results from those in the response. You must add ALL items from the response to your messages array when sending the next request, so the model can use them in subsequent steps.
+</div>
 
 ### Step 3: Client Sends Results
 
