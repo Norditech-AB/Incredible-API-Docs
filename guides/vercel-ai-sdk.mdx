@@ -1,0 +1,93 @@
+---
+title: Vercel AI SDK
+description: Stream Incredible models through the Vercel AI SDK using the OpenAI-compatible client.
+sidebarTitle: Vercel AI SDK
+section: SDKs
+---
+
+# Vercel AI SDK
+
+Use Vercel's [`ai`](https://vercel.com/docs/ai/vercel-ai-sdk) package together with Incredible's OpenAI-compatible endpoint by creating a client with `@ai-sdk/openai-compatible`. The example below mirrors the `basic_stream.ts` sample bundled with the Incredible SDK tests and shows the minimal pieces you need to stream completions.
+
+---
+
+## Requirements
+- Node.js 18 or newer
+- An Incredible API key (the API currently works without one, but plan for it)
+- Packages: `ai`, `@ai-sdk/openai-compatible`
+
+```bash
+npm install ai @ai-sdk/openai-compatible
+# or: pnpm add ai @ai-sdk/openai-compatible
+```
+
+Set your API key (if required) before running the script:
+
+```bash
+export INCREDIBLE_API_KEY="your incredible api key"
+```
+
+---
+
+## Configure the Incredible client
+
+At the top of your script, import both the OpenAI-compatible helper and Vercel's `streamText` runner. `basic_stream.ts` uses these lines to plug Incredible into any Vercel AI SDK project:
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { streamText } from 'ai';
+
+const incredible = createOpenAICompatible({
+  baseURL: 'https://api.incredible.one/v1',
+  apiKey: process.env.INCREDIBLE_API_KEY ?? 'your incredible api key',
+  name: 'incredible',
+  headers: {
+    'User-Agent': 'Mozilla/5.0',
+  },
+});
+```
+
+- `createOpenAICompatible` gives you a drop-in client for any OpenAI-style model ID (use `small-2` for public access).
+- The optional `User-Agent` header mirrors the sample script; keep it if your environment standardises outbound requests.
+
+---
+
+## Stream a completion
+
+The full sample streams tokens to `stdout` while keeping the rest of the script light:
+
+```ts
+async function main() {
+  const prompt = process.argv[2] ?? 'Say hello in one sentence.';
+  const modelId = 'small-2';
+
+  const result = await streamText({
+    model: incredible(modelId),
+    messages: [{ role: 'user', content: prompt }],
+    maxRetries: 1,
+  });
+
+  for await (const textPart of result.textStream) {
+    process.stdout.write(textPart);
+  }
+
+  process.stdout.write('\n');
+}
+
+main().catch((error) => {
+  console.error('Vercel AI SDK request failed', error);
+  process.exit(1);
+});
+```
+
+- Pass any prompt as a CLI argument: `node basic_stream.mjs "Generate a haiku"`.
+- `streamText` yields an async iterator, so you can render the stream in a UI instead of `stdout`.
+
+---
+
+## Next steps
+- Swap in other Incredible model IDs (check the Models page for current options).
+- Handle retries and errors with your own policy by wrapping the `streamText` call.
+- Pair this setup with Vercel AI SDK's React hooks for server actions or edge streaming.
+
+
