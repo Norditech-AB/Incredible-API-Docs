@@ -88,7 +88,7 @@ requests.post(
 
 # Request 1:
 requests.post(
-    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "messages": [
@@ -103,7 +103,7 @@ requests.post(
 
 # Request 2 (hours later):
 requests.post(
-    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "messages": [
@@ -118,7 +118,7 @@ requests.post(
 
 # Request 3 (days later):
 requests.post(
-    "https://api.incredible.one/v1/agentic-model/chat/completions",
+    "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "messages": [
@@ -184,7 +184,7 @@ await fetch('https://api.incredible.one/v1/files/confirm-upload', {
 // ============================================
 
 // Request 1:
-await fetch('https://api.incredible.one/v1/agentic-model/chat/completions', {
+await fetch('https://api.incredible.one/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -202,7 +202,7 @@ await fetch('https://api.incredible.one/v1/agentic-model/chat/completions', {
 });
 
 // Request 2 (later):
-await fetch('https://api.incredible.one/v1/agentic-model/chat/completions', {
+await fetch('https://api.incredible.one/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -254,7 +254,7 @@ curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
 # ============================================
 
 # Request 1:
-curl -X POST "https://api.incredible.one/v1/agentic-model/chat/completions" \
+curl -X POST "https://api.incredible.one/v1/chat/completions" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -268,7 +268,7 @@ curl -X POST "https://api.incredible.one/v1/agentic-model/chat/completions" \
   }'
 
 # Request 2 (use the same file_id again!):
-curl -X POST "https://api.incredible.one/v1/agentic-model/chat/completions" \
+curl -X POST "https://api.incredible.one/v1/chat/completions" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
