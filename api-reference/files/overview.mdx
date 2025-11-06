@@ -90,6 +90,7 @@ requests.post(
 requests.post(
     "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
+    model: "small-2",
     json={
         "messages": [
             {
@@ -105,6 +106,7 @@ requests.post(
 requests.post(
     "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
+    model: "small-2",
     json={
         "messages": [
             {
@@ -120,6 +122,7 @@ requests.post(
 requests.post(
     "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
+    model: "small-2",
     json={
         "messages": [
             {
@@ -190,6 +193,7 @@ await fetch('https://api.incredible.one/v1/chat/completions', {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
+  model: "small-2",
   body: JSON.stringify({
     messages: [
       {
@@ -208,6 +212,7 @@ await fetch('https://api.incredible.one/v1/chat/completions', {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
+  model: "small-2",
   body: JSON.stringify({
     messages: [
       {
@@ -258,6 +263,7 @@ curl -X POST "https://api.incredible.one/v1/chat/completions" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "model": "small-2",
     "messages": [
       {
         "role": "user",
@@ -365,6 +371,7 @@ class FileLibrary:
         response = requests.post(
             "https://api.incredible.one/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
+            model: "small-2",
             json={
                 "messages": [
                     {
