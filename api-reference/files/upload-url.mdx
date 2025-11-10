@@ -198,6 +198,7 @@ requests.post(
 requests.post(
     "https://api.incredible.one/v1/chat/completions",
     headers={"Authorization": "Bearer ik_your_api_key"},
+    model= "small-2",
     json={
         "messages": [
             {"role": "user", "content": "Summarize this", "file_ids": [file_id]}

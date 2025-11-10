@@ -43,7 +43,8 @@
               "guides/typescript-sdk",
               "guides/litellm-sdk",
               "guides/openai-sdk-compatibility",
-              "guides/langchain-sdk"
+              "guides/langchain-sdk",
+              "guides/vercel-ai-sdk"
             ]
           }
         ]
