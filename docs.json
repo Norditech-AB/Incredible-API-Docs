@@ -98,7 +98,8 @@
             "pages": [
               "api-reference/services/answer",
               "api-reference/services/web-search",
-              "api-reference/services/deep-research"
+              "api-reference/services/deep-research",
+              "api-reference/services/generate-image"
             ]
           },
           {

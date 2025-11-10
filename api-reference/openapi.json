@@ -469,6 +469,145 @@
         }
       }
     },
+    "/v1/generate-image": {
+      "post": {
+        "summary": "Generate Image",
+        "description": "Generate high-quality images from text descriptions using Fireworks AI's FLUX.1 Kontext [pro] model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateImageRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Basic Image",
+                  "value": {
+                    "prompt": "A majestic mountain landscape at sunset with vibrant colors"
+                  }
+                },
+                "with_seed": {
+                  "summary": "With Seed",
+                  "value": {
+                    "prompt": "A futuristic cyberpunk city at night with neon signs",
+                    "seed": 42,
+                    "aspect_ratio": "16:9"
+                  }
+                },
+                "square_format": {
+                  "summary": "Square Format",
+                  "value": {
+                    "prompt": "A minimalist coffee cup on a wooden table",
+                    "aspect_ratio": "1:1",
+                    "output_format": "png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateImageResponse"
+                },
+                "example": {
+                  "success": true,
+                  "image_url": "https://storage.googleapis.com/fw-flumina-kontext-images/abc123.jpeg",
+                  "request_id": "abc123",
+                  "seed": 42
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missing_prompt": {
+                    "summary": "Missing prompt",
+                    "value": {
+                      "success": false,
+                      "error": "Request body required"
+                    }
+                  },
+                  "invalid_aspect_ratio": {
+                    "summary": "Invalid aspect ratio",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid request",
+                      "details": "aspect_ratio must be one of ['1:1', '16:9', '9:16', '4:3', '3:4', '21:9', '9:21']"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - Fireworks API error or generation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Image generation failed",
+                  "details": "Safety check failed"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - FIREWORKS_AI_API_KEY not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "FIREWORKS_AI_API_KEY not configured"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout - image generation took longer than 5 minutes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Image generation timed out",
+                  "details": "Request did not complete within 300 seconds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/integrations": {
       "get": {
         "summary": "List all integrations",
@@ -1017,6 +1156,72 @@
             "type": "object",
             "description": "Structured data matching the provided schema (only present when response_format is provided)",
             "additionalProperties": true
+          }
+        },
+        "required": ["success"]
+      },
+      "GenerateImageRequest": {
+        "type": "object",
+        "required": ["prompt"],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Text description of the image to generate",
+            "minLength": 1
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": ["1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "9:21"],
+            "default": "16:9",
+            "description": "Aspect ratio of the output image"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": ["jpeg", "png"],
+            "default": "jpeg",
+            "description": "Output format of the generated image"
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Random seed for reproducibility. Using the same seed with the same prompt will generate similar images"
+          },
+          "prompt_upsampling": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to enhance the prompt for more creative generation"
+          },
+          "safety_tolerance": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6,
+            "default": 2,
+            "description": "Content moderation level (0-6, where 0 is most strict)"
+          }
+        }
+      },
+      "GenerateImageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether image generation was successful"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the generated image (expires in 1 hour)"
+          },
+          "image_base64": {
+            "type": "string",
+            "description": "Base64-encoded image data (if available)"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Unique request ID from Fireworks API"
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Seed used for generation"
           }
         },
         "required": ["success"]
