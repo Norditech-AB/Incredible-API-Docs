@@ -123,6 +123,130 @@
         }
       }
     },
+    "/v1/answer": {
+      "post": {
+        "summary": "Answer",
+        "description": "Get direct answers or structured JSON output. Returns plain text for simple queries, or JSON matching your schema when response_format is provided",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerRequest"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Simple Answer",
+                  "value": {
+                    "query": "What is the capital of France?"
+                  }
+                },
+                "structured": {
+                  "summary": "Structured Output",
+                  "value": {
+                    "query": "Extract info: John Doe is a 30 year old software engineer in San Francisco",
+                    "response_format": {
+                      "type": "object",
+                      "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "number"},
+                        "profession": {"type": "string"},
+                        "location": {"type": "string"}
+                      },
+                      "required": ["name", "age"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                },
+                "examples": {
+                  "simple": {
+                    "summary": "Simple Answer",
+                    "value": {
+                      "success": true,
+                      "answer": "The capital of France is Paris."
+                    }
+                  },
+                  "structured": {
+                    "summary": "Structured Output",
+                    "value": {
+                      "success": true,
+                      "data": {
+                        "name": "John Doe",
+                        "age": 30,
+                        "profession": "software engineer",
+                        "location": "San Francisco"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing query or invalid response_format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missing_query": {
+                    "summary": "Missing query",
+                    "value": {
+                      "success": false,
+                      "error": "query is required"
+                    }
+                  },
+                  "invalid_schema": {
+                    "summary": "Invalid schema",
+                    "value": {
+                      "success": false,
+                      "error": "response_format must be a valid JSON schema object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - LLM error or JSON parsing failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Failed to parse JSON response from LLM",
+                  "details": "Expecting property name enclosed in double quotes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/integrations": {
       "get": {
         "summary": "List all integrations",
@@ -640,6 +764,40 @@
           }
         },
         "required": ["result"]
+      },
+      "AnswerRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Your question, task, or text to analyze"
+          },
+          "response_format": {
+            "type": "object",
+            "description": "JSON schema defining the structure of the output. If omitted, returns plain text",
+            "additionalProperties": true
+          }
+        }
+      },
+      "AnswerResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "answer": {
+            "type": "string",
+            "description": "The generated answer (only present in simple mode without response_format)"
+          },
+          "data": {
+            "type": "object",
+            "description": "Structured data matching the provided schema (only present when response_format is provided)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["success"]
       },
       "Error": {
         "type": "object",

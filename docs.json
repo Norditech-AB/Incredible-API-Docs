@@ -30,9 +30,14 @@
               "guides/connecting-api-endpoints",
               "guides/streaming-responses"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
           {
-            "group": "SDKs",
+            "group": "Client Libraries",
             "pages": [
               "guides/python-sdk",
               "guides/typescript-sdk",
@@ -88,6 +93,12 @@
             ]
           },
           {
+            "group": "Services",
+            "pages": [
+              "api-reference/services/answer"
+            ]
+          },
+          {
             "group": "Files",
             "pages": [
               "api-reference/files/overview",
@@ -117,7 +128,18 @@
       }
     ],
     "global": {
-      "anchors": []
+      "anchors": [
+        {
+          "anchor": "API Status",
+          "icon": "chart-line",
+          "href": "https://status.incredible.one"
+        },
+        {
+          "anchor": "Blog",
+          "icon": "newspaper",
+          "href": "https://web.incredible.one/blog"
+        }
+      ]
     }
   },
   "logo": {
@@ -128,16 +150,12 @@
     "links": [
       {
         "label": "Blog",
-        "href": "https://www.incredible.one/blog"
-      },
-      {
-        "label": "Website",
-        "href": "https://www.incredible.one/"
+        "href": "https://web.incredible.one/blog"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Get Started",
+      "label": "API Dashboard",
       "href": "https://platform.incredible.one"
     }
   },

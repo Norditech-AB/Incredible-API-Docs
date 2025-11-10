@@ -1,0 +1,83 @@
+---
+title: "Answer"
+description: "Get direct answers or structured JSON output. Perfect for Q&A, data extraction, and classification tasks."
+openapi: "POST /v1/answer"
+---
+
+## Overview
+
+Get answers from minimax-m2 in two modes:
+
+- **Simple mode** (no `response_format`) — Returns plain text answers
+- **Structured mode** (with `response_format`) — Returns JSON matching your schema
+
+Use this for quick Q&A, data extraction, sentiment analysis, classification, or any task where you need guaranteed JSON output without the full agentic model.
+
+## Use cases
+
+**Simple mode:**
+- Q&A and general knowledge
+- Explanations and summaries
+- Content generation
+
+**Structured mode:**
+- Data extraction from text
+- Sentiment analysis
+- Email/ticket classification
+- Resume/document parsing
+- Named entity recognition
+- API integration requiring JSON
+
+## JSON Schema examples
+
+The `response_format` parameter accepts standard JSON Schema:
+
+```json Simple object
+{
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "age": {"type": "number"}
+  }
+}
+```
+
+```json Classification with enums
+{
+  "type": "object",
+  "properties": {
+    "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
+    "priority": {"type": "string", "enum": ["urgent", "high", "normal"]}
+  }
+}
+```
+
+```json Arrays
+{
+  "type": "object",
+  "properties": {
+    "tags": {"type": "array", "items": {"type": "string"}}
+  }
+}
+```
+
+## Model details
+
+- Model: minimax/minimax-m2 (Novita AI)
+- Reasoning: Medium effort
+- Max tokens: 65,536
+
+## vs Chat Completion
+
+| Feature | `/v1/answer` | `/v1/chat-completion` |
+|---------|--------------|----------------------|
+| Use case | Quick answers, extraction | Conversations, tools |
+| Structured output | ✅ Native JSON Schema | ⚠️ Prompt engineering |
+| Tool calling | ❌ No | ✅ Yes |
+| Multi-turn | ❌ Single turn | ✅ Full history |
+
+## Next steps
+
+- Full agentic model: /api-reference/chat/completion
+- Available models: /api-reference/models
+
