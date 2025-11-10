@@ -1,0 +1,129 @@
+---
+title: "Web Search"
+description: "Semantic web search powered by Exa.AI. Search with filters, retrieve content, and get AI-enhanced results."
+openapi: "POST /v1/web-search"
+---
+
+## Overview
+
+Perform powerful web searches using Exa.AI's neural search technology:
+
+- **Semantic search** — Find content by meaning, not just keywords
+- **Keyword search** — Traditional exact-match search when needed
+- **Rich content** — Get full text, highlights, or AI-generated summaries
+- **Advanced filtering** — Filter by domain, date, category, and more
+
+Perfect for research, content discovery, competitive analysis, and building search-powered applications.
+
+## Search types
+
+### Neural search (default)
+Semantic understanding of your query. Best for:
+- Conceptual searches
+- Finding similar content
+- Research and discovery
+
+### Keyword search
+Traditional exact-match search. Best for:
+- Specific terms or phrases
+- Technical queries
+- Precise matching
+
+## Content options
+
+Control what content you retrieve:
+
+| Option | Description | Use case |
+|--------|-------------|----------|
+| `text` | Full parsed text content | Deep analysis, RAG |
+| `highlights` | Key passages from the page | Quick scanning, summaries |
+| `summary` | AI-generated summary | Overview, condensing |
+
+## Filtering
+
+### By domain
+```json
+{
+  "include_domains": ["github.com", "stackoverflow.com"],
+  "exclude_domains": ["example.com"]
+}
+```
+
+### By date
+```json
+{
+  "start_published_date": "2024-01-01",
+  "end_published_date": "2024-12-31"
+}
+```
+
+### By category
+```json
+{
+  "category": "research paper"
+}
+```
+
+Available categories:
+- `company` — Company websites and pages
+- `research paper` — Academic papers
+- `news` — News articles
+- `github` — GitHub repositories
+- `tweet` — Tweets
+- `pdf` — PDF documents
+
+## Autoprompt
+
+Exa's autoprompt automatically enhances your query for better results:
+
+```json
+{
+  "query": "AI developments",
+  "use_autoprompt": true
+}
+```
+
+Returns `autoprompt_string` showing how your query was enhanced:
+```json
+{
+  "autoprompt_string": "recent artificial intelligence advancements 2024"
+}
+```
+
+## Use cases
+
+**Research & Discovery**
+- Gather recent sources on a topic
+- Find expert opinions
+- Discover trending discussions
+
+**Competitive Analysis**
+- Monitor competitor content
+- Track industry news
+- Analyze market trends
+
+**Content Curation**
+- Find relevant articles
+- Discover high-quality sources
+- Build reading lists
+
+**RAG Applications**
+- Retrieve current information
+- Augment LLM context
+- Build knowledge bases
+
+## Pricing notes
+
+Web Search uses Exa.AI. Costs vary based on:
+- Number of results requested
+- Content retrieval options (text, highlights, summary)
+- Search volume
+
+Set `EXA_API_KEY` environment variable to use this endpoint.
+
+## Next steps
+
+- Deep research: `/api-reference/services/deep-research`
+- Answer endpoint: `/api-reference/services/answer`
+- Chat completion: `/api-reference/chat/completion`
+

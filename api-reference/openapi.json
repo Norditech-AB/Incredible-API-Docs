@@ -247,6 +247,228 @@
         }
       }
     },
+    "/v1/web-search": {
+      "post": {
+        "summary": "Web Search",
+        "description": "Perform semantic web search powered by Exa.AI. Search with filters, retrieve content, and get AI-enhanced results",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebSearchRequest"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Simple Search",
+                  "value": {
+                    "query": "latest AI developments",
+                    "num_results": 5
+                  }
+                },
+                "with_content": {
+                  "summary": "Search with Content",
+                  "value": {
+                    "query": "quantum computing breakthroughs",
+                    "num_results": 10,
+                    "contents": {
+                      "text": true,
+                      "highlights": true,
+                      "summary": true
+                    }
+                  }
+                },
+                "filtered": {
+                  "summary": "Filtered Search",
+                  "value": {
+                    "query": "machine learning papers",
+                    "num_results": 20,
+                    "type": "neural",
+                    "category": "research paper",
+                    "start_published_date": "2024-01-01"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebSearchResponse"
+                },
+                "example": {
+                  "success": true,
+                  "results": [
+                    {
+                      "title": "Latest AI Breakthroughs 2024",
+                      "url": "https://example.com/ai-news",
+                      "published_date": "2024-11-01",
+                      "author": "Tech News",
+                      "score": 0.95,
+                      "text": "Full article text...",
+                      "highlights": ["key highlight 1", "key highlight 2"],
+                      "summary": "AI-generated summary..."
+                    }
+                  ],
+                  "autoprompt_string": "recent artificial intelligence advancements 2024"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - Exa API error or EXA_API_KEY not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/deep-research": {
+      "post": {
+        "summary": "Deep Research",
+        "description": "Multi-step web research powered by Exa.AI. Get comprehensive reports with structured output and citations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeepResearchRequest"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Simple Research",
+                  "value": {
+                    "instructions": "Research the latest developments in quantum computing"
+                  }
+                },
+                "structured": {
+                  "summary": "Structured Research",
+                  "value": {
+                    "instructions": "Compare flagship GPUs from NVIDIA, AMD, and Intel. Include model name, price, TDP, and launch date",
+                    "output_schema": {
+                      "type": "object",
+                      "required": ["gpus"],
+                      "properties": {
+                        "gpus": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["manufacturer", "model", "price", "tdp", "launchDate"],
+                            "properties": {
+                              "manufacturer": {"type": "string"},
+                              "model": {"type": "string"},
+                              "price": {"type": "number"},
+                              "tdp": {"type": "integer"},
+                              "launchDate": {"type": "string"}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "model": "exa-research-pro"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Research completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeepResearchResponse"
+                },
+                "example": {
+                  "success": true,
+                  "research_id": "research-abc123",
+                  "status": "completed",
+                  "output": {
+                    "gpus": [
+                      {
+                        "manufacturer": "NVIDIA",
+                        "model": "RTX 4090",
+                        "price": 1599,
+                        "tdp": 450,
+                        "launchDate": "2022-10-12"
+                      }
+                    ]
+                  },
+                  "citations": [
+                    {
+                      "url": "https://nvidia.com/specs",
+                      "title": "NVIDIA RTX 4090 Specifications"
+                    }
+                  ],
+                  "searches_performed": 8,
+                  "pages_read": 42
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - Exa API error or EXA_API_KEY not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/integrations": {
       "get": {
         "summary": "List all integrations",
@@ -798,6 +1020,178 @@
           }
         },
         "required": ["success"]
+      },
+      "WebSearchRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query"
+          },
+          "num_results": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 10,
+            "description": "Number of results to return"
+          },
+          "include_domains": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Domains to include in search"
+          },
+          "exclude_domains": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Domains to exclude from search"
+          },
+          "start_published_date": {
+            "type": "string",
+            "description": "Filter results published after this date (YYYY-MM-DD)"
+          },
+          "end_published_date": {
+            "type": "string",
+            "description": "Filter results published before this date (YYYY-MM-DD)"
+          },
+          "use_autoprompt": {
+            "type": "boolean",
+            "default": true,
+            "description": "Use Exa's autoprompt to enhance query"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["neural", "keyword"],
+            "default": "neural",
+            "description": "Search type: 'neural' for semantic or 'keyword' for exact match"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category (e.g., 'company', 'research paper', 'news')"
+          },
+          "contents": {
+            "type": "object",
+            "description": "Content retrieval options",
+            "properties": {
+              "text": {
+                "type": "boolean",
+                "description": "Get full text content"
+              },
+              "highlights": {
+                "type": "boolean",
+                "description": "Get key highlights"
+              },
+              "summary": {
+                "type": "boolean",
+                "description": "Get AI-generated summary"
+              }
+            }
+          }
+        }
+      },
+      "WebSearchResponse": {
+        "type": "object",
+        "required": ["success", "results"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "results": {
+            "type": "array",
+            "description": "Search results",
+            "items": {
+              "type": "object",
+              "required": ["title", "url", "score"],
+              "properties": {
+                "title": {"type": "string"},
+                "url": {"type": "string"},
+                "published_date": {"type": "string"},
+                "author": {"type": "string"},
+                "score": {"type": "number"},
+                "text": {"type": "string"},
+                "highlights": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "summary": {"type": "string"}
+              }
+            }
+          },
+          "autoprompt_string": {
+            "type": "string",
+            "description": "Enhanced query string if autoprompt was used"
+          }
+        }
+      },
+      "DeepResearchRequest": {
+        "type": "object",
+        "required": ["instructions"],
+        "properties": {
+          "instructions": {
+            "type": "string",
+            "description": "Research task instructions in natural language"
+          },
+          "output_schema": {
+            "type": "object",
+            "description": "JSON schema for structured output",
+            "additionalProperties": true
+          },
+          "model": {
+            "type": "string",
+            "enum": ["exa-research", "exa-research-pro"],
+            "default": "exa-research",
+            "description": "Model to use: 'exa-research' (standard) or 'exa-research-pro' (enhanced reasoning)"
+          },
+          "use_cache": {
+            "type": "boolean",
+            "default": true,
+            "description": "Use cached results for identical requests"
+          }
+        }
+      },
+      "DeepResearchResponse": {
+        "type": "object",
+        "required": ["success", "research_id", "status", "output"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "research_id": {
+            "type": "string",
+            "description": "Unique identifier for this research task"
+          },
+          "status": {
+            "type": "string",
+            "description": "Completion status"
+          },
+          "output": {
+            "type": "object",
+            "description": "Structured research output",
+            "additionalProperties": true
+          },
+          "citations": {
+            "type": "array",
+            "description": "Source citations",
+            "items": {
+              "type": "object",
+              "required": ["url", "title"],
+              "properties": {
+                "url": {"type": "string"},
+                "title": {"type": "string"}
+              }
+            }
+          },
+          "searches_performed": {
+            "type": "integer",
+            "description": "Number of searches executed"
+          },
+          "pages_read": {
+            "type": "integer",
+            "description": "Number of web pages analyzed"
+          }
+        }
       },
       "Error": {
         "type": "object",

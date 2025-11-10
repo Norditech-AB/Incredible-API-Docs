@@ -1,0 +1,194 @@
+---
+title: "Deep Research"
+description: "Multi-step web research powered by Exa.AI. Get comprehensive reports with structured output and citations."
+openapi: "POST /v1/deep-research"
+---
+
+## Overview
+
+Perform comprehensive, multi-step research that:
+
+- **Plans research** — Determines what searches to run
+- **Gathers information** — Performs multiple web searches
+- **Synthesizes findings** — Combines information into a report
+- **Provides citations** — Links back to original sources
+- **Structured output** — Returns JSON matching your schema
+
+This is like having an AI research assistant that can gather, analyze, and format information from across the web.
+
+## How it works
+
+1. **You provide**: Natural language instructions + optional JSON schema
+2. **Exa researches**: Plans searches, reads pages, extracts information
+3. **You receive**: Structured report with citations and metadata
+
+## Models
+
+### exa-research (default)
+Standard research model for most tasks:
+- Fast results
+- Good quality
+- Cost-effective
+
+### exa-research-pro
+Enhanced reasoning for complex tasks:
+- Better analysis
+- More thorough research
+- Higher quality synthesis
+
+## Output schemas
+
+Define exactly how you want results formatted:
+
+```json Company comparison
+{
+  "type": "object",
+  "properties": {
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "founded": {"type": "string"},
+          "revenue": {"type": "number"},
+          "employees": {"type": "integer"}
+        }
+      }
+    }
+  }
+}
+```
+
+```json Market analysis
+{
+  "type": "object",
+  "properties": {
+    "market_size": {"type": "number"},
+    "growth_rate": {"type": "number"},
+    "key_players": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "trends": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
+```
+
+```json Technical comparison
+{
+  "type": "object",
+  "properties": {
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "supported_by": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Metadata
+
+Each response includes useful metadata:
+
+- `research_id` — Unique identifier for this research task
+- `status` — Completion status
+- `searches_performed` — Number of searches executed
+- `pages_read` — Number of web pages analyzed
+- `citations` — Source URLs with titles
+
+## Use cases
+
+**Competitive Intelligence**
+- Compare competitors' features and pricing
+- Analyze market positioning
+- Track product launches
+
+**Market Research**
+- Industry size and growth
+- Key players and trends
+- Customer sentiment
+
+**Technical Research**
+- Technology comparisons
+- Best practices and patterns
+- Implementation guides
+
+**Due Diligence**
+- Company backgrounds
+- Financial information
+- Leadership profiles
+
+**Content Creation**
+- Research for articles
+- Data for presentations
+- Fact-checking sources
+
+## Caching
+
+Enable caching to reuse results for identical requests:
+
+```json
+{
+  "instructions": "...",
+  "use_cache": true
+}
+```
+
+Benefits:
+- Faster responses
+- Lower costs
+- Consistent results
+
+Cache duration: 24 hours
+
+## Pricing notes
+
+Deep Research uses Exa.AI. Costs vary based on:
+- Number of searches performed
+- Number of pages read
+- Reasoning tokens used
+- Model selected (pro costs more)
+
+Set `EXA_API_KEY` environment variable to use this endpoint.
+
+## Tips for best results
+
+1. **Be specific**: Clear instructions get better results
+2. **Use schemas**: Structured output ensures consistency
+3. **Include context**: Mention time frames, regions, or specific aspects
+4. **Request citations**: Ask for sources in your instructions
+5. **Choose the right model**: Use pro for complex analysis
+
+## Example instructions
+
+**Good** ✅
+> "Compare the flagship smartphones from Apple, Samsung, and Google released in 2024. Include model name, starting price, screen size, camera specs, and battery capacity. Provide citations for each specification."
+
+**Too vague** ❌
+> "Tell me about phones"
+
+**Good** ✅
+> "Research the current state of quantum computing. Focus on: 1) Leading companies and their qubit counts, 2) Recent breakthroughs in 2024, 3) Expected timeline for commercial applications. Return as structured data with citations."
+
+**Too vague** ❌
+> "What's happening with quantum computing?"
+
+## Next steps
+
+- Web search: `/api-reference/services/web-search`
+- Answer endpoint: `/api-reference/services/answer`
+- Chat completion: `/api-reference/chat/completion`
+

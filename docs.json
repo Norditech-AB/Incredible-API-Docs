@@ -96,7 +96,9 @@
           {
             "group": "Services",
             "pages": [
-              "api-reference/services/answer"
+              "api-reference/services/answer",
+              "api-reference/services/web-search",
+              "api-reference/services/deep-research"
             ]
           },
           {
