@@ -142,6 +142,11 @@
           "anchor": "Blog",
           "icon": "newspaper",
           "href": "https://web.incredible.one/blog"
+        },
+        {
+          "anchor": "Discord",
+          "icon": "discord",
+          "href": "https://discord.com/invite/pNmdkxgBe2"
         }
       ]
     }
