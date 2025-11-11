@@ -247,6 +247,166 @@
         }
       }
     },
+    "/v1/conversation": {
+      "post": {
+        "summary": "Conversation",
+        "description": "Multi-turn conversation using DeepSeek v3.1. Fast and cost-effective for conversational tasks without tool calling",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationRequest"
+              },
+              "example": {
+                "messages": [
+                  {"role": "user", "content": "Hello!"},
+                  {"role": "assistant", "content": "Hi there!"},
+                  {"role": "user", "content": "How are you?"}
+                ],
+                "system_prompt": "You are a helpful assistant.",
+                "stream": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful conversation response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                },
+                "example": {
+                  "success": true,
+                  "response": "I'm doing well, thank you for asking! How can I help you today?"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent": {
+      "post": {
+        "summary": "Agent",
+        "description": "Agentic conversation with tool calling using Kimi K2 Thinking. Returns tool calls for the caller to execute",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              },
+              "example": {
+                "messages": [
+                  {"role": "user", "content": "What is the weather in San Francisco?"}
+                ],
+                "system_prompt": "You are a helpful assistant with access to tools.",
+                "tools": [
+                  {
+                    "name": "get_weather",
+                    "description": "Get weather information for a location",
+                    "input_schema": {
+                      "type": "object",
+                      "properties": {
+                        "location": {"type": "string", "description": "City name"}
+                      },
+                      "required": ["location"]
+                    }
+                  }
+                ],
+                "stream": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful agent response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentResponse"
+                },
+                "example": {
+                  "success": true,
+                  "response": "I'll check the weather in San Francisco for you.",
+                  "tool_calls": [
+                    {
+                      "id": "call_123",
+                      "name": "get_weather",
+                      "inputs": {"location": "San Francisco"}
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid messages/tools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error - invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error - LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/web-search": {
       "post": {
         "summary": "Web Search",
@@ -1159,6 +1319,150 @@
           }
         },
         "required": ["success"]
+      },
+      "ConversationRequest": {
+        "type": "object",
+        "required": ["messages"],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "description": "Conversation history with user and assistant messages",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["role", "content"],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "assistant"],
+                  "description": "Role of the message sender"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Content of the message"
+                }
+              }
+            }
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System prompt to guide the conversation. Defaults to 'You are a helpful assistant.'"
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Enable streaming response via Server-Sent Events",
+            "default": false
+          }
+        }
+      },
+      "ConversationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "response": {
+            "type": "string",
+            "description": "The assistant's response"
+          }
+        },
+        "required": ["success", "response"]
+      },
+      "AgentRequest": {
+        "type": "object",
+        "required": ["messages", "tools"],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "description": "Conversation history with user and assistant messages",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["role", "content"],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "assistant"],
+                  "description": "Role of the message sender"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Content of the message"
+                }
+              }
+            }
+          },
+          "tools": {
+            "type": "array",
+            "description": "List of tool definitions available to the agent",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["name", "description", "input_schema"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Tool name (should be descriptive)"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "What the tool does"
+                },
+                "input_schema": {
+                  "type": "object",
+                  "description": "JSON schema defining tool inputs"
+                }
+              }
+            }
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System prompt to guide the agent. Defaults to 'You are a helpful assistant with access to tools.'"
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Enable streaming response via Server-Sent Events",
+            "default": false
+          }
+        }
+      },
+      "AgentResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful"
+          },
+          "response": {
+            "type": "string",
+            "description": "The assistant's response"
+          },
+          "tool_calls": {
+            "type": "array",
+            "description": "List of tool calls made by the agent (null if no tools were called)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the tool call"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name of the tool being called"
+                },
+                "inputs": {
+                  "type": "object",
+                  "description": "Inputs to pass to the tool",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["id", "name", "inputs"]
+            }
+          }
+        },
+        "required": ["success", "response"]
       },
       "GenerateImageRequest": {
         "type": "object",

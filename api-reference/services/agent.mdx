@@ -1,0 +1,247 @@
+---
+title: "Agent"
+description: "Agentic conversation with tool calling using Kimi K2 Thinking. Returns tool calls for the caller to execute."
+openapi: "POST /v1/agent"
+---
+
+## Overview
+
+Use Kimi K2 Thinking model for agentic conversations with function calling capabilities. This endpoint excels at reasoning and tool use, returning tool calls for the caller to execute.
+
+**Important:** This endpoint returns tool calls but does not execute them. The caller is responsible for executing tools and providing results back in subsequent requests.
+
+Use this when you need:
+- Advanced reasoning and planning
+- Function/tool calling
+- Multi-step problem solving
+- External API integration
+- Streaming or non-streaming responses
+
+## Use cases
+
+- API integration (weather, search, databases)
+- Multi-step task planning
+- Data retrieval and manipulation
+- External system interaction
+- Complex reasoning with tools
+
+## Model details
+
+- Model: Kimi K2 Thinking (via Fireworks)
+- Advanced reasoning capabilities
+- Native tool calling support
+- Caller-executed tools pattern
+
+## Request example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/agent" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What is the weather in San Francisco?"}
+    ],
+    "system_prompt": "You are a helpful assistant with access to tools.",
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "Get weather information for a location",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "location": {"type": "string", "description": "City name"}
+          },
+          "required": ["location"]
+        }
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/agent",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "messages": [
+            {"role": "user", "content": "What is the weather in San Francisco?"}
+        ],
+        "system_prompt": "You are a helpful assistant with access to tools.",
+        "tools": [
+            {
+                "name": "get_weather",
+                "description": "Get weather information for a location",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "location": {"type": "string", "description": "City name"}
+                    },
+                    "required": ["location"]
+                }
+            }
+        ]
+    }
+)
+
+result = response.json()
+print(result)
+
+# If tool calls were made, execute them
+if result.get("tool_calls"):
+    for tool_call in result["tool_calls"]:
+        print(f"Tool called: {tool_call['name']}")
+        print(f"Inputs: {tool_call['inputs']}")
+        # Execute the tool here and provide results back
+```
+
+```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/agent", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    messages: [
+      {role: "user", content: "What is the weather in San Francisco?"}
+    ],
+    system_prompt: "You are a helpful assistant with access to tools.",
+    tools: [
+      {
+        name: "get_weather",
+        description: "Get weather information for a location",
+        input_schema: {
+          type: "object",
+          properties: {
+            location: {type: "string", description: "City name"}
+          },
+          required: ["location"]
+        }
+      }
+    ]
+  })
+});
+
+const result = await response.json();
+console.log(result);
+
+// If tool calls were made, execute them
+if (result.tool_calls) {
+  for (const toolCall of result.tool_calls) {
+    console.log(`Tool called: ${toolCall.name}`);
+    console.log(`Inputs:`, toolCall.inputs);
+    // Execute the tool here and provide results back
+  }
+}
+```
+
+</CodeGroup>
+
+## Request Body
+
+- **messages** array (required) — Conversation history with user and assistant messages
+  - **role** string — Either `"user"` or `"assistant"`
+  - **content** string — Message content
+- **tools** array (required) — List of tool definitions available to the agent
+  - **name** string — Tool name (should be descriptive)
+  - **description** string — What the tool does
+  - **input_schema** object — JSON schema defining tool inputs
+- **system_prompt** string (optional) — System prompt to guide the agent (default: "You are a helpful assistant with access to tools.")
+- **stream** boolean (optional) — Enable streaming response via Server-Sent Events (default: false)
+
+## Response
+
+### Non-streaming (default)
+
+```json
+{
+  "success": true,
+  "response": "I'll check the weather in San Francisco for you.",
+  "tool_calls": [
+    {
+      "id": "call_123",
+      "name": "get_weather",
+      "inputs": {
+        "location": "San Francisco"
+      }
+    }
+  ]
+}
+```
+
+If no tools are called:
+
+```json
+{
+  "success": true,
+  "response": "I'm ready to help! Please let me know what you need.",
+  "tool_calls": null
+}
+```
+
+### Streaming (stream=true)
+
+Server-Sent Events format:
+
+```text
+data: {"thinking": "The user wants weather information..."}
+data: {"content": "I'll check"}
+data: {"content": " the weather"}
+data: {"tool_call": {"id": "call_123", "name": "get_weather", "inputs": {"location": "San Francisco"}}}
+data: {"tokens": 245}
+data: {"done": true}
+```
+
+## Tool execution pattern
+
+This endpoint follows a "caller-executed tools" pattern:
+
+1. **Agent request** → Returns tool calls
+2. **Caller executes** → Run the tools in your code
+3. **Provide results** → Send results back in next request as assistant message
+4. **Agent responds** → Uses tool results to answer
+
+Example multi-turn flow:
+
+```python
+# Step 1: Agent decides to call tool
+response1 = call_agent({
+    "messages": [{"role": "user", "content": "Weather in SF?"}],
+    "tools": [weather_tool]
+})
+# Returns: tool_calls=[{name: "get_weather", inputs: {location: "SF"}}]
+
+# Step 2: Execute tool
+weather_result = get_weather("SF")
+
+# Step 3: Provide result back
+response2 = call_agent({
+    "messages": [
+        {"role": "user", "content": "Weather in SF?"},
+        {"role": "assistant", "content": f"Tool result: {weather_result}"}
+    ],
+    "tools": [weather_tool]
+})
+# Returns: response="The weather in SF is sunny and 72°F"
+```
+
+## vs Other Endpoints
+
+| Feature | `/v1/agent` | `/v1/conversation` | `/v1/chat-completion` |
+|---------|------------|-------------------|----------------------|
+| Tool calling | ✅ Yes (caller-executed) | ❌ No | ✅ Yes (auto-executed) |
+| Reasoning | ✅ Advanced | ⚠️ Basic | ✅ Configurable |
+| Model | Kimi K2 Thinking | DeepSeek v3.1 | Configurable |
+| Best for | Tool use + reasoning | Fast conversations | Full agentic |
+
+## Next steps
+
+- Auto-executing tools: [Chat Completion](/api-reference/chat/completion)
+- Simple conversations: [Conversation](/api-reference/services/conversation)
+- Available models: [Models](/api-reference/models)
+

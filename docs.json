@@ -97,9 +97,12 @@
             "group": "Services",
             "pages": [
               "api-reference/services/answer",
+              "api-reference/services/conversation",
+              "api-reference/services/agent",
               "api-reference/services/web-search",
               "api-reference/services/deep-research",
-              "api-reference/services/generate-image"
+              "api-reference/services/generate-image",
+              "api-reference/services/generate-video"
             ]
           },
           {

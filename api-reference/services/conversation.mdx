@@ -1,0 +1,138 @@
+---
+title: "Conversation"
+description: "Multi-turn conversation endpoint using DeepSeek v3.1. Fast and cost-effective for conversational tasks without tool calling."
+openapi: "POST /v1/conversation"
+---
+
+## Overview
+
+Have natural multi-turn conversations using DeepSeek v3.1 via Fireworks. This endpoint is optimized for conversational AI without the overhead of tool calling or full agentic capabilities.
+
+Use this when you need:
+- Fast, cost-effective conversations
+- Multi-turn dialogue with context
+- Simple chat without function calling
+- Streaming or non-streaming responses
+
+## Use cases
+
+- Customer support chatbots
+- Interactive Q&A sessions
+- Conversational interfaces
+- Multi-step explanations
+- Context-aware dialogue
+
+## Model details
+
+- Model: DeepSeek v3.1 (via Fireworks)
+- Fast inference and cost-effective
+- Excellent for conversational tasks
+- No tool calling capabilities
+
+## Request example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/conversation" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Hello!"},
+      {"role": "assistant", "content": "Hi there!"},
+      {"role": "user", "content": "How are you?"}
+    ],
+    "system_prompt": "You are a helpful assistant."
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.incredible.one/v1/conversation",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    json={
+        "messages": [
+            {"role": "user", "content": "Hello!"},
+            {"role": "assistant", "content": "Hi there!"},
+            {"role": "user", "content": "How are you?"}
+        ],
+        "system_prompt": "You are a helpful assistant."
+    }
+)
+
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://api.incredible.one/v1/conversation", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    messages: [
+      {role: "user", content: "Hello!"},
+      {role: "assistant", content: "Hi there!"},
+      {role: "user", content: "How are you?"}
+    ],
+    system_prompt: "You are a helpful assistant."
+  })
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## Request Body
+
+- **messages** array (required) — Conversation history with alternating user and assistant messages
+  - **role** string — Either `"user"` or `"assistant"`
+  - **content** string — Message content
+- **system_prompt** string (optional) — System prompt to guide the conversation (default: "You are a helpful assistant.")
+- **stream** boolean (optional) — Enable streaming response via Server-Sent Events (default: false)
+
+## Response
+
+### Non-streaming (default)
+
+```json
+{
+  "success": true,
+  "response": "I'm doing well, thank you for asking! How can I help you today?"
+}
+```
+
+### Streaming (stream=true)
+
+Server-Sent Events format:
+
+```text
+data: {"thinking": "User is greeting me..."}
+data: {"content": "I'm doing"}
+data: {"content": " well"}
+data: {"content": ", thank you!"}
+data: {"tokens": 156}
+data: {"done": true}
+```
+
+## vs Other Endpoints
+
+| Feature | `/v1/conversation` | `/v1/agent` | `/v1/chat-completion` |
+|---------|-------------------|-------------|----------------------|
+| Multi-turn | ✅ Yes | ✅ Yes | ✅ Yes |
+| Tool calling | ❌ No | ✅ Yes | ✅ Yes |
+| Streaming | ✅ Yes | ✅ Yes | ✅ Yes |
+| Model | DeepSeek v3.1 | Kimi K2 Thinking | Configurable |
+| Best for | Fast conversations | Reasoning + tools | Full agentic |
+
+## Next steps
+
+- Need tool calling? See [Agent](/api-reference/services/agent)
+- Full agentic model: [Chat Completion](/api-reference/chat/completion)
+- Available models: [Models](/api-reference/models)
+
