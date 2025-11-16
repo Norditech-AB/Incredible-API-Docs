@@ -1,15 +1,14 @@
 ---
 title: "Generate Video"
-description: "Generate high-quality videos from text using Google Vertex AI's VEO 3.0 Fast model."
+description: "Generate high-quality videos from text."
 openapi: "POST /v1/generate-video"
 ---
 
 ## Overview
 
-Generate professional-quality videos from natural language descriptions using Google's state-of-the-art VEO 3.0 Fast model. Perfect for content creation, social media, marketing, and creative projects.
+Generate professional-quality videos from natural language descriptions. Perfect for content creation, social media, marketing, and creative projects.
 
 **Generation time:** 1-10 minutes  
-**Model:** VEO 3.0 Fast (Google Vertex AI)  
 **Output:** Base64-encoded MP4 video  
 **Duration:** 8 seconds (fixed)
 
@@ -403,12 +402,9 @@ downloadVideo(result.video_url, 'generated_video.mp4');
 
 ## Model information
 
-- **Model:** VEO 3.0 Fast (veo-3.0-fast-generate-001)
-- **Provider:** Google Vertex AI
 - **Duration:** 8 seconds (fixed)
 - **Quality:** High (professional-grade)
 - **Features:** Text-to-video, image-to-video
-- **No audio:** VEO 3.0 Fast does not generate audio
 
 ## Platform-specific sizes
 

@@ -1,12 +1,12 @@
 ---
 title: "Agent"
-description: "Agentic conversation with tool calling using Kimi K2 Thinking. Returns tool calls for the caller to execute."
+description: "Agentic conversation with tool calling. Returns tool calls for the caller to execute."
 openapi: "POST /v1/agent"
 ---
 
 ## Overview
 
-Use Kimi K2 Thinking model for agentic conversations with function calling capabilities. This endpoint excels at reasoning and tool use, returning tool calls for the caller to execute.
+Use Agent endpoint for agentic conversations with function calling capabilities. This endpoint excels at reasoning and tool use, returning tool calls for the caller to execute.
 
 **Important:** This endpoint returns tool calls but does not execute them. The caller is responsible for executing tools and providing results back in subsequent requests.
 
@@ -27,7 +27,6 @@ Use this when you need:
 
 ## Model details
 
-- Model: Kimi K2 Thinking (via Fireworks)
 - Advanced reasoning capabilities
 - Native tool calling support
 - Caller-executed tools pattern
@@ -236,7 +235,6 @@ response2 = call_agent({
 |---------|------------|-------------------|----------------------|
 | Tool calling | ✅ Yes (caller-executed) | ❌ No | ✅ Yes (auto-executed) |
 | Reasoning | ✅ Advanced | ⚠️ Basic | ✅ Configurable |
-| Model | Kimi K2 Thinking | DeepSeek v3.1 | Configurable |
 | Best for | Tool use + reasoning | Fast conversations | Full agentic |
 
 ## Next steps
