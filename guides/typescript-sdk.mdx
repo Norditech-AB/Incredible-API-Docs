@@ -23,12 +23,22 @@ TypeScript SDK used for the [Incredible API](https://incredible.one). Supports A
    - [Beta tool runner](#beta-tool-runner)
 7. [Streaming responses](#streaming-responses)
 8. [Token counting](#token-counting)
-9. [Cookbook compatibility](#cookbook-compatibility)
-10. [Integrations API](#integrations-api)
-11. [Error handling & debugging](#error-handling--debugging)
-12. [Helpers reference](#helpers-reference)
-13. [Examples](#examples)
-14. [Development & contributing](#development--contributing)
+9. [Text Completions](#text-completions)
+10. [Models API](#models-api)
+11. [Answer API](#answer-api)
+12. [Conversation API](#conversation-api)
+13. [Agent API](#agent-api)
+14. [Web Search](#web-search)
+15. [Deep Research](#deep-research)
+16. [Image Generation](#image-generation)
+17. [Video Generation](#video-generation)
+18. [OCR](#ocr)
+19. [Cookbook compatibility](#cookbook-compatibility)
+20. [Integrations API](#integrations-api)
+21. [Error handling & debugging](#error-handling--debugging)
+22. [Helpers reference](#helpers-reference)
+23. [Examples](#examples)
+24. [Development & contributing](#development--contributing)
 
 ---
 
@@ -303,6 +313,245 @@ console.log(usage.token_usage);
 ```
 
 > **Note:** `/v1/messages/count_tokens` is not yet live on the Incredible API. Expect a 404 until it ships.
+
+---
+
+## Text Completions
+
+For simple text completion tasks (without chat structure):
+
+```ts
+const response = await client.completions({
+  model: 'small-1',
+  prompt: '2+2=',
+  max_tokens: 5,
+});
+
+console.log(response.choices?.[0]?.text || response.text);
+```
+
+---
+
+## Models API
+
+List and inspect available models:
+
+```ts
+const models = await client.models.list();
+const modelList = models.data || models.models || models;
+const modelCount = Array.isArray(modelList) ? modelList.length : 0;
+
+console.log(`Available models: ${modelCount}`);
+if (Array.isArray(modelList) && modelList.length > 0) {
+  console.log(`First model: ${modelList[0].id}`);
+}
+```
+
+---
+
+## Answer API
+
+For straightforward question-answering:
+
+```ts
+const response = await client.answer({
+  query: 'What is 2+2?',
+});
+
+console.log('Success:', response.success);
+console.log('Answer:', response.answer);
+```
+
+### Structured Output
+
+Extract data in a specific JSON schema:
+
+```ts
+const schema = {
+  type: 'object',
+  properties: {
+    result: { type: 'number' },
+    explanation: { type: 'string' },
+  },
+  required: ['result'],
+};
+
+const response = await client.answer({
+  query: 'What is 10% of 100?',
+  responseFormat: schema,
+});
+
+console.log('Data:', response.data);
+```
+
+---
+
+## Conversation API
+
+For multi-turn conversations with automatic context management:
+
+```ts
+const response = await client.conversation({
+  messages: [
+    { role: 'user', content: 'Hi' },
+    { role: 'assistant', content: 'Hello!' },
+    { role: 'user', content: 'How are you?' },
+  ],
+});
+
+console.log('Success:', response.success);
+console.log('Response:', response.response || response.message);
+```
+
+---
+
+## Agent API
+
+For autonomous agents that can plan and execute multiple tool calls:
+
+```ts
+const tools = [
+  {
+    name: 'calculator',
+    description: 'Perform calculations',
+    input_schema: {
+      type: 'object',
+      properties: {
+        expression: { type: 'string' },
+      },
+      required: ['expression'],
+    },
+  },
+];
+
+const response = await client.agent({
+  messages: [{ role: 'user', content: 'Calculate 5+5' }],
+  tools,
+  maxTokens: 512,
+});
+
+console.log('Response:', response.response || response.content?.[0]?.text);
+if (response.tool_calls && response.tool_calls.length > 0) {
+  console.log(`Tool calls: ${response.tool_calls.length}`);
+  response.tool_calls.forEach((call) => {
+    console.log(`  - ${call.name}: ${JSON.stringify(call.inputs || call.arguments)}`);
+  });
+}
+```
+
+---
+
+## Web Search
+
+Perform web searches with AI-powered result synthesis:
+
+```ts
+const response = await client.research({
+  query: 'Python programming',
+  num_results: 3,
+});
+
+if (response.success) {
+  console.log(`Found ${response.results.length} results`);
+  response.results.forEach((result) => {
+    console.log(`- ${result.title}: ${result.url}`);
+  });
+}
+```
+
+---
+
+## Deep Research
+
+For in-depth research tasks:
+
+```ts
+const response = await client.research.deepResearch({
+  instructions: 'Research the history of Python programming language',
+});
+
+if (response.success) {
+  console.log('Research completed!');
+  console.log(`Research ID: ${response.research_id || 'N/A'}`);
+  console.log(`Citations: ${response.citations?.length || 0}`);
+}
+```
+
+---
+
+## Image Generation
+
+Generate images from text descriptions:
+
+```ts
+const response = await client.images({
+  prompt: 'A red circle',
+  aspect_ratio: '1:1',
+});
+
+if (response.success) {
+  console.log('Image generated!');
+  console.log(`URL: ${response.image_url}`);
+  console.log(`Seed: ${response.seed}`);
+}
+```
+
+---
+
+## Video Generation
+
+Generate videos from text descriptions:
+
+```ts
+const response = await client.videos({
+  prompt: 'Ocean waves',
+  size: '1280x720',
+});
+
+if (response.success) {
+  console.log('Video generated!');
+  console.log(`Video ID: ${response.video_id}`);
+  console.log(`Duration: ${response.duration}s`);
+}
+```
+
+---
+
+## OCR
+
+Extract text from images and PDFs:
+
+### Health Check
+
+```ts
+const response = await client.ocr.health();
+console.log(`Status: ${response.status}`);
+console.log(`OCR enabled: ${response.ocr_enabled}`);
+```
+
+### Image OCR
+
+```ts
+const response = await client.ocr.image({
+  image_url: 'https://example.com/document.jpg',
+});
+console.log('Extracted Text:', response.text);
+```
+
+### PDF OCR
+
+```ts
+const response = await client.ocr.pdf({
+  pdf_url: 'https://example.com/document.pdf',
+  pages: '1-5',
+});
+
+console.log(`Pages processed: ${response.pages.length}`);
+response.pages.forEach((page) => {
+  console.log(`\n--- Page ${page.page_number} ---`);
+  console.log(page.text);
+});
+```
 
 ---
 
