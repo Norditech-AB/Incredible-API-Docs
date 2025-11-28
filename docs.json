@@ -12,101 +12,24 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
             "group": "Getting Started",
             "pages": [
-              "index",
-              "quickstart",
-              "guides/core-concepts"
+              "index"
             ]
           },
           {
-            "group": "Taking Actions",
-            "pages": [
-              "guides/function-calling",
-              "guides/mathematical-operations",
-              "guides/connecting-api-endpoints",
-              "guides/streaming-responses"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "SDKs",
-        "groups": [
-          {
-            "group": "Client Libraries",
-            "pages": [
-              "guides/python-sdk",
-              "guides/typescript-sdk",
-              "guides/litellm-sdk",
-              "guides/openai-sdk-compatibility",
-              "guides/langchain-sdk",
-              "guides/vercel-ai-sdk"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Examples",
-        "groups": [
-          {
-            "group": "Getting Started",
-            "pages": [
-              "examples/hello-incredible",
-              "examples/basic-chat",
-              "examples/streaming-chat"
-            ]
-          },
-          {
-            "group": "Function Calling",
-            "pages": [
-              "examples/function-calling",
-              "examples/simple-calculator",
-              "examples/multiple-tools"
-            ]
-          },
-          {
-            "group": "MCPs",
-            "pages": [
-              "examples/playwright-mcp"
-            ]
-          },
-          {
-            "group": "Advanced",
-            "pages": [
-              "examples/conversation",
-              "examples/json-extraction"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Core Endpoints",
-            "pages": [
-              "api-reference/models",
-              "api-reference/chat/completion"
-            ]
-          },
-          {
-            "group": "Services",
+            "group": "Text",
             "pages": [
               "api-reference/services/answer",
               "api-reference/services/conversation",
-              "api-reference/services/agent",
-              "api-reference/services/web-search",
-              "api-reference/services/deep-research",
-              "api-reference/services/generate-image",
-              "api-reference/services/generate-video"
+              "api-reference/services/agent"
             ]
           },
           {
-            "group": "Files",
+            "group": "File Support",
             "pages": [
               "api-reference/files/overview",
               "api-reference/files/upload-url",
@@ -116,15 +39,60 @@
             ]
           },
           {
+            "group": "Research",
+            "pages": [
+              "api-reference/services/web-search",
+              "api-reference/services/deep-research"
+  
+            ]
+          },
+          {
+            "group": "Media",
+            "pages": [
+              "api-reference/services/generate-image",
+              "api-reference/services/generate-video"
+            ]
+          },
+       
+          
+          {
             "group": "OCR",
             "pages": [
               "api-reference/ocr/image",
               "api-reference/ocr/pdf"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "SDKs",
+            "pages": [
+              "guides/python-sdk",
+              "guides/typescript-sdk"
+            ]
           },
           {
-            "group": "Integrations",
+            "group": "External SDKS",
             "pages": [
+              "guides/litellm-sdk",
+              "guides/openai-sdk-compatibility",
+              "guides/langchain-sdk",
+              "guides/vercel-ai-sdk"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Legacy API",
+        "groups": [
+          {
+            "group": "Legacy Endpoints",
+            "pages": [
+              "api-reference/models",
+              "api-reference/chat/completion",
               "api-reference/endpoint/list-integrations",
               "api-reference/endpoint/get-integration",
               "api-reference/endpoint/connect-integration",

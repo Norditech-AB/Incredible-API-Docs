@@ -4,31 +4,62 @@ description: "Generate stunning images from text."
 openapi: "POST /v1/generate-image"
 ---
 
-## Overview
+## Examples
 
-Generate high-quality images from natural language descriptions. Perfect for content creation, product mockups, marketing materials, and creative projects.
+<CodeGroup>
 
-**Generation time:** 10-60 seconds  
-**Output:** JPEG or PNG image URLs
+```python Python SDK
+from incredible_python import Incredible
 
-## Use cases
+client = Incredible()
 
-- **Content creation** — Blog images, social media posts, thumbnails
-- **Product design** — Mockups, concept art, visual brainstorming
-- **Marketing** — Ad creatives, promotional materials, landing page graphics
-- **Creative projects** — Illustrations, artwork, visual storytelling
-- **UI/UX design** — Hero images, backgrounds, placeholder content
+response = client.generate_image(
+    prompt="A serene mountain landscape at sunset, digital art style",
+    aspect_ratio="16:9",
+    output_format="jpeg"
+)
+
+print("Image URL:", response.image_url)
+print("Revised prompt:", response.revised_prompt)
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient();
+
+const response = await client.images({
+  prompt: 'A serene mountain landscape at sunset, digital art style',
+  aspect_ratio: '16:9'
+});
+
+if (response.success) {
+  console.log('Image URL:', response.image_url);
+  console.log('Seed:', response.seed);
+}
+```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/generate-image" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A serene mountain landscape at sunset, digital art style",
+    "aspect_ratio": "16:9",
+    "output_format": "jpeg"
+  }'
+```
+
+</CodeGroup>
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `prompt` | string | ✅ Yes | - | Text description of the image to generate |
-| `aspect_ratio` | string | ❌ No | `"16:9"` | Image dimensions: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `21:9`, `9:21` |
-| `output_format` | string | ❌ No | `"jpeg"` | Output format: `jpeg` or `png` |
-| `seed` | integer | ❌ No | random | Random seed for reproducibility |
-| `prompt_upsampling` | boolean | ❌ No | `false` | Enhance prompt for more creative results |
-| `safety_tolerance` | integer | ❌ No | `2` | Content moderation (0-6, 0 is most strict) |
+- **prompt** (required) — Text description of the image
+- **aspect_ratio** (optional) — Image dimensions: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `21:9`, `9:21` (default: `16:9`)
+- **output_format** (optional) — `jpeg` or `png` (default: `jpeg`)
+- **seed** (optional) — Random seed for reproducibility
+- **prompt_upsampling** (optional) — Enhance prompt automatically (default: `false`)
+- **safety_tolerance** (optional) — Content moderation level 0-6 (default: `2`)
 
 ## Response
 
@@ -37,208 +68,9 @@ Generate high-quality images from natural language descriptions. Perfect for con
   "success": true,
   "image_url": "https://storage.googleapis.com/...",
   "request_id": "abc123",
-  "seed": 42
+  "seed": 42,
+  "revised_prompt": "Enhanced version of your prompt"
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | boolean | Whether generation succeeded |
-| `image_url` | string | URL to the generated image (expires in 1 hour) |
-| `image_base64` | string | Base64-encoded image data (if available) |
-| `request_id` | string | Unique request ID |
-| `seed` | integer | Seed used for generation |
-
-## Aspect ratios
-
-Choose the right dimensions for your use case:
-
-| Ratio | Best for | Example use cases |
-|-------|----------|-------------------|
-| `1:1` | Square | Social media posts (Instagram), avatars, thumbnails |
-| `16:9` | Widescreen | Blog headers, YouTube thumbnails, presentations |
-| `9:16` | Portrait | Mobile screens, Instagram stories, TikTok |
-| `4:3` | Standard | Traditional photos, print materials |
-| `3:4` | Tall portrait | Book covers, posters |
-| `21:9` | Ultra-wide | Cinematic, panoramic scenes |
-
-## Examples
-
-### Basic image generation
-
-```bash
-curl -X POST https://api.incredible.one/v1/generate-image \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "A majestic mountain landscape at sunset with vibrant colors"
-  }'
-```
-
-### With specific aspect ratio
-
-```python
-import requests
-
-response = requests.post(
-    'https://api.incredible.one/v1/generate-image',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={
-        'prompt': 'A minimalist coffee cup on a wooden table',
-        'aspect_ratio': '1:1',
-        'output_format': 'png'
-    }
-)
-
-result = response.json()
-if result['success']:
-    print(f"Image URL: {result['image_url']}")
-```
-
-### Reproducible generation with seed
-
-```javascript
-const response = await fetch('https://api.incredible.one/v1/generate-image', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    prompt: 'A futuristic cyberpunk city at night',
-    seed: 42,
-    aspect_ratio: '16:9'
-  })
-});
-
-const result = await response.json();
-console.log('Image URL:', result.image_url);
-console.log('Seed:', result.seed); // Use same seed for similar images
-```
-
-## Prompt writing tips
-
-### Be specific and detailed
-
-❌ **Vague:** "A car"  
-✅ **Better:** "A red sports car parked on a winding mountain road at sunset"
-
-### Include style and mood
-
-- "A watercolor painting of..."
-- "A photorealistic image of..."
-- "A minimalist illustration of..."
-- "...with dramatic lighting"
-- "...in soft pastel colors"
-
-### Describe composition and perspective
-
-- "...viewed from above"
-- "...close-up shot"
-- "...wide-angle landscape"
-- "...centered composition"
-
-### Use prompt upsampling for simple prompts
-
-If your prompt is brief, enable `prompt_upsampling: true` to let the model enhance it:
-
-```json
-{
-  "prompt": "dragon",
-  "prompt_upsampling": true
-}
-```
-
-## Seeds for reproducibility
-
-Using the same `seed` with the same prompt will generate similar (but not identical) images:
-
-```python
-# Generate image with specific seed
-response = requests.post(
-    'https://api.incredible.one/v1/generate-image',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={
-        'prompt': 'A sunset over mountains',
-        'seed': 12345
-    }
-)
-
-# Later, use same seed for similar style
-response2 = requests.post(
-    'https://api.incredible.one/v1/generate-image',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={
-        'prompt': 'A sunrise over ocean',  # Different prompt
-        'seed': 12345  # Same seed = similar style
-    }
-)
-```
-
-## Error handling
-
-```python
-response = requests.post(
-    'https://api.incredible.one/v1/generate-image',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={'prompt': 'A beautiful landscape'}
-)
-
-result = response.json()
-
-if result['success']:
-    image_url = result['image_url']
-    print(f"Generated: {image_url}")
-else:
-    error = result['error']
-    print(f"Error: {error}")
-    if 'details' in result:
-        print(f"Details: {result['details']}")
-```
-
-## Common errors
-
-| Status | Error | Solution |
-|--------|-------|----------|
-| 400 | Invalid request | Check parameters match required format |
-| 401 | Unauthorized | Verify API key is correct |
-| 500 | Generation failed | Try again or simplify prompt |
-| 504 | Timeout | Generation took >5 minutes, retry |
-
-## Limitations
-
-- **Generation time:** 10-60 seconds per image
-- **URL expiration:** Image URLs expire after 1 hour
-- **Content policy:** Subject to Fireworks AI content moderation
-- **Rate limits:** Shared with other API endpoints
-
-## Best practices
-
-1. **Save images immediately** — URLs expire in 1 hour
-2. **Use descriptive prompts** — More details = better results
-3. **Choose appropriate aspect ratios** — Match your use case
-4. **Store seeds** — Keep seeds for images you want to recreate
-5. **Handle timeouts** — Retry failed generations
-
-## vs Other endpoints
-
-| Feature | `/v1/generate-image` | `/v1/chat-completion` |
-|---------|---------------------|----------------------|
-| Output | Images | Text, tool calls |
-| Generation time | 10-60 seconds | 1-10 seconds |
-| Use case | Visual content | Conversations, agents |
-| Requires prompt | Yes | Yes (as message) |
-| Supports tools | No | Yes |
-
-## Model information
-
-- **Context-aware:** Yes
-- **Quality:** High (professional-grade)
-- **Speed:** 2-5 seconds average generation time
-
-## Next steps
-
-- Get your API key: [API Dashboard](https://platform.incredible.one)
-- See all endpoints: [API Reference](/api-reference/introduction)
-- Learn about other services: [Answer](/api-reference/services/answer), [Web Search](/api-reference/services/web-search)
-
+**Note:** Image URLs expire after 1 hour. Download and save images immediately.

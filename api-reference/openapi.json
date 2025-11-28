@@ -19,6 +19,11 @@
       "post": {
         "summary": "Chat Completion (Non-Streaming)",
         "description": "Return a complete response in one shot",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -75,6 +80,11 @@
       "post": {
         "summary": "Chat Completion (Streaming)",
         "description": "Generate AI responses as a live stream (SSE)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -127,6 +137,11 @@
       "post": {
         "summary": "Answer",
         "description": "Get direct answers or structured JSON output. Returns plain text for simple queries, or JSON matching your schema when response_format is provided",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -251,6 +266,11 @@
       "post": {
         "summary": "Conversation",
         "description": "Multi-turn conversation using DeepSeek v3.1. Fast and cost-effective for conversational tasks without tool calling",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -322,6 +342,11 @@
       "post": {
         "summary": "Agent",
         "description": "Agentic conversation with tool calling using Kimi K2 Thinking. Returns tool calls for the caller to execute",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -411,6 +436,11 @@
       "post": {
         "summary": "Web Search",
         "description": "Perform semantic web search powered by Exa.AI. Search with filters, retrieve content, and get AI-enhanced results",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -516,6 +546,11 @@
       "post": {
         "summary": "Deep Research",
         "description": "Multi-step web research powered by Exa.AI. Get comprehensive reports with structured output and citations",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -633,6 +668,11 @@
       "post": {
         "summary": "Generate Image",
         "description": "Generate high-quality images from text descriptions using Fireworks AI's FLUX.1 Kontext [pro] model",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -772,6 +812,11 @@
       "get": {
         "summary": "List all integrations",
         "description": "Returns a list of available integrations with id, name, description, logo URL, app URL, features, and authentication method",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response with list of integrations",
@@ -842,6 +887,11 @@
       "get": {
         "summary": "Get integration details",
         "description": "Returns detailed information about a specific integration including its capabilities and authentication requirements",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "integration_id",
@@ -881,6 +931,11 @@
       "post": {
         "summary": "Connect to integration",
         "description": "Establishes a connection to a specific integration. The connection process varies based on the integration's authentication method (API key, OAuth1, OAuth2)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "integration_id",
@@ -950,6 +1005,11 @@
       "post": {
         "summary": "Execute integration feature",
         "description": "Executes a specific feature or function from an integration. Used by agentic models to perform actions through connected integrations",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "integration_id",
@@ -1017,6 +1077,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "Enter your API key. Get your API key from https://platform.incredible.one"
+      }
+    },
     "schemas": {
       "Integration": {
         "required": [

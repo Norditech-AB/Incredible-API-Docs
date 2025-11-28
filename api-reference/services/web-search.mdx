@@ -4,118 +4,79 @@ description: "Semantic web search. Search with filters, retrieve content, and ge
 openapi: "POST /v1/web-search"
 ---
 
-## Overview
+## Examples
 
-Perform powerful web searches:
+<CodeGroup>
 
-- **Semantic search** — Find content by meaning, not just keywords
-- **Keyword search** — Traditional exact-match search when needed
-- **Rich content** — Get full text, highlights, or AI-generated summaries
-- **Advanced filtering** — Filter by domain, date, category, and more
+```python Python SDK
+from incredible_python import Incredible
 
-Perfect for research, content discovery, competitive analysis, and building search-powered applications.
+client = Incredible()
 
-## Search types
+response = client.web_search(
+    query="Latest developments in quantum computing 2024",
+    max_results=5
+)
 
-### Neural search (default)
-Semantic understanding of your query. Best for:
-- Conceptual searches
-- Finding similar content
-- Research and discovery
+print("Answer:", response.answer)
+print("\nSources:")
+for source in response.sources:
+    print(f"- {source['title']}: {source['url']}")
+```
 
-### Keyword search
-Traditional exact-match search. Best for:
-- Specific terms or phrases
-- Technical queries
-- Precise matching
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
 
-## Content options
+const client = new IncredibleClient();
 
-Control what content you retrieve:
+const response = await client.research({
+  query: 'Latest developments in quantum computing 2024',
+  num_results: 5
+});
 
-| Option | Description | Use case |
-|--------|-------------|----------|
-| `text` | Full parsed text content | Deep analysis, RAG |
-| `highlights` | Key passages from the page | Quick scanning, summaries |
-| `summary` | AI-generated summary | Overview, condensing |
-
-## Filtering
-
-### By domain
-```json
-{
-  "include_domains": ["github.com", "stackoverflow.com"],
-  "exclude_domains": ["example.com"]
+if (response.success) {
+  console.log('Answer:', response.answer);
+  console.log('\nSources:');
+  response.results?.forEach(result => {
+    console.log(`- ${result.title}: ${result.url}`);
+  });
 }
 ```
 
-### By date
-```json
-{
-  "start_published_date": "2024-01-01",
-  "end_published_date": "2024-12-31"
-}
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/web-search" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Latest developments in quantum computing 2024",
+    "max_results": 5
+  }'
 ```
 
-### By category
-```json
-{
-  "category": "research paper"
-}
-```
+</CodeGroup>
 
-Available categories:
-- `company` — Company websites and pages
-- `research paper` — Academic papers
-- `news` — News articles
-- `github` — GitHub repositories
-- `tweet` — Tweets
-- `pdf` — PDF documents
+## Parameters
 
-## Autoprompt
+- **query** (required) — Search query
+- **max_results** (optional) — Number of results to return
+- **include_domains** (optional) — Filter to specific domains
+- **exclude_domains** (optional) — Exclude specific domains
+- **start_published_date** (optional) — Filter by date range
+- **end_published_date** (optional) — Filter by date range
+- **category** (optional) — Filter by category (company, research paper, news, github, tweet, pdf)
 
-Exa's autoprompt automatically enhances your query for better results:
+## Response
 
 ```json
 {
-  "query": "AI developments",
-  "use_autoprompt": true
+  "success": true,
+  "answer": "Quantum computing has seen significant advances in 2024...",
+  "sources": [
+    {
+      "title": "Quantum Computing Breakthrough",
+      "url": "https://example.com/article",
+      "snippet": "Recent developments show..."
+    }
+  ]
 }
 ```
-
-Returns `autoprompt_string` showing how your query was enhanced:
-```json
-{
-  "autoprompt_string": "recent artificial intelligence advancements 2024"
-}
-```
-
-## Use cases
-
-**Research & Discovery**
-- Gather recent sources on a topic
-- Find expert opinions
-- Discover trending discussions
-
-**Competitive Analysis**
-- Monitor competitor content
-- Track industry news
-- Analyze market trends
-
-**Content Curation**
-- Find relevant articles
-- Discover high-quality sources
-- Build reading lists
-
-**RAG Applications**
-- Retrieve current information
-- Augment LLM context
-- Build knowledge bases
-
-
-## Next steps
-
-- Deep research: `/api-reference/services/deep-research`
-- Answer endpoint: `/api-reference/services/answer`
-- Chat completion: `/api-reference/chat/completion`
-

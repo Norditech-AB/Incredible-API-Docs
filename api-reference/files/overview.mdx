@@ -83,56 +83,32 @@ requests.post(
 # STEP 4: Reuse Forever (Use unlimited times)
 # ============================================
 
-# Use the same file_id in ANY future chat request
-# No need to re-upload!
+from incredible_python import Incredible
+client = Incredible()
 
-# Request 1:
-requests.post(
-    "https://api.incredible.one/v1/chat/completions",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-    model="small-2",
-    json={
-        "messages": [
-            {
-                "role": "user",
-                "content": "Summarize this report",
-                "file_ids": [file_id]  # ← Reuse the same file_id
-            }
-        ]
-    }
+# Use with Answer endpoint - quick Q&A about the file
+response = client.answer(
+    query="Summarize this report",
+    file_ids=[file_id]
 )
+print(response.answer)
 
-# Request 2 (hours later):
-requests.post(
-    "https://api.incredible.one/v1/chat/completions",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-    model="small-2",
-    json={
-        "messages": [
-            {
-                "role": "user",
-                "content": "What are the key findings?",
-                "file_ids": [file_id]  # ← Same file_id, no re-upload needed
-            }
-        ]
-    }
+# Use with Conversation endpoint - multi-turn discussion
+response = client.conversation(
+    messages=[
+        {"role": "user", "content": "What are the key findings?", "file_ids": [file_id]}
+    ]
 )
+print(response.response)
 
-# Request 3 (days later):
-requests.post(
-    "https://api.incredible.one/v1/chat/completions",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-    model="small-2",
-    json={
-        "messages": [
-            {
-                "role": "user",
-                "content": "Create a presentation from this",
-                "file_ids": [file_id]  # ← Still the same file_id!
-            }
-        ]
-    }
+# Use with Agent endpoint - complex tasks with tool calling
+response = client.agent(
+    messages=[
+        {"role": "user", "content": "Analyze this report and create a chart", "file_ids": [file_id]}
+    ],
+    tools=[...]  # Your tool definitions
 )
+# Same file_id works across all endpoints, forever!
 ```
 
 ```javascript JavaScript
@@ -186,43 +162,32 @@ await fetch('https://api.incredible.one/v1/files/confirm-upload', {
 // STEP 4: Reuse Forever (Use unlimited times)
 // ============================================
 
-// Request 1:
-await fetch('https://api.incredible.one/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  model: "small-2",
-  body: JSON.stringify({
-    messages: [
-      {
-        role: 'user',
-        content: 'Summarize this report',
-        file_ids: [file_id]  // ← Reuse the same file_id
-      }
-    ]
-  })
-});
+import { IncredibleClient } from '@incredible-ai/sdk';
+const client = new IncredibleClient();
 
-// Request 2 (later):
-await fetch('https://api.incredible.one/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  model: "small-2",
-  body: JSON.stringify({
-    messages: [
-      {
-        role: 'user',
-        content: 'Extract key metrics',
-        file_ids: [file_id]  // ← Same file_id!
-      }
-    ]
-  })
+// Use with Answer endpoint - quick Q&A about the file
+const answerResponse = await client.answer({
+  query: 'Summarize this report',
+  file_ids: [file_id]
 });
+console.log(answerResponse.answer);
+
+// Use with Conversation endpoint - multi-turn discussion
+const convResponse = await client.conversation({
+  messages: [
+    { role: 'user', content: 'What are the key findings?', file_ids: [file_id] }
+  ]
+});
+console.log(convResponse.response);
+
+// Use with Agent endpoint - complex tasks with tool calling
+const agentResponse = await client.agent({
+  messages: [
+    { role: 'user', content: 'Analyze this report and create a chart', file_ids: [file_id] }
+  ],
+  tools: [...]  // Your tool definitions
+});
+// Same file_id works across all endpoints, forever!
 ```
 
 ```bash cURL
@@ -258,33 +223,34 @@ curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
 # STEP 4: Reuse Forever (Use unlimited times)
 # ============================================
 
-# Request 1:
-curl -X POST "https://api.incredible.one/v1/chat/completions" \
+# Use with Answer endpoint - quick Q&A
+curl -X POST "https://api.incredible.one/v1/answer" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "small-2",
+    "query": "Summarize this report",
+    "file_ids": ["550e8400-..."]
+  }'
+
+# Use with Conversation endpoint - multi-turn discussion
+curl -X POST "https://api.incredible.one/v1/conversation" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
     "messages": [
-      {
-        "role": "user",
-        "content": "Summarize this report",
-        "file_ids": ["550e8400-..."]
-      }
+      {"role": "user", "content": "What are the key findings?", "file_ids": ["550e8400-..."]}
     ]
   }'
 
-# Request 2 (use the same file_id again!):
-curl -X POST "https://api.incredible.one/v1/chat/completions" \
+# Use with Agent endpoint - complex tasks
+curl -X POST "https://api.incredible.one/v1/agent" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
-      {
-        "role": "user",
-        "content": "What are the conclusions?",
-        "file_ids": ["550e8400-..."]
-      }
-    ]
+      {"role": "user", "content": "Analyze and create a chart", "file_ids": ["550e8400-..."]}
+    ],
+    "tools": [...]
   }'
 ```
 
@@ -296,6 +262,7 @@ Here's how to implement a proper file management system that uploads once and re
 
 ```python
 # Example: File library implementation
+from incredible_python import Incredible
 
 class FileLibrary:
     """
@@ -305,6 +272,7 @@ class FileLibrary:
     
     def __init__(self, api_key, database):
         self.api_key = api_key
+        self.client = Incredible(api_key=api_key)
         self.db = database
     
     def upload_file(self, user_id, file_path, filename):
@@ -364,25 +332,18 @@ class FileLibrary:
         """
         return self.db.get_files_by_user(user_id)
     
-    def chat_with_files(self, user_id, message, file_ids):
+    def answer_with_files(self, message, file_ids):
         """
-        Use stored file_ids in chat - no re-uploading!
+        Use stored file_ids for Q&A - no re-uploading!
         """
-        response = requests.post(
-            "https://api.incredible.one/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            model="small-2",
-            json={
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": message,
-                        "file_ids": file_ids  # ← Reuse stored file_ids
-                    }
-                ]
-            }
-        )
-        return response.json()
+        return self.client.answer(query=message, file_ids=file_ids)
+    
+    def conversation_with_files(self, messages):
+        """
+        Use stored file_ids in conversation - no re-uploading!
+        Messages can include file_ids in user messages.
+        """
+        return self.client.conversation(messages=messages)
 
 # Usage Example:
 library = FileLibrary(api_key="ik_...", database=db)
@@ -400,18 +361,20 @@ print("Your files:")
 for file in user_files:
     print(f"  - {file['filename']} (ID: {file['file_id']})")
 
-# Use file in unlimited chats (no re-upload needed!)
-response1 = library.chat_with_files(
-    user_id="user123",
+# Use file in unlimited requests (no re-upload needed!)
+response1 = library.answer_with_files(
     message="Summarize this report",
     file_ids=[file_id]
 )
+print(response1.answer)
 
-response2 = library.chat_with_files(
-    user_id="user123",
-    message="What are the key metrics?",
-    file_ids=[file_id]  # ← Same file_id, instant access!
+# Or use in a conversation with file context
+response2 = library.conversation_with_files(
+    messages=[
+        {"role": "user", "content": "What are the key metrics?", "file_ids": [file_id]}
+    ]
 )
+print(response2.response)  # ← Same file_id, instant access!
 ```
 
 **Key Implementation Points:**

@@ -4,41 +4,66 @@ description: "Generate high-quality videos from text."
 openapi: "POST /v1/generate-video"
 ---
 
-## Overview
+## Examples
 
-Generate professional-quality videos from natural language descriptions. Perfect for content creation, social media, marketing, and creative projects.
+<CodeGroup>
 
-**Generation time:** 1-10 minutes  
-**Output:** Base64-encoded MP4 video  
-**Duration:** 8 seconds (fixed)
+```python Python SDK
+from incredible_python import Incredible
+import base64
 
-## Use cases
+client = Incredible()
 
-- **Social media** — TikTok, Instagram Reels, YouTube Shorts
-- **Marketing** — Product demos, ad creatives, promotional clips
-- **Content creation** — B-roll footage, stock videos, visual content
-- **Prototyping** — Concept videos, storyboards, creative exploration
-- **Education** — Explainer videos, visual demonstrations
+response = client.generate_video(
+    prompt="A golden retriever playing in a sunny park",
+    size="1280x720"
+)
+
+# Extract and save video
+video_data = response.video_url.split(',')[1]
+with open('generated_video.mp4', 'wb') as f:
+    f.write(base64.b64decode(video_data))
+
+print("Video saved!")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+import fs from 'fs';
+
+const client = new IncredibleClient();
+
+const response = await client.videos({
+  prompt: 'A golden retriever playing in a sunny park',
+  size: '1280x720'
+});
+
+if (response.success && response.video_url) {
+  // Extract and save video
+  const base64Data = response.video_url.split(',')[1];
+  const videoBuffer = Buffer.from(base64Data, 'base64');
+  fs.writeFileSync('generated_video.mp4', videoBuffer);
+  console.log('Video saved!');
+}
+```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/generate-video" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A golden retriever playing in a sunny park",
+    "size": "1280x720"
+  }'
+```
+
+</CodeGroup>
 
 ## Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `prompt` | string | ✅ Yes | - | Text description of the video to generate |
-| `size` | string | ❌ No | `"1280x720"` | Video dimensions (see supported sizes below) |
-| `input_reference` | string | ❌ No | - | Base64-encoded reference image for image-to-video |
-
-### Supported video sizes
-
-| Size | Resolution | Aspect Ratio | Best for |
-|------|-----------|--------------|----------|
-| `1280x720` | 720p | 16:9 | YouTube, web content, landscape videos |
-| `720x1280` | 720p | 9:16 | TikTok, Instagram Reels, Stories, mobile |
-| `1920x1080` | 1080p | 16:9 | High-quality landscape, presentations |
-| `1080x1920` | 1080p | 9:16 | High-quality portrait, premium mobile |
-| `1024x1024` | 720p | 1:1 | Square social posts, Instagram feed |
-
-**Note:** All videos are 8 seconds long (VEO 3.0 Fast standard duration).
+- **prompt** (required) — Text description of the video
+- **size** (optional) — Video dimensions: `1280x720`, `720x1280`, `1920x1080`, `1080x1920`, `1024x1024` (default: `1280x720`)
+- **input_reference** (optional) — Base64-encoded reference image for image-to-video
 
 ## Response
 
@@ -48,381 +73,8 @@ Generate professional-quality videos from natural language descriptions. Perfect
   "video_id": "operation_abc123",
   "video_url": "data:video/mp4;base64,AAAIGZ0...",
   "status": "completed",
-  "prompt": "A cat jumping over a fence",
   "duration": 8
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | boolean | Whether generation succeeded |
-| `video_id` | string | Unique operation ID from Vertex AI |
-| `video_url` | string | Base64-encoded video as data URI |
-| `status` | string | Generation status (`completed`) |
-| `prompt` | string | The prompt that was used |
-| `duration` | integer | Video duration in seconds (always 8) |
-
-### Working with base64 video
-
-The `video_url` field contains a data URI in the format:
-```
-data:video/mp4;base64,AAAIGZ0dAA...
-```
-
-You can:
-- **Display directly** in HTML: `<video src="data:video/mp4;base64,..."></video>`
-- **Decode to file** in Python: `base64.b64decode(video_url.split(',')[1])`
-- **Download** by copying the data URI to a browser address bar
-
-## Examples
-
-### Basic video generation
-
-```bash
-curl -X POST https://api.incredible.one/v1/generate-video \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "A golden retriever playing in a sunny park"
-  }'
-```
-
-### With specific size (portrait for mobile)
-
-```python
-import requests
-import base64
-
-response = requests.post(
-    'https://api.incredible.one/v1/generate-video',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={
-        'prompt': 'A cat jumping over a fence in slow motion',
-        'size': '720x1280'  # Portrait for TikTok/Reels
-    },
-    timeout=660  # 11 minute timeout for generation
-)
-
-result = response.json()
-if result['success']:
-    # Extract base64 data
-    video_data = result['video_url'].split(',')[1]
-    
-    # Save to file
-    with open('generated_video.mp4', 'wb') as f:
-        f.write(base64.b64decode(video_data))
-    
-    print("Video saved to generated_video.mp4")
-```
-
-### Image-to-video with reference
-
-```javascript
-import fs from 'fs';
-
-// Read and encode reference image
-const imageBuffer = fs.readFileSync('reference.png');
-const imageBase64 = imageBuffer.toString('base64');
-
-const response = await fetch('https://api.incredible.one/v1/generate-video', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    prompt: 'Animate this scene with gentle motion',
-    input_reference: imageBase64,
-    size: '1920x1080'
-  })
-});
-
-const result = await response.json();
-
-// Extract and save video
-if (result.success) {
-  const base64Data = result.video_url.split(',')[1];
-  const videoBuffer = Buffer.from(base64Data, 'base64');
-  fs.writeFileSync('animated_video.mp4', videoBuffer);
-  console.log('Video saved!');
-}
-```
-
-### TypeScript with proper typing
-
-```typescript
-interface VideoGenerationRequest {
-  prompt: string;
-  size?: '1280x720' | '720x1280' | '1920x1080' | '1080x1920' | '1024x1024';
-  input_reference?: string;
-}
-
-interface VideoGenerationResponse {
-  success: boolean;
-  video_id: string;
-  video_url: string;
-  status: string;
-  prompt: string;
-  duration: number;
-}
-
-async function generateVideo(
-  prompt: string, 
-  size: string = '1280x720'
-): Promise<string> {
-  const response = await fetch('https://api.incredible.one/v1/generate-video', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.INCREDIBLE_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ prompt, size })
-  });
-
-  const result: VideoGenerationResponse = await response.json();
-  
-  if (!result.success) {
-    throw new Error('Video generation failed');
-  }
-
-  return result.video_url;
-}
-
-// Usage
-const videoDataUri = await generateVideo(
-  'A serene beach at sunset with waves',
-  '1920x1080'
-);
-```
-
-## Prompt writing tips
-
-### Be specific and descriptive
-
-❌ **Vague:** "A person walking"  
-✅ **Better:** "A person walking through a bustling city street at sunset with dramatic lighting"
-
-### Include motion and action
-
-- "A bird flying through clouds"
-- "Water flowing over rocks in a stream"
-- "A car driving along a winding coastal road"
-- "Leaves falling from trees in autumn"
-
-### Describe camera movement
-
-- "Camera slowly panning across..."
-- "Aerial view descending towards..."
-- "Close-up shot zooming in on..."
-- "Tracking shot following..."
-
-### Set the scene and mood
-
-- "...in golden hour lighting"
-- "...with cinematic composition"
-- "...in slow motion"
-- "...with vibrant colors"
-- "...in a serene atmosphere"
-
-### Examples of good prompts
-
-```
-"A majestic eagle soaring over snowy mountain peaks at sunrise with 
-cinematic camera movement"
-
-"Slow motion shot of a coffee cup being filled, steam rising, 
-warm morning light through window"
-
-"Aerial drone footage flying through a dense forest with sunlight 
-filtering through the canopy"
-
-"Close-up of ocean waves crashing on rocks with dramatic slow motion 
-and golden hour lighting"
-```
-
-## Image-to-video
-
-Use a reference image to guide video generation:
-
-```python
-import base64
-import requests
-
-# Read and encode your image
-with open('reference.jpg', 'rb') as f:
-    image_base64 = base64.b64encode(f.read()).decode('utf-8')
-
-response = requests.post(
-    'https://api.incredible.one/v1/generate-video',
-    headers={'Authorization': 'Bearer YOUR_API_KEY'},
-    json={
-        'prompt': 'Add gentle motion and life to this scene',
-        'input_reference': image_base64,
-        'size': '1280x720'
-    }
-)
-```
-
-The model will use your image as the starting frame and animate it according to your prompt.
-
-## Error handling
-
-```python
-import requests
-
-try:
-    response = requests.post(
-        'https://api.incredible.one/v1/generate-video',
-        headers={'Authorization': 'Bearer YOUR_API_KEY'},
-        json={'prompt': 'A beautiful landscape'},
-        timeout=660
-    )
-    
-    result = response.json()
-    
-    if result['success']:
-        print(f"Video generated: {result['video_id']}")
-        # Handle video data...
-    else:
-        print(f"Error: {result['error']}")
-        if 'details' in result:
-            print(f"Details: {result['details']}")
-            
-except requests.Timeout:
-    print("Video generation timed out (>11 minutes)")
-except Exception as e:
-    print(f"Request failed: {str(e)}")
-```
-
-## Common errors
-
-| Status | Error | Solution |
-|--------|-------|----------|
-| 400 | Invalid request | Check prompt and size parameters |
-| 400 | Invalid size | Use one of the supported video sizes |
-| 401 | Unauthorized | Verify API key is correct |
-| 500 | Generation failed | Try again or rephrase prompt |
-| 503 | Service unavailable | Vertex AI credentials not configured |
-| 504 | Timeout | Generation took >10 minutes, retry |
-
-## Limitations
-
-- **Duration:** Fixed at 8 seconds per video
-- **Generation time:** 1-10 minutes depending on complexity
-- **Format:** MP4 video returned as base64
-- **Model:** VEO 3.0 Fast (no audio generation)
-- **Rate limits:** Shared with other API endpoints
-- **Timeout:** Maximum 10 minutes per request
-
-## Best practices
-
-1. **Be patient** — Video generation takes 1-10 minutes
-2. **Use descriptive prompts** — Include motion, lighting, and mood
-3. **Choose the right size** — Match your target platform (16:9 for web, 9:16 for mobile)
-4. **Save videos immediately** — Decode base64 and store to file
-5. **Handle timeouts gracefully** — Set appropriate timeout values (660s recommended)
-6. **Test with short prompts** — Verify setup before complex generations
-
-## Saving videos from base64
-
-### Python
-
-```python
-import base64
-
-def save_video(video_url: str, filename: str):
-    """Save base64 video data URI to file"""
-    # Extract base64 data after the comma
-    base64_data = video_url.split(',')[1]
-    
-    # Decode and write to file
-    video_bytes = base64.b64decode(base64_data)
-    with open(filename, 'wb') as f:
-        f.write(video_bytes)
-
-# Usage
-result = response.json()
-save_video(result['video_url'], 'output.mp4')
-```
-
-### Node.js
-
-```javascript
-const fs = require('fs');
-
-function saveVideo(videoUrl, filename) {
-  // Extract base64 data
-  const base64Data = videoUrl.split(',')[1];
-  
-  // Decode and write to file
-  const buffer = Buffer.from(base64Data, 'base64');
-  fs.writeFileSync(filename, buffer);
-}
-
-// Usage
-saveVideo(result.video_url, 'output.mp4');
-```
-
-### Browser (download)
-
-```javascript
-function downloadVideo(videoUrl, filename) {
-  // Create blob from data URI
-  const byteString = atob(videoUrl.split(',')[1]);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  
-  const blob = new Blob([ab], { type: 'video/mp4' });
-  
-  // Trigger download
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Usage
-downloadVideo(result.video_url, 'generated_video.mp4');
-```
-
-## vs Other endpoints
-
-| Feature | `/v1/generate-video` | `/v1/generate-image` | `/v1/chat-completion` |
-|---------|---------------------|---------------------|----------------------|
-| Output | MP4 videos (8s) | JPEG/PNG images | Text, tool calls |
-| Generation time | 1-10 minutes | 10-60 seconds | 1-10 seconds |
-| Format | Base64 data URI | URL or base64 | JSON streaming |
-| Use case | Video content | Static visuals | Conversations, agents |
-
-## Model information
-
-- **Duration:** 8 seconds (fixed)
-- **Quality:** High (professional-grade)
-- **Features:** Text-to-video, image-to-video
-
-## Platform-specific sizes
-
-Choose the right size for your target platform:
-
-| Platform | Recommended Size | Aspect Ratio |
-|----------|-----------------|--------------|
-| YouTube | `1920x1080` | 16:9 landscape |
-| TikTok | `720x1280` | 9:16 portrait |
-| Instagram Reels | `1080x1920` | 9:16 portrait |
-| Instagram Feed | `1024x1024` | 1:1 square |
-| Twitter/X | `1280x720` | 16:9 landscape |
-| Facebook | `1280x720` | 16:9 landscape |
-| LinkedIn | `1920x1080` | 16:9 landscape |
-
-## Next steps
-
-- Get your API key: [API Dashboard](https://platform.incredible.one)
-- See all endpoints: [API Reference](/api-reference/introduction)
-- Learn about other services: [Generate Image](/api-reference/services/generate-image), [Answer](/api-reference/services/answer)
-
+**Note:** Generation takes 1-10 minutes. Videos are 8 seconds long. The `video_url` is a base64 data URI—extract and decode to save as MP4 file.

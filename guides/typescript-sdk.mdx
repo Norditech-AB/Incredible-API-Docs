@@ -5,609 +5,469 @@ sidebarTitle: TypeScript SDK
 section: SDKs
 ---
 
-# @incredible-ai/sdk
-
-TypeScript SDK used for the [Incredible API](https://incredible.one). Supports Anthropic client SDK interface. Swap a single import and keep the rest of your code—function calling, streaming, token counting, and cookbook workflows included.
-
 ---
 
-## Table of contents
-1. [Features](#features)
-2. [Installation](#installation)
-3. [Configuration](#configuration)
-4. [Quick start](#quick-start)
-5. [Messages API](#messages-api)
-6. [Function calling](#function-calling)
-   - [Manual control](#manual-control)
-   - [Automated helper flow](#automated-helper-flow)
-   - [Beta tool runner](#beta-tool-runner)
-7. [Streaming responses](#streaming-responses)
-8. [Token counting](#token-counting)
-9. [Text Completions](#text-completions)
-10. [Models API](#models-api)
-11. [Answer API](#answer-api)
-12. [Conversation API](#conversation-api)
-13. [Agent API](#agent-api)
-14. [Web Search](#web-search)
-15. [Deep Research](#deep-research)
-16. [Image Generation](#image-generation)
-17. [Video Generation](#video-generation)
-18. [OCR](#ocr)
-19. [Cookbook compatibility](#cookbook-compatibility)
-20. [Integrations API](#integrations-api)
-21. [Error handling & debugging](#error-handling--debugging)
-22. [Helpers reference](#helpers-reference)
-23. [Examples](#examples)
-24. [Development & contributing](#development--contributing)
+## Quick Start with Fetch
 
----
+```typescript
+const response = await fetch('https://api.incredible.one/v1/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    // 'Authorization': `Bearer ${process.env.INCREDIBLE_API_KEY}`, // Optional for now
+  },
+  body: JSON.stringify({
+    model: 'small-1',
+    max_tokens: 150,
+    messages: [
+      { role: 'user', content: 'Give me 3 productivity tips.' }
+    ],
+  }),
+});
 
-## Features
-- **Anthropic-compatible client** – constructor options and method signatures match Anthropic’s SDK.
-- **Tool calling** – send `functions`/`tools`, receive structured tool-use events, and feed results back automatically.
-- **Streaming** – async iterators that emit the same chunks Anthropic’s SSE API provides.
-- **Helper utilities** – cookbook-style helpers to build `function_call` / `function_call_result` messages.
-- **Token counting** – mirror Anthropic’s `countTokens` endpoint (forward-compatible).
-- **Cookbook ready** – every scenario in `Incredible-API-Cookbook-main/` runs unchanged with this SDK.
-
----
-
-## Installation
-```bash
-npm install @incredible-ai/sdk
-# yarn add @incredible-ai/sdk
-# pnpm add @incredible-ai/sdk
+const data = await response.json();
+console.log(data.content[0].text);
+console.log('Token usage:', data.token_usage);
 ```
 
 ---
 
-## Configuration
+## TypeScript Client Example
 
-| Option        | Env var                  | Default                       |
-| ------------- | ------------------------ | ----------------------------- |
-| `apiKey`      | `INCREDIBLE_API_KEY`     | *(optional today)*            |
-| `baseUrl`     | `INCREDIBLE_BASE_URL`    | `https://api.incredible.one`  |
-| `timeoutMs`   | —                        | `60_000`                      |
-| `maxRetries`  | —                        | `2`                           |
-| `streamThinkingMode` | — | `'mute'` (set `'default'` to mirror Anthropic reasoning stream) |
+Here's a simple TypeScript client you can use:
 
-```ts
-import { IncredibleClient } from '@incredible-ai/sdk';
+```typescript
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
+interface MessageResponse {
+  content: Array<{ text: string }>;
+  token_usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+  stop_reason: string;
+}
+
+class IncredibleClient {
+  private baseUrl: string;
+  private apiKey?: string;
+
+  constructor(config?: { baseUrl?: string; apiKey?: string }) {
+    this.baseUrl = config?.baseUrl || 'https://api.incredible.one';
+    this.apiKey = config?.apiKey || process.env.INCREDIBLE_API_KEY;
+  }
+
+  async messages(params: {
+    model: string;
+    max_tokens: number;
+    messages: Message[];
+    temperature?: number;
+  }): Promise<MessageResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.apiKey && { Authorization: `Bearer ${this.apiKey}` }),
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API error: ${error.message || response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async answer(params: { query: string }): Promise<{ answer: string; success: boolean }> {
+    const response = await fetch(`${this.baseUrl}/v1/answer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.apiKey && { Authorization: `Bearer ${this.apiKey}` }),
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API error: ${error.message || response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async conversation(params: {
+    messages: Message[];
+    model?: string;
+    max_tokens?: number;
+  }): Promise<{ response: string; success: boolean }> {
+    const response = await fetch(`${this.baseUrl}/v1/conversation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.apiKey && { Authorization: `Bearer ${this.apiKey}` }),
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API error: ${error.message || response.statusText}`);
+    }
+
+    return response.json();
+  }
+}
+
+// Usage
 const client = new IncredibleClient({
   apiKey: process.env.INCREDIBLE_API_KEY,
-  baseUrl: process.env INCREDIBLE_BASE_URL,
-  timeoutMs: 60_000,
-  maxRetries: 2,
 });
-```
 
-If you omit `model`, the SDK defaults to `small-1` (the only public model at the moment).
-
----
-
-## Quick start
-```ts
-import { IncredibleClient } from '@incredible-ai/sdk';
-
-const client = new IncredibleClient();
-
-const response = await client.messages.create({
+const response = await client.messages({
   model: 'small-1',
-  max_tokens: 128,
-  messages: [{ role: 'user', content: 'Give me three startup ideas.' }],
+  max_tokens: 150,
+  messages: [{ role: 'user', content: 'Hello!' }],
 });
 
-console.log(response.content.map((block) => block.text).join('\n'));
+console.log(response.content[0].text);
 ```
-
-`response` exposes Anthropic-style fields (`tool_calls`, `stop_reason`, `usage`, etc.) and the raw payload (`response.raw`).
 
 ---
 
-## Messages API
-```ts
-const response = await client.messages.create({
+## Using with Axios
+
+```typescript
+import axios from 'axios';
+
+const client = axios.create({
+  baseURL: 'https://api.incredible.one',
+  headers: {
+    'Content-Type': 'application/json',
+    // Authorization: `Bearer ${process.env.INCREDIBLE_API_KEY}`, // Optional
+  },
+});
+
+// Messages
+const response = await client.post('/v1/messages', {
   model: 'small-1',
-  max_tokens: 256,
-  temperature: 0.3,
-  messages: [
-    { role: 'system', content: 'You are a helpful assistant.' },
-    { role: 'user', content: 'List three fun activities in Stockholm.' },
-  ],
+  max_tokens: 150,
+  messages: [{ role: 'user', content: 'Hello!' }],
 });
 
-response.content
-  .filter((block) => block.type === 'text')
-  .forEach((block) => console.log(block.text));
+console.log(response.data.content[0].text);
 
-console.log('Token usage', response.token_usage);
+// Answer
+const answer = await client.post('/v1/answer', {
+  query: 'What is the speed of light?',
+});
+
+console.log(answer.data.answer);
 ```
 
 ---
 
-## Function calling
+## Function Calling
 
-Register tools using Anthropic’s schema (`parameters` / `input_schema`). The SDK converts them into Incredible’s JSON automatically and normalises the response back into Anthropic-style `tool_use` blocks.
+```typescript
+interface FunctionCall {
+  name: string;
+  arguments: Record<string, any>;
+  id: string;
+}
 
-### Manual control
-```ts
-import { IncredibleClient } from '@incredible-ai/sdk';
-
-const client = new IncredibleClient();
-
-const functions = [
-  {
-    name: 'calculate_sum',
-    description: 'Add two numbers together',
+// Initial request with functions
+const response = await fetch('https://api.incredible.one/v1/messages', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'small-1',
+    max_tokens: 256,
+    messages: [{ role: 'user', content: 'What is 127 + 349?' }],
+    functions: [
+      {
+        name: 'calculate',
+        description: 'Perform basic math',
     parameters: {
       type: 'object',
       properties: {
+            operation: { type: 'string', enum: ['add', 'subtract', 'multiply', 'divide'] },
         a: { type: 'number' },
         b: { type: 'number' },
       },
-      required: ['a', 'b'],
-    },
-  },
-];
-
-const initial = await client.messages.create({
-  model: 'small-1',
-  max_tokens: 64,
-  messages: [{ role: 'user', content: 'What is 127 + 349?' }],
-  functions,
+          required: ['operation', 'a', 'b'],
+        },
+      },
+    ],
+  }),
 });
 
-for (const call of initial.tool_calls ?? []) {
-  const result = call.arguments.a + call.arguments.b;
+const data = await response.json();
 
-  const followUp = [
-    { role: 'user', content: 'What is 127 + 349?' },
-    {
-      type: 'function_call',
-      function_call_id: call.id,
-      function_calls: [{ name: call.name, input: call.arguments }],
-    },
-    {
+// Execute function calls if any
+if (data.tool_calls && data.tool_calls.length > 0) {
+  const toolCalls = data.tool_calls;
+  const results = toolCalls.map((call: FunctionCall) => {
+    const { operation, a, b } = call.arguments;
+    let result: number;
+    
+    switch (operation) {
+      case 'add':
+        result = a + b;
+        break;
+      case 'subtract':
+        result = a - b;
+        break;
+      case 'multiply':
+        result = a * b;
+        break;
+      case 'divide':
+        result = a / b;
+        break;
+      default:
+        throw new Error(`Unknown operation: ${operation}`);
+    }
+    
+    return {
       type: 'function_call_result',
       function_call_id: call.id,
       function_call_results: [result],
-    },
-  ];
-
-  const final = await client.messages.create({
-    model: 'small-1',
-    max_tokens: 128,
-    messages: followUp,
-    functions,
+    };
   });
 
-  console.log(final.content);
-}
-```
-
-### Automated helper flow
-Let the helpers parse tool calls, execute your registry, and build follow-up messages.
-
-```ts
-import { IncredibleClient } from '@incredible-ai/sdk';
-import { helpers } from '@incredible-ai/sdk/helpers';
-
-const registry = new Map([
-  ['calculate_sum', async ({ a, b }: { a: number; b: number }) => a + b],
-]);
-
-const messages = [{ role: 'user', content: 'Add 42 and 11.' }];
-
-const initial = await client.messages.create({
+  // Follow-up request with results
+  const followUp = await fetch('https://api.incredible.one/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
   model: 'small-1',
-  max_tokens: 64,
-  messages,
-  functions,
-});
-
-const plan = helpers.buildToolExecutionPlan(initial);
-if (plan && !plan.isEmpty()) {
-  const results = await Promise.all(
-    plan.toolCalls.map(async (call) => {
-      const fn = registry.get(call.name);
-      if (!fn) throw new Error(`No tool named ${call.name}`);
-      return fn(call.arguments as any);
+      max_tokens: 256,
+      messages: [
+        { role: 'user', content: 'What is 127 + 349?' },
+        {
+          type: 'function_call',
+          function_call_id: toolCalls[0].id,
+          function_calls: [{ name: toolCalls[0].name, input: toolCalls[0].arguments }],
+        },
+        results[0],
+      ],
+      functions: [/* same functions as before */],
     }),
-  );
-
-  const followUp = helpers.buildFollowUpMessages(messages, plan, results);
-  const final = await client.messages.create({
-    model: 'small-1',
-    max_tokens: 128,
-    messages: followUp,
-    functions,
   });
 
-  console.log(final.content);
+  const final = await followUp.json();
+  console.log(final.content[0].text);
 }
 ```
-
-### Beta tool runner
-If you already use Anthropic’s `beta.messages.toolRunner`, you can swap in `IncredibleClient` and keep the rest.
-
-```ts
-import { IncredibleClient } from '@incredible-ai/sdk';
-import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
-import { z } from 'zod';
-
-const client = new IncredibleClient();
-
-const response = await client.beta.messages.toolRunner({
-  messages: [{ role: 'user', content: 'What is the weather in SF?' }],
-  tools: [
-    betaZodTool({
-      name: 'getWeather',
-      description: 'Get the weather at a specific location',
-      inputSchema: z.object({
-        location: z.string().describe('The city and state, e.g. San Francisco, CA'),
-      }),
-      run: ({ location }) => `The weather is foggy with a temperature of 20°C in ${location}.`,
-    }),
-  ],
-  model: 'claude-3-5-sonnet-latest',
-  max_tokens: 1024,
-});
-
-console.log(response.content);
-```
-
-The SDK adapts Anthropic’s beta tool payloads to Incredible’s API on the way in and out.
 
 ---
 
-## Streaming responses
-```ts
-const stream = await client.messages.stream({
+## Streaming Responses
+
+```typescript
+const response = await fetch('https://api.incredible.one/v1/messages/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
   model: 'small-1',
   max_tokens: 256,
-  messages: [{ role: 'user', content: 'Stream a short poem about the ocean.' }],
+    messages: [{ role: 'user', content: 'Write a haiku about coding.' }],
+  }),
 });
 
-stream.on('message_start', (event) => {
-  console.log('stream started for', event.message.model);
-});
+const reader = response.body?.getReader();
+const decoder = new TextDecoder();
 
-stream.on('content_block_delta', (event) => {
-  if (event.delta.type === 'text_delta') {
-    process.stdout.write(event.delta.text);
+if (reader) {
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value);
+    const lines = chunk.split('\n');
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data === '[DONE]') break;
+
+        try {
+          const event = JSON.parse(data);
+          if (event.content?.type === 'content_chunk') {
+            process.stdout.write(event.content.content);
+          }
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+    }
   }
-});
+}
+```
 
-stream.once('message_stop', () => {
-  console.log('\nstream completed');
-});
+---
 
-const finalMessage = await stream.finalMessage();
-console.log('stop_reason:', finalMessage.stop_reason); // "end_turn" unless overridden
-console.log('usage:', finalMessage.usage);
+## Available Endpoints
 
-for await (const event of stream) {
-  if (event.type === 'tool_call') {
-    console.log('tool requested:', event.content.name);
+### Messages
+- `POST /v1/messages` - Chat completions
+- `POST /v1/messages/stream` - Streaming chat
+
+### Text Services
+- `POST /v1/answer` - Simple Q&A
+- `POST /v1/conversation` - Multi-turn conversations
+- `POST /v1/agent` - Autonomous agents with tools
+
+### Research
+- `POST /v1/web-search` - Web search
+- `POST /v1/deep-research` - Deep research
+
+### Media
+- `POST /v1/generate-image` - Image generation
+- `POST /v1/generate-video` - Video generation
+
+### OCR
+- `POST /v1/ocr/image` - Extract text from images
+- `POST /v1/ocr/pdf` - Extract text from PDFs
+
+### Files
+- `POST /v1/files/upload` - Upload file
+- `POST /v1/files/upload-url` - Upload from URL
+- `GET /v1/files` - List files
+- `GET /v1/files/{file_id}` - Get file metadata
+- `DELETE /v1/files/{file_id}` - Delete file
+
+### Integrations
+- `GET /v1/integrations` - List integrations
+- `GET /v1/integrations/{integration_id}` - Get integration details
+- `POST /v1/integrations/{integration_id}/connect` - Connect integration
+- `POST /v1/integrations/{integration_id}/execute` - Execute integration feature
+
+### Models
+- `GET /v1/models` - List available models
+
+---
+
+## Error Handling
+
+```typescript
+try {
+  const response = await fetch('https://api.incredible.one/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'small-1',
+      messages: [{ role: 'user', content: 'Hello' }],
+      max_tokens: 100,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    
+    if (response.status === 401) {
+      throw new Error('Authentication failed');
+    } else if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After');
+      throw new Error(`Rate limited. Retry after ${retryAfter}s`);
+    } else if (response.status === 400) {
+      throw new Error(`Invalid request: ${error.message}`);
+    } else {
+      throw new Error(`API error: ${error.message || response.statusText}`);
+    }
   }
-}
 
-// Enable Anthropic-style "thinking" deltas:
-const thinkingClient = new IncredibleClient({ streamThinkingMode: 'default' });
-```
-
-> **Tip:** `stream.receivedMessages` accumulates every resolved message turn—tool-use and final responses—matching Anthropic’s `MessageStream` behaviour.
-
----
-
-## Token counting
-```ts
-const usage = await client.messages.countTokens({
-  model: 'small-1',
-  messages: [{ role: 'user', content: 'Summarise this 1,000 word article.' }],
-  max_tokens: 1,
-});
-
-console.log(usage.token_usage);
-```
-
-> **Note:** `/v1/messages/count_tokens` is not yet live on the Incredible API. Expect a 404 until it ships.
-
----
-
-## Text Completions
-
-For simple text completion tasks (without chat structure):
-
-```ts
-const response = await client.completions({
-  model: 'small-1',
-  prompt: '2+2=',
-  max_tokens: 5,
-});
-
-console.log(response.choices?.[0]?.text || response.text);
-```
-
----
-
-## Models API
-
-List and inspect available models:
-
-```ts
-const models = await client.models.list();
-const modelList = models.data || models.models || models;
-const modelCount = Array.isArray(modelList) ? modelList.length : 0;
-
-console.log(`Available models: ${modelCount}`);
-if (Array.isArray(modelList) && modelList.length > 0) {
-  console.log(`First model: ${modelList[0].id}`);
+  const data = await response.json();
+  console.log(data);
+} catch (error) {
+  console.error('Request failed:', error);
 }
 ```
 
 ---
 
-## Answer API
+## TypeScript Types
 
-For straightforward question-answering:
+For better type safety, you can define types for API requests and responses:
 
-```ts
-const response = await client.answer({
-  query: 'What is 2+2?',
-});
+```typescript
+// Request types
+interface MessageRequest {
+  model: string;
+  max_tokens: number;
+  messages: Array<{
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+  }>;
+  temperature?: number;
+  functions?: Array<{
+    name: string;
+    description: string;
+    parameters: Record<string, any>;
+  }>;
+}
 
-console.log('Success:', response.success);
-console.log('Answer:', response.answer);
-```
+interface AnswerRequest {
+  query: string;
+  model?: string;
+  max_tokens?: number;
+  response_format?: Record<string, any>;
+}
 
-### Structured Output
+// Response types
+interface MessageResponse {
+  content: Array<{ text: string }>;
+  token_usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+  stop_reason: string;
+  tool_calls?: Array<{
+    id: string;
+    name: string;
+    arguments: Record<string, any>;
+  }>;
+}
 
-Extract data in a specific JSON schema:
-
-```ts
-const schema = {
-  type: 'object',
-  properties: {
-    result: { type: 'number' },
-    explanation: { type: 'string' },
-  },
-  required: ['result'],
-};
-
-const response = await client.answer({
-  query: 'What is 10% of 100?',
-  responseFormat: schema,
-});
-
-console.log('Data:', response.data);
-```
-
----
-
-## Conversation API
-
-For multi-turn conversations with automatic context management:
-
-```ts
-const response = await client.conversation({
-  messages: [
-    { role: 'user', content: 'Hi' },
-    { role: 'assistant', content: 'Hello!' },
-    { role: 'user', content: 'How are you?' },
-  ],
-});
-
-console.log('Success:', response.success);
-console.log('Response:', response.response || response.message);
-```
-
----
-
-## Agent API
-
-For autonomous agents that can plan and execute multiple tool calls:
-
-```ts
-const tools = [
-  {
-    name: 'calculator',
-    description: 'Perform calculations',
-    input_schema: {
-      type: 'object',
-      properties: {
-        expression: { type: 'string' },
-      },
-      required: ['expression'],
-    },
-  },
-];
-
-const response = await client.agent({
-  messages: [{ role: 'user', content: 'Calculate 5+5' }],
-  tools,
-  maxTokens: 512,
-});
-
-console.log('Response:', response.response || response.content?.[0]?.text);
-if (response.tool_calls && response.tool_calls.length > 0) {
-  console.log(`Tool calls: ${response.tool_calls.length}`);
-  response.tool_calls.forEach((call) => {
-    console.log(`  - ${call.name}: ${JSON.stringify(call.inputs || call.arguments)}`);
-  });
+interface AnswerResponse {
+  success: boolean;
+  answer: string;
+  data?: Record<string, any>; // For structured output
 }
 ```
 
 ---
 
-## Web Search
+## Coming Soon
 
-Perform web searches with AI-powered result synthesis:
+The official TypeScript SDK (`@incredible-ai/sdk`) is in development and will provide:
 
-```ts
-const response = await client.research({
-  query: 'Python programming',
-  num_results: 3,
-});
+- Anthropic-compatible client interface
+- Full TypeScript type definitions
+- Helper utilities for function calling
+- Streaming support with async iterators
+- Automatic retry and error handling
+- Token counting utilities
 
-if (response.success) {
-  console.log(`Found ${response.results.length} results`);
-  response.results.forEach((result) => {
-    console.log(`- ${result.title}: ${result.url}`);
-  });
-}
-```
+Stay tuned for updates!
 
 ---
 
-## Deep Research
+## Additional Resources
 
-For in-depth research tasks:
-
-```ts
-const response = await client.research.deepResearch({
-  instructions: 'Research the history of Python programming language',
-});
-
-if (response.success) {
-  console.log('Research completed!');
-  console.log(`Research ID: ${response.research_id || 'N/A'}`);
-  console.log(`Citations: ${response.citations?.length || 0}`);
-}
-```
-
----
-
-## Image Generation
-
-Generate images from text descriptions:
-
-```ts
-const response = await client.images({
-  prompt: 'A red circle',
-  aspect_ratio: '1:1',
-});
-
-if (response.success) {
-  console.log('Image generated!');
-  console.log(`URL: ${response.image_url}`);
-  console.log(`Seed: ${response.seed}`);
-}
-```
-
----
-
-## Video Generation
-
-Generate videos from text descriptions:
-
-```ts
-const response = await client.videos({
-  prompt: 'Ocean waves',
-  size: '1280x720',
-});
-
-if (response.success) {
-  console.log('Video generated!');
-  console.log(`Video ID: ${response.video_id}`);
-  console.log(`Duration: ${response.duration}s`);
-}
-```
-
----
-
-## OCR
-
-Extract text from images and PDFs:
-
-### Health Check
-
-```ts
-const response = await client.ocr.health();
-console.log(`Status: ${response.status}`);
-console.log(`OCR enabled: ${response.ocr_enabled}`);
-```
-
-### Image OCR
-
-```ts
-const response = await client.ocr.image({
-  image_url: 'https://example.com/document.jpg',
-});
-console.log('Extracted Text:', response.text);
-```
-
-### PDF OCR
-
-```ts
-const response = await client.ocr.pdf({
-  pdf_url: 'https://example.com/document.pdf',
-  pages: '1-5',
-});
-
-console.log(`Pages processed: ${response.pages.length}`);
-response.pages.forEach((page) => {
-  console.log(`\n--- Page ${page.page_number} ---`);
-  console.log(page.text);
-});
-```
-
----
-
-## Cookbook compatibility
-
-Validated against every scenario in **Incredible-API-Cookbook-main**:
-
-- ✅ `01-getting-started/` – chat, streaming, integrations.
-- ✅ `02-function-calling/` – multi-tool workflows, JSON extraction, RPG demos, etc.
-
----
-
-## Integrations API
-```ts
-const integrations = await client.integrations.list();
-console.log(integrations.map((integration) => integration.name));
-
-const gmail = await client.integrations.retrieve('gmail');
-console.log(gmail.features);
-
-await client.integrations.connect('apollo', {
-  api_key: process.env.APOLLO_API_KEY!,
-  user_id: process.env.APOLLO_USER_ID,
-});
-
-const results = await client.integrations.execute('apollo', {
-  feature_name: 'APOLLO_PEOPLE_SEARCH',
-  inputs: { query: 'Sales Director Sweden' },
-});
-
-console.log(results);
-```
-
----
-
-## Error handling & debugging
-- The HTTP client throws typed `Error` instances; the Incredible API error payload is attached when available.
-- Inspect `response.raw` if you want the exact wire-level payload.
-- `tool_calls` and `tool_results` help trace agentic workflows.
-- For 5xx responses, log the request body—especially the `function_call_result` block—to cross-check with the cookbook examples.
-
----
-
-## Helpers reference
-```
-makeToolCall(name, arguments, options?)
-makeToolCalls([...])
-makeToolResult(callId, result)
-buildToolExecutionPlan(response)
-buildFollowUpMessages(messages, plan, results)
-ToolExecutionPlan, ToolExecution
-```
-
-Helpers live under `@incredible-ai/sdk/helpers` and mirror the names in the Python SDK.
-
----
-
-## Examples
-- `examples/basic-usage`
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="API Reference" icon="book" href="/">
+    Complete API documentation.
+  </Card>
+  <Card title="Python SDK" icon="code" href="/guides/python-sdk">
+    Official Python SDK guide.
+  </Card>
+  <Card title="OpenAI SDK Compatibility" icon="plug" href="/guides/openai-sdk-compatibility">
+    Use with OpenAI SDK.
+  </Card>
+</div>

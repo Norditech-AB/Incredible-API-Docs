@@ -4,158 +4,77 @@ description: "Multi-step web research. Get comprehensive reports with structured
 openapi: "POST /v1/deep-research"
 ---
 
-## Overview
+## Examples
 
-Perform comprehensive, multi-step research that:
+<CodeGroup>
 
-- **Plans research** — Determines what searches to run
-- **Gathers information** — Performs multiple web searches
-- **Synthesizes findings** — Combines information into a report
-- **Provides citations** — Links back to original sources
-- **Structured output** — Returns JSON matching your schema
+```python Python SDK
+from incredible_python import Incredible
 
-## Output schemas
+client = Incredible()
 
-Define exactly how you want results formatted:
+response = client.deep_research(
+    query="Comprehensive analysis of renewable energy trends in 2024",
+    depth="standard"  # Options: "quick", "standard", "thorough"
+)
 
-```json Company comparison
-{
-  "type": "object",
-  "properties": {
-    "companies": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {"type": "string"},
-          "founded": {"type": "string"},
-          "revenue": {"type": "number"},
-          "employees": {"type": "integer"}
-        }
-      }
-    }
-  }
+print("Report:", response.report)
+print("\nKey Findings:")
+for finding in response.key_findings:
+    print(f"- {finding}")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient();
+
+const response = await client.research.deepResearch({
+  instructions: 'Comprehensive analysis of renewable energy trends in 2024'
+});
+
+if (response.success) {
+  console.log('Research completed!');
+  console.log('Report:', response.report || response.content);
+  console.log('Citations:', response.citations?.length || 0);
 }
 ```
 
-```json Market analysis
-{
-  "type": "object",
-  "properties": {
-    "market_size": {"type": "number"},
-    "growth_rate": {"type": "number"},
-    "key_players": {
-      "type": "array",
-      "items": {"type": "string"}
-    },
-    "trends": {
-      "type": "array",
-      "items": {"type": "string"}
-    }
-  }
-}
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/deep-research" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Comprehensive analysis of renewable energy trends in 2024",
+    "depth": "standard"
+  }'
 ```
 
-```json Technical comparison
-{
-  "type": "object",
-  "properties": {
-    "features": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {"type": "string"},
-          "supported_by": {
-            "type": "array",
-            "items": {"type": "string"}
-          }
-        }
-      }
-    }
-  }
-}
-```
+</CodeGroup>
 
-## Metadata
+## Parameters
 
-Each response includes useful metadata:
+- **query** (required) — Research topic or question
+- **depth** (optional) — Research depth: "quick", "standard", or "thorough"
+- **max_sources** (optional) — Maximum sources to consult
+- **response_format** (optional) — JSON schema for structured output
 
-- `research_id` — Unique identifier for this research task
-- `status` — Completion status
-- `searches_performed` — Number of searches executed
-- `pages_read` — Number of web pages analyzed
-- `citations` — Source URLs with titles
-
-## Use cases
-
-**Competitive Intelligence**
-- Compare competitors' features and pricing
-- Analyze market positioning
-- Track product launches
-
-**Market Research**
-- Industry size and growth
-- Key players and trends
-- Customer sentiment
-
-**Technical Research**
-- Technology comparisons
-- Best practices and patterns
-- Implementation guides
-
-**Due Diligence**
-- Company backgrounds
-- Financial information
-- Leadership profiles
-
-**Content Creation**
-- Research for articles
-- Data for presentations
-- Fact-checking sources
-
-## Caching
-
-Enable caching to reuse results for identical requests:
+## Response
 
 ```json
 {
-  "instructions": "...",
-  "use_cache": true
+  "success": true,
+  "report": "Comprehensive research report...",
+  "key_findings": [
+    "Finding 1",
+    "Finding 2"
+  ],
+  "sources": [
+    {
+      "title": "Source Title",
+      "url": "https://example.com",
+      "relevance": "high"
+    }
+  ]
 }
 ```
-
-Benefits:
-- Faster responses
-- Lower costs
-- Consistent results
-
-Cache duration: 24 hours
-
-## Tips for best results
-
-1. **Be specific**: Clear instructions get better results
-2. **Use schemas**: Structured output ensures consistency
-3. **Include context**: Mention time frames, regions, or specific aspects
-4. **Request citations**: Ask for sources in your instructions
-
-## Example instructions
-
-**Good** ✅
-> "Compare the flagship smartphones from Apple, Samsung, and Google released in 2024. Include model name, starting price, screen size, camera specs, and battery capacity. Provide citations for each specification."
-
-**Too vague** ❌
-> "Tell me about phones"
-
-**Good** ✅
-> "Research the current state of quantum computing. Focus on: 1) Leading companies and their qubit counts, 2) Recent breakthroughs in 2024, 3) Expected timeline for commercial applications. Return as structured data with citations."
-
-**Too vague** ❌
-> "What's happening with quantum computing?"
-
-## Next steps
-
-- Web search: `/api-reference/services/web-search`
-- Answer endpoint: `/api-reference/services/answer`
-- Chat completion: `/api-reference/chat/completion`
-

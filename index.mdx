@@ -1,32 +1,75 @@
 ---
-title: 'Overview'
-description: 'Overview of Incredible API agentic models and how to get started'
+title: 'Welcome to Incredible'
+description: 'The Incredible API is a all-in-one API for all your AI needs.'
 ---
 
-The Incredible API provides agentic models that can execute code and take actions, OCR capabilities for document processing, and file handling features. Compatible with standard LLM interfaces for easy integration.
 
-<div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
-  <strong>Available Models:</strong> Use <code>small-2</code> (latest generation) for complex work across all your tools, or use the last generation <code>small-1</code> 
-  <a href="/api-reference/models" style={{color: '#FF6200'}}>View all models →</a>
-</div>
 
-<div style={{ border: '1px solid #4A90E2', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(74, 144, 226, 0.08)' }}>
-  💬 Looking to chat with Incredible? Visit <a href="https://incredible.one" target="_blank" rel="noopener noreferrer" style={{color: '#4A90E2', fontWeight: 'bold'}}>incredible.one</a>
-</div>
+### Text
 
-### Get Started
-
-If you’re new to the Incredible API, start with these essentials.
+Powerful endpoints for text-based AI tasks.
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
-  <Card title="Quickstart" icon="lightbulb" href="/guides/core-concepts">
-    Get started with the Incredible API.
+  <Card title="Answer" icon="message" href="/api-reference/services/answer">
+    Get quick answers with a single API call.
   </Card>
-  <Card title="Examples" icon="file-code" href="/examples/hello-incredible">
-    Explore step-by-step examples of what you can do with the API.
+  <Card title="Conversation" icon="comments" href="/api-reference/services/conversation">
+    Build multi-turn conversations with memory.
   </Card>
-  <Card title="API Reference" icon="book" href="/api-reference/chat/completion">
-    Integrate the Incredible API into your products.
+  <Card title="Agent" icon="robot" href="/api-reference/services/agent">
+    Deploy autonomous agents that take actions.
+  </Card>
+</div>
+
+### File Support
+
+Upload and manage files for use with Incredible API.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Files Overview" icon="folder-open" href="/api-reference/files/overview">
+    Learn how file uploads work with the API.
+  </Card>
+  <Card title="Upload Files" icon="upload" href="/api-reference/files/upload-url">
+    Upload files for processing.
+  </Card>
+</div>
+
+### Research
+
+Search and research capabilities for real-time information.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Web Search" icon="magnifying-glass" href="/api-reference/services/web-search">
+    Search the web for real-time information.
+  </Card>
+  <Card title="Deep Research" icon="book-open" href="/api-reference/services/deep-research">
+    Comprehensive research on any topic.
+  </Card>
+</div>
+
+### Media
+
+Generate images and videos from text descriptions.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="Generate Image" icon="image" href="/api-reference/services/generate-image">
+    Create images from text descriptions.
+  </Card>
+  <Card title="Generate Video" icon="video" href="/api-reference/services/generate-video">
+    Generate videos from prompts.
+  </Card>
+</div>
+
+### OCR
+
+Extract text from images and documents.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+  <Card title="OCR Image" icon="image" href="/api-reference/ocr/image">
+    Extract text from images.
+  </Card>
+  <Card title="OCR PDF" icon="file-pdf" href="/api-reference/ocr/pdf">
+    Extract text from PDF documents.
   </Card>
 </div>
 

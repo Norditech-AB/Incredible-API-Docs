@@ -7,28 +7,17 @@ section: SDKs
 
 # Incredible Python SDK
 
-Use the officially supported Python client to call the [Incredible API](https://docs.incredible.one/) from your projects. The SDK wraps the REST endpoints, adds helper utilities for tool chaining, and stays compatible with our live API behavior (no API key required at the moment).
-
-> **Models**: This guide uses `small-1`, but you can swap in any public model from the Model Overview page.
+The official Python SDK for the [Incredible API](https://docs.incredible.one/). Provides an Anthropic-compatible interface with enhanced features for all Incredible API endpoints.
 
 ---
 
 ## Installation
 
-### PyPI (recommended)
-
 ```bash
 pip install incredible-python
 ```
 
-### TestPyPI (pre-release testing)
-
-```bash
-pip install \
-  --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple \
-  incredible-python==0.1.1
-```
+The SDK requires Python 3.8 or higher.
 
 ---
 
@@ -39,6 +28,7 @@ from incredible_python import Incredible
 
 client = Incredible()
 
+# Simple chat completion
 response = client.messages.create(
     model="small-1",
     max_tokens=150,
@@ -49,65 +39,84 @@ print(response.content[0]['text'])
 print("Token usage:", response.token_usage)
 ```
 
-### Notes
+### Configuration
 
-- **Authentication**: The current API does not require a key. When that changes, pass `api_key=` or set `INCREDIBLE_API_KEY`.
-- **Base URL overrides**: `Incredible(base_url="https://your-proxy.example.com")` if you route through a proxy.
-
-### Callable Pattern
-
-The SDK supports two patterns for most endpoints:
+The client can be configured via constructor arguments or environment variables:
 
 ```python
-# Pattern 1: Direct callable (cleaner, more concise)
+from incredible_python import Incredible
+
+client = Incredible(
+    api_key="your-api-key",  # or set INCREDIBLE_API_KEY env var
+    base_url="https://api.incredible.one",  # or set INCREDIBLE_BASE_URL
+    timeout=600,  # Request timeout in seconds
+    max_retries=2,  # Number of retry attempts
+)
+```
+
+| Setting | Environment Variable | Default |
+|---------|---------------------|---------|
+| `api_key` | `INCREDIBLE_API_KEY` | *(optional)* |
+| `base_url` | `INCREDIBLE_BASE_URL` | `https://api.incredible.one` |
+| `timeout` | — | `600` seconds |
+| `max_retries` | — | `2` |
+
+---
+
+## Callable Resources
+
+All resources support both direct callable syntax and explicit `.create()` methods:
+
+```python
+# Direct callable (more concise)
 response = client.messages(
     model="small-1",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=100
 )
 
-# Pattern 2: Using .create() method (explicit)
+# Explicit method (more familiar)
 response = client.messages.create(
     model="small-1",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=100
 )
-
-# Access the response content
-print(response.content[0]['text'])
 ```
 
-Both patterns work identically - use whichever feels more natural. The callable pattern is more concise, while `.create()` is more explicit and familiar to OpenAI SDK users.
-
-**Endpoints supporting both patterns:**
+**Resources supporting callable syntax:**
 - `client.messages()` / `client.messages.create()`
 - `client.completions()` / `client.completions.create()`
-- `client.answer()` (callable only)
-- `client.conversation()` (callable only)
-- `client.agent()` (callable only)
-- `client.web_search()` (callable only)
-- `client.deep_research()` (callable only)
-- `client.generate_image()` (callable only)
-- `client.generate_video()` (callable only)
+- `client.answer()`
+- `client.conversation()`
+- `client.agent()`
+- `client.web_search()`
+- `client.deep_research()`
+- `client.generate_image()`
+- `client.generate_video()`
 
 ---
 
-## Token Usage
+## Messages API
 
-Every response includes token usage metadata:
+Chat completions with Anthropic-compatible interface:
 
 ```python
-usage = response.token_usage
-# {'input_tokens': 5339, 'output_tokens': 92}
+response = client.messages.create(
+    model="small-1",
+    max_tokens=256,
+    temperature=0.7,
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain quantum computing in simple terms."},
+    ],
+)
+
+print(response.content[0]['text'])
+print(f"Stop reason: {response.stop_reason}")
+print(f"Usage: {response.token_usage}")
 ```
 
-A convenience copy also lives at `response.usage` if you ever need the legacy field.
-
----
-
-## Tool Calling & Workflow Execution
-
-The SDK contains helpers that translate model-issued function calls into executable Python functions and back into the messages expected by the API. This mirrors our cookbook examples but removes the boilerplate.
+### Function Calling
 
 ```python
 from incredible_python import Incredible, helpers
@@ -116,8 +125,8 @@ client = Incredible()
 
 functions = [
     {
-        "name": "calculate_operation",
-        "description": "Perform basic math",
+        "name": "calculate",
+        "description": "Perform basic math operations",
         "parameters": {
             "type": "object",
             "properties": {
@@ -128,182 +137,120 @@ functions = [
             "required": ["operation", "a", "b"],
         },
     },
-    {
-        "name": "lookup_contact",
-        "description": "Fetch CRM contact details",
-        "parameters": {
-            "type": "object",
-            "properties": {"email": {"type": "string"}},
-            "required": ["email"],
-        },
-    },
 ]
 
-registry = {
-    "calculate_operation": lambda operation, a, b: eval(
-        f"{a} { {'add': '+', 'subtract': '-', 'multiply': '*', 'divide': '/'}[operation] } {b}"
-    ),
-    "lookup_contact": lambda email: {"email": email, "name": "Taylor Example", "status": "active"},
-}
-
-messages = [{"role": "user", "content": "Add 7 and 35, then look up taylor@example.com"}]
-
-initial = client.messages.create(
+# Initial request
+response = client.messages.create(
     model="small-1",
     max_tokens=256,
-    messages=messages,
+    messages=[{"role": "user", "content": "What is 127 + 349?"}],
     functions=functions,
 )
 
-plan = helpers.build_tool_execution_plan(initial.raw)
-if plan:
-    results = helpers.execute_plan(plan, registry=registry)
-    follow_up = helpers.build_follow_up_messages(messages, plan, results)
-
-    final = client.messages.create(
-        model="small-1",
-        max_tokens=256,
-        messages=follow_up,
-        functions=functions,
-    )
-
-    print(final.content[0]['text'])
-    print("Token usage:", final.token_usage)
+# Execute tool calls if any
+if response.tool_calls:
+    plan = helpers.build_tool_execution_plan(response.raw)
+    if plan and not plan.is_empty():
+        # Define your tool registry
+        registry = {
+            "calculate": lambda operation, a, b: {
+                "add": a + b,
+                "subtract": a - b,
+                "multiply": a * b,
+                "divide": a / b,
+            }[operation],
+        }
+        
+        # Execute tools
+        results = helpers.execute_plan(plan, registry=registry)
+        
+        # Build follow-up messages
+        follow_up = helpers.build_follow_up_messages(
+            [{"role": "user", "content": "What is 127 + 349?"}],
+            plan,
+            results
+        )
+        
+        # Get final response
+        final = client.messages.create(
+            model="small-1",
+            max_tokens=256,
+            messages=follow_up,
+            functions=functions,
+        )
+        
+        print(final.content[0]['text'])
 ```
 
-Helpers provided:
+### Streaming
 
-| Helper | Purpose |
-| --- | --- |
-| `build_tool_execution_plan(raw_response)` | Parses model-issued tool calls into an executable plan. |
-| `execute_plan(plan, registry)` | Runs Python callables based on the plan and returns their results. |
-| `build_follow_up_messages(original_messages, plan, results)` | Produces the `function_call` / `function_call_result` messages to send back to the model. |
+```python
+stream = client.messages.stream(
+    model="small-1",
+    max_tokens=256,
+    messages=[{"role": "user", "content": "Write a haiku about coding."}],
+)
+
+for event in stream.iter_lines():
+    if event.get("content", {}).get("type") == "content_chunk":
+        print(event["content"]["content"], end="", flush=True)
+```
 
 ---
 
 ## Text Completions
 
-For simple text completion tasks (without chat structure), use the `completions` endpoint:
+Simple text completion (OpenAI-style):
 
 ```python
-# Direct callable approach
-response = client.completions(
+response = client.completions.create(
     model="small-1",
     prompt="The capital of France is",
     max_tokens=10
 )
-print(response.choices[0].text)
 
-# Or using .create() method
-response = client.completions.create(
-    model="small-1",
-    prompt="2 + 2 =",
-    max_tokens=5
-)
 print(response.choices[0].text)
 ```
 
-### Response Structure
-
-The completion response includes:
-- `choices`: Array of completion choices, each with `text` and `finish_reason`
-- `usage`: Token usage information (input and output tokens)
-- `model`: The model used for completion
-
 ---
 
-## Models API
+## Answer API
 
-List and inspect available models:
-
-```python
-# List all available models
-models = client.models.list()
-
-print(f"Available models: {len(models['data'])}")
-for model in models['data']:
-    print(f"- {model['id']}")
-    print(f"  Created: {model.get('created', 'N/A')}")
-    print(f"  Owned by: {model.get('owned_by', 'Incredible')}")
-```
-
-### Model Response Fields
-
-The response is a dictionary with a `data` array. Each model object includes:
-- `id`: Model identifier (e.g., "small-1", "large-1")
-- `object`: Always "model"
-- `created`: Unix timestamp of model creation (optional)
-- `owned_by`: Organization that owns the model (optional)
-
----
-
-## Streaming
-
-> **Caution**: Streaming support is currently in development. The `client.messages.stream()` method exists but the streaming format is still being finalized. The `iter_lines()` helper method is not yet available in the current SDK version (0.1.2).
+Simple question-answering with optional structured output:
 
 ```python
-# Streaming is currently experimental
-try:
-    stream = client.messages.stream(
-        model="small-1",
-        max_tokens=150,
-        messages=[{"role": "user", "content": "Stream a haiku about focus."}],
-    )
-    
-    # Note: The exact streaming interface is still being finalized
-    # Check SDK version and documentation for the latest streaming API
-    
-    # Future API (when available):
-    # for event in stream.iter_lines():
-    #     content_block = event.get("content")
-    #     if isinstance(content_block, dict) and content_block.get("type") == "content_chunk":
-    #         print(content_block.get("content", ""), end="", flush=True)
-    
-except AttributeError as e:
-    print("Streaming API is still evolving. Check for SDK updates.")
-```
-
-**For production use**, we recommend using the non-streaming `client.messages.create()` endpoint until streaming is fully stabilized. Watch for SDK updates that will include complete streaming support.
-
----
-
-## Answer (Simple Q&A)
-
-For straightforward question-answering without conversation history:
-
-```python
+# Simple answer
 response = client.answer(query="What is the speed of light?")
-
 print(response.answer)
-# Optionally check sources or metadata
-if hasattr(response, 'sources'):
-    print("Sources:", response.sources)
+
+# Structured output
+schema = {
+    "type": "object",
+    "properties": {
+        "result": {"type": "number"},
+        "explanation": {"type": "string"},
+    },
+    "required": ["result"],
+}
+
+response = client.answer(
+    query="What is 10% of 100?",
+    response_format=schema
+)
+print(response.data)  # Structured data matching schema
 ```
-
-### Parameters
-
-- `query` (required): The question to answer
-- `model` (optional): Model to use (defaults to API default)
-- `max_tokens` (optional): Maximum tokens in response
-
-### Use Cases
-
-- Quick facts and definitions
-- Single-turn Q&A
-- Knowledge retrieval without context
-- FAQ automation
 
 ---
 
-## Conversation
+## Conversation API
 
-For multi-turn conversations with automatic context management:
+Multi-turn conversations with automatic context management:
 
 ```python
 response = client.conversation(
     messages=[
         {"role": "user", "content": "Hi, I'm working on a Python project"},
-        {"role": "assistant", "content": "Hello! I'd be happy to help with your Python project. What are you building?"},
+        {"role": "assistant", "content": "Hello! What are you building?"},
         {"role": "user", "content": "I need to parse JSON files. Any suggestions?"}
     ]
 )
@@ -311,24 +258,11 @@ response = client.conversation(
 print(response.response)
 ```
 
-### Parameters
-
-- `messages` (required): Array of message objects with `role` and `content`
-- `model` (optional): Model to use
-- `max_tokens` (optional): Maximum tokens in response
-- `temperature` (optional): Sampling temperature (0-1)
-
-### Response Structure
-
-- `response`: The assistant's reply text
-- `conversation_id`: Optional conversation ID for tracking
-- `usage`: Token usage information
-
 ---
 
-## Agent (Autonomous Tool Calling)
+## Agent API
 
-For autonomous agents that can plan and execute multiple tool calls:
+Autonomous agents with tool calling:
 
 ```python
 tools = [
@@ -343,54 +277,24 @@ tools = [
             "required": ["query"]
         }
     },
-    {
-        "name": "calculator",
-        "description": "Perform mathematical calculations",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "expression": {"type": "string", "description": "Math expression"}
-            },
-            "required": ["expression"]
-        }
-    }
 ]
 
 response = client.agent(
-    messages=[{"role": "user", "content": "Search for the current Bitcoin price and calculate how much 5 BTC would be worth"}],
+    messages=[{"role": "user", "content": "Search for the current Bitcoin price"}],
     tools=tools,
     max_tokens=500
 )
 
-# Check if the agent wants to call tools
 if response.tool_calls:
-    print(f"Agent plans to call {len(response.tool_calls)} tools:")
     for call in response.tool_calls:
-        print(f"- {call.name}: {call.inputs}")
+        print(f"Tool: {call.name}, Inputs: {call.inputs}")
 else:
     print(response.content[0]['text'])
 ```
 
-### Parameters
-
-- `messages` (required): Conversation messages
-- `tools` (required): Available tools with schemas
-- `model` (optional): Model to use
-- `max_tokens` (optional): Maximum tokens
-- `temperature` (optional): Sampling temperature
-
-### Response Fields
-
-- `content`: Text response (if no tool calls)
-- `tool_calls`: Array of tool invocations planned by the agent
-- `usage`: Token usage
-- `stop_reason`: Why generation stopped
-
 ---
 
 ## Web Search
-
-Perform web searches with AI-powered result synthesis:
 
 ```python
 response = client.web_search(
@@ -404,23 +308,11 @@ for source in response.sources:
     print(f"- {source['title']}: {source['url']}")
 ```
 
-### Parameters
-
-- `query` (required): Search query
-- `max_results` (optional): Number of search results to consider
-- `model` (optional): Model to use for synthesis
-
-### Response Structure
-
-- `answer`: Synthesized answer from search results
-- `sources`: Array of source documents with title, URL, and snippet
-- `usage`: Token usage information
-
 ---
 
 ## Deep Research
 
-For in-depth research tasks that require multiple searches and synthesis:
+In-depth research with multiple searches and synthesis:
 
 ```python
 response = client.deep_research(
@@ -430,42 +322,14 @@ response = client.deep_research(
 
 print("Research Report:")
 print(response.report)
-
 print("\nKey Findings:")
 for finding in response.key_findings:
     print(f"- {finding}")
-
-print("\nSources Consulted:")
-for source in response.sources:
-    print(f"- {source['title']} ({source['url']})")
 ```
-
-### Parameters
-
-- `query` (required): Research topic or question
-- `depth` (optional): Research depth - "quick", "standard", or "thorough"
-- `max_sources` (optional): Maximum sources to consult
-- `model` (optional): Model to use
-
-### Response Structure
-
-- `report`: Full research report text
-- `key_findings`: Array of key insights
-- `sources`: Detailed source information
-- `usage`: Token usage
-
-### Use Cases
-
-- Market research
-- Literature reviews
-- Competitive analysis
-- Academic research assistance
 
 ---
 
 ## Image Generation
-
-Generate images from text descriptions:
 
 ```python
 response = client.generate_image(
@@ -476,33 +340,18 @@ response = client.generate_image(
 
 print("Image URL:", response.image_url)
 print("Revised prompt:", response.revised_prompt)
-
-# Save the image
-import requests
-img_data = requests.get(response.image_url).content
-with open('generated_image.png', 'wb') as f:
-    f.write(img_data)
 ```
 
-### Parameters
-
-- `prompt` (required): Text description of the image
-- `size` (optional): Image dimensions - "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"
+**Parameters:**
+- `prompt` (required): Text description
+- `size` (optional): "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"
 - `quality` (optional): "standard" or "high"
-- `n` (optional): Number of images to generate (default: 1)
+- `n` (optional): Number of images (default: 1)
 - `style` (optional): "vivid" or "natural"
-
-### Response Structure
-
-- `image_url`: URL to the generated image
-- `revised_prompt`: Enhanced version of your prompt
-- `created`: Timestamp of generation
 
 ---
 
 ## Video Generation
-
-Generate videos from text descriptions:
 
 ```python
 response = client.generate_video(
@@ -513,59 +362,28 @@ response = client.generate_video(
 
 print("Video URL:", response.video_url)
 print("Status:", response.status)
-
-# For longer videos, you may need to poll for completion
-if response.status == "processing":
-    import time
-    while True:
-        status = client.generate_video.status(response.generation_id)
-        if status.status == "completed":
-            print("Video ready:", status.video_url)
-            break
-        time.sleep(5)
 ```
 
-### Parameters
-
-- `prompt` (required): Text description of the video
+**Parameters:**
+- `prompt` (required): Text description
 - `duration` (optional): Video duration in seconds (1-10)
 - `resolution` (optional): "480p", "720p", or "1080p"
 - `fps` (optional): Frames per second (default: 24)
 
-### Response Structure
-
-- `video_url`: URL to the generated video
-- `generation_id`: ID for tracking generation status
-- `status`: "processing", "completed", or "failed"
-- `duration`: Actual video duration
-
 ---
 
-## OCR (Optical Character Recognition)
+## OCR
 
 Extract text from images and PDFs:
-
-### Health Check
-
-```python
-# Check OCR service availability
-health = client.ocr.health()
-print(f"Status: {health['status']}")
-print(f"OCR Enabled: {health['ocr_enabled']}")
-```
 
 ### Image OCR
 
 ```python
-# Extract text from an image
-response = client.ocr.image(
-    image_url="https://example.com/document.jpg"
-)
-
-print("Extracted Text:")
+# From URL
+response = client.ocr.image(image_url="https://example.com/document.jpg")
 print(response.text)
 
-# With local file
+# From local file
 with open("document.jpg", "rb") as f:
     response = client.ocr.image(image_file=f)
     print(response.text)
@@ -574,7 +392,7 @@ with open("document.jpg", "rb") as f:
 ### PDF OCR
 
 ```python
-# Extract text from PDF
+# From URL
 response = client.ocr.pdf(
     pdf_url="https://example.com/document.pdf",
     pages="1-5"  # Extract specific pages
@@ -585,69 +403,76 @@ for page in response.pages:
     print(f"\n--- Page {page.page_number} ---")
     print(page.text)
 
-# With local file
+# From local file
 with open("document.pdf", "rb") as f:
     response = client.ocr.pdf(pdf_file=f)
     print(response.text)
 ```
 
-### Parameters
+---
 
-**Image OCR:**
-- `image_url` or `image_file` (required): Image source
-- `language` (optional): OCR language hint (e.g., "en", "es", "fr")
-- `enhance` (optional): Apply image enhancement (default: True)
+## Files API
 
-**PDF OCR:**
-- `pdf_url` or `pdf_file` (required): PDF source
-- `pages` (optional): Page range (e.g., "1-5", "1,3,5", "all")
-- `language` (optional): OCR language hint
-- `extract_tables` (optional): Extract tables separately (default: False)
+Upload and manage files:
 
-### Response Structure
+```python
+# Upload file
+with open("document.pdf", "rb") as f:
+    response = client.files.upload(
+        file=f,
+        purpose="assistants"  # "assistants", "vision", "ocr"
+    )
+    print(f"File ID: {response.file_id}")
 
-- `text`: Extracted text content
-- `pages`: Array of page objects (PDF only)
-- `confidence`: OCR confidence score (0-1)
-- `language_detected`: Detected language
-- `tables`: Extracted tables (if requested)
+# Upload from URL
+response = client.files.upload_url(
+    url="https://example.com/document.pdf",
+    purpose="ocr"
+)
 
-### Use Cases
+# List files
+files = client.files.list()
+for file in files.data:
+    print(f"{file.id}: {file.filename} ({file.size} bytes)")
 
-- Document digitization
-- Invoice processing
-- Receipt scanning
-- Form extraction
-- Business card recognition
+# Get metadata
+metadata = client.files.metadata(file_id="file_abc123")
+print(f"Filename: {metadata.filename}, Size: {metadata.size}")
+
+# Delete file
+client.files.delete(file_id="file_abc123")
+```
 
 ---
 
 ## Integrations API
 
-List, inspect, connect, and execute Incredible integrations directly:
+List, connect, and execute third-party integrations:
 
 ```python
+# List integrations
 integrations = client.integrations.list()
 for integration in integrations[:10]:
-    print(integration["id"], integration["name"])
+    print(f"{integration['id']}: {integration['name']}")
 
+# Get integration details
 details = client.integrations.retrieve("perplexity")
-print(details["features"][0]["name"])
+print(f"Features: {len(details['features'])}")
 
+# Connect integration
 connection = client.integrations.connect(
     "perplexity",
     user_id="user_123",
     api_key="perplexity-secret",
 )
-# Connection returns a result object with success status
+
 if hasattr(connection, 'requires_oauth') and connection.requires_oauth:
-    print("Open this URL to authorize:", connection.redirect_url)
+    print("OAuth required:", connection.redirect_url)
 elif hasattr(connection, 'success'):
-    print("Connection successful:", connection.success)
+    print("Connected:", connection.success)
 
-# Get the correct feature name from integration details
+# Execute integration feature
 feature_name = details["features"][0]["name"]  # e.g., "PERPLEXITYAI_PERPLEXITY_AI_SEARCH"
-
 execution = client.integrations.execute(
     "perplexity",
     user_id="user_123",
@@ -657,160 +482,33 @@ execution = client.integrations.execute(
 print(execution)
 ```
 
-**Connection results** come back as an `IntegrationConnectionResult` object, with `success`, `redirect_url`, and `instructions` fields so you can direct users through OAuth or API-key flows.
-
 ---
 
-## Files API
+## Models API
 
-Upload and manage files for use with chat, OCR, and other endpoints:
-
-### Upload File
+List available models:
 
 ```python
-# Upload a file from local storage
-with open("document.pdf", "rb") as f:
-    response = client.files.upload(
-        file=f,
-        purpose="assistants"  # Purpose: "assistants", "vision", "ocr"
-    )
-
-print(f"File ID: {response.file_id}")
-print(f"Filename: {response.filename}")
-print(f"Size: {response.bytes} bytes")
-```
-
-### Upload from URL
-
-```python
-# Upload a file from a URL
-response = client.files.upload_url(
-    url="https://example.com/document.pdf",
-    purpose="ocr"
-)
-
-print(f"File ID: {response.file_id}")
-print(f"Status: {response.status}")
-```
-
-### Confirm Upload
-
-```python
-# Confirm file upload completed successfully
-response = client.files.confirm_upload(
-    file_id="file_abc123"
-)
-
-print(f"Confirmed: {response.confirmed}")
-print(f"Ready for use: {response.ready}")
-```
-
-### Get File Metadata
-
-```python
-# Retrieve file metadata
-metadata = client.files.metadata(
-    file_id="file_abc123"
-)
-
-print(f"Filename: {metadata.filename}")
-print(f"Size: {metadata.size}")
-print(f"Created: {metadata.created_at}")
-print(f"Purpose: {metadata.purpose}")
-```
-
-### List Files
-
-```python
-# List all uploaded files
-files = client.files.list()
-
-for file in files.data:
-    print(f"{file.id}: {file.filename} ({file.size} bytes)")
-```
-
-### Delete File
-
-```python
-# Delete a file
-response = client.files.delete(file_id="file_abc123")
-
-print(f"Deleted: {response.deleted}")
-```
-
-### Parameters
-
-**Upload:**
-- `file` (required): File object or file path
-- `purpose` (required): "assistants", "vision", "ocr", or "fine-tune"
-- `filename` (optional): Custom filename
-
-**Upload URL:**
-- `url` (required): Public URL to the file
-- `purpose` (required): File purpose
-- `filename` (optional): Custom filename
-
-### Response Structure
-
-- `file_id`: Unique file identifier
-- `filename`: Original or custom filename
-- `bytes` / `size`: File size in bytes
-- `purpose`: Intended use case
-- `created_at`: Upload timestamp
-- `status`: Upload status ("uploaded", "processing", "ready", "error")
-
-### Use Cases
-
-- Upload documents for OCR processing
-- Provide context files for chat conversations
-- Upload images for vision models
-- Store files for later reference
-
-### Using Files with Other Endpoints
-
-```python
-# Upload and use with OCR
-with open("invoice.pdf", "rb") as f:
-    file_response = client.files.upload(f, purpose="ocr")
-
-ocr_response = client.ocr.pdf(file_id=file_response.file_id)
-print(ocr_response.text)
-
-# Upload and use with messages
-with open("context.pdf", "rb") as f:
-    file_response = client.files.upload(f, purpose="assistants")
-
-response = client.messages.create(
-    model="small-1",
-    messages=[
-        {
-            "role": "user",
-            "content": "Summarize this document",
-            "attachments": [{"file_id": file_response.file_id}]
-        }
-    ],
-    max_tokens=500
-)
+models = client.models.list()
+print(f"Available models: {len(models['data'])}")
+for model in models['data']:
+    print(f"- {model['id']}")
 ```
 
 ---
 
 ## Error Handling
 
-The SDK raises exceptions for various error conditions. Always wrap API calls in try-except blocks for production use:
-
-### Basic Error Handling
+The SDK provides typed exceptions for different error conditions:
 
 ```python
 from incredible_python import Incredible
-from incredible_python.exceptions import (
-    IncredibleAPIError,
+from incredible_python._exceptions import (
     AuthenticationError,
     RateLimitError,
-    InvalidRequestError,
-    ServerError,
-    TimeoutError,
-    NetworkError
+    NotFoundError,
+    ValidationError,
+    APIError,
 )
 
 client = Incredible()
@@ -821,710 +519,55 @@ try:
         messages=[{"role": "user", "content": "Hello"}],
         max_tokens=100
     )
-    print(response.content[0]['text'])
-
 except AuthenticationError as e:
     print(f"Authentication failed: {e}")
-    print("Check your API key")
-
 except RateLimitError as e:
-    print(f"Rate limit exceeded: {e}")
-    print(f"Retry after: {e.retry_after} seconds")
-
-except InvalidRequestError as e:
+    print(f"Rate limited. Retry after: {e.retry_after}s")
+except NotFoundError as e:
+    print(f"Resource not found: {e.message}")
+except ValidationError as e:
     print(f"Invalid request: {e}")
-    print(f"Status code: {e.status_code}")
-    print(f"Error details: {e.error}")
-
-except ServerError as e:
-    print(f"Server error: {e}")
-    print("The API is experiencing issues, please try again")
-
-except TimeoutError as e:
-    print(f"Request timed out: {e}")
-    print("Try increasing the timeout or retry")
-
-except NetworkError as e:
-    print(f"Network error: {e}")
-    print("Check your internet connection")
-
-except IncredibleAPIError as e:
-    # Catch-all for any API error
+except APIError as e:
     print(f"API error: {e}")
 ```
 
-### Error Response Structure
+---
 
-All exceptions include the following attributes:
+## Helper Utilities
 
-- `message`: Human-readable error message
-- `status_code`: HTTP status code (if applicable)
-- `error`: Error type or code
-- `request_id`: Request ID for debugging (include in support requests)
-
-### Retry Logic
+The SDK includes helper functions for tool execution workflows:
 
 ```python
-import time
-from incredible_python.exceptions import RateLimitError, ServerError, TimeoutError
+from incredible_python import helpers
 
-def call_with_retry(func, max_retries=3, backoff=2):
-    """
-    Call an API function with exponential backoff retry logic.
-    """
-    for attempt in range(max_retries):
-        try:
-            return func()
-        
-        except RateLimitError as e:
-            if attempt == max_retries - 1:
-                raise
-            wait_time = e.retry_after if hasattr(e, 'retry_after') else backoff ** attempt
-            print(f"Rate limited. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}")
-            time.sleep(wait_time)
-        
-        except (ServerError, TimeoutError) as e:
-            if attempt == max_retries - 1:
-                raise
-            wait_time = backoff ** attempt
-            print(f"Temporary error. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}")
-            time.sleep(wait_time)
-        
-        except Exception as e:
-            # Don't retry on client errors
-            raise
+# Build execution plan from response
+plan = helpers.build_tool_execution_plan(response.raw)
 
-# Usage
-response = call_with_retry(
-    lambda: client.messages.create(
-        model="small-1",
-        messages=[{"role": "user", "content": "Hello"}],
-        max_tokens=100
-    )
-)
-```
+# Execute plan with registry
+results = helpers.execute_plan(plan, registry=your_tool_registry)
 
-### Timeout Configuration
-
-```python
-# Set custom timeout (in seconds)
-client = Incredible(
-    api_key="your-api-key",
-    timeout=60.0  # 60 seconds
-)
-
-# Or set per-request
-response = client.messages.create(
-    model="small-1",
-    messages=[{"role": "user", "content": "Hello"}],
-    max_tokens=100,
-    timeout=30.0  # Override default timeout for this request
-)
-```
-
-### Best Practices
-
-1. **Always handle errors**: Wrap API calls in try-except blocks
-2. **Log errors**: Include `request_id` in logs for debugging
-3. **Implement retries**: Use exponential backoff for transient errors
-4. **Validate inputs**: Check parameters before making requests
-5. **Monitor rate limits**: Implement rate limiting in your application
-6. **Set timeouts**: Configure appropriate timeouts for your use case
-7. **Graceful degradation**: Have fallback behavior when API calls fail
-
-### Common Error Scenarios
-
-**Invalid Model:**
-```python
-try:
-    response = client.messages.create(
-        model="invalid-model",
-        messages=[{"role": "user", "content": "Hello"}]
-    )
-except InvalidRequestError as e:
-    if "model" in str(e).lower():
-        print("Model not found. Available models:")
-        models = client.models.list()
-        for model in models.data:
-            print(f"- {model.id}")
-```
-
-**Token Limit Exceeded:**
-```python
-try:
-    response = client.messages.create(
-        model="small-1",
-        messages=[{"role": "user", "content": "Hello"}],
-        max_tokens=1000000  # Too large
-    )
-except InvalidRequestError as e:
-    if "max_tokens" in str(e).lower():
-        print("Requested too many tokens. Try a smaller value.")
-```
-
-**Missing Required Parameters:**
-```python
-try:
-    response = client.messages.create(
-        model="small-1"
-        # Missing required 'messages' parameter
-    )
-except InvalidRequestError as e:
-    print(f"Missing required parameter: {e}")
+# Build follow-up messages
+follow_up = helpers.build_follow_up_messages(original_messages, plan, results)
 ```
 
 ---
 
-## Advanced Features
+## Examples
 
-### Batch Processing
-
-Process multiple requests efficiently:
-
-```python
-from incredible_python import Incredible
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-client = Incredible()
-
-# Batch chat requests
-prompts = [
-    "Explain photosynthesis in one sentence",
-    "What is the capital of Japan?",
-    "Define machine learning",
-    "How does gravity work?",
-    "What is DNA?"
-]
-
-def process_prompt(prompt):
-    """Process a single prompt."""
-    try:
-        response = client.messages.create(
-            model="small-1",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=100
-        )
-        return {"prompt": prompt, "response": response.content[0]['text'], "success": True}
-    except Exception as e:
-        return {"prompt": prompt, "error": str(e), "success": False}
-
-# Process in parallel
-results = []
-with ThreadPoolExecutor(max_workers=5) as executor:
-    futures = [executor.submit(process_prompt, prompt) for prompt in prompts]
-    
-    for future in as_completed(futures):
-        result = future.result()
-        results.append(result)
-        if result["success"]:
-            print(f"✓ {result['prompt'][:30]}...")
-        else:
-            print(f"✗ {result['prompt'][:30]}... - {result['error']}")
-
-# Process results
-successful = [r for r in results if r["success"]]
-failed = [r for r in results if not r["success"]]
-
-print(f"\nCompleted: {len(successful)}/{len(prompts)}")
-print(f"Failed: {len(failed)}")
-```
-
-### Rate Limiting
-
-Implement rate limiting to avoid hitting API limits:
-
-```python
-import time
-from collections import deque
-from threading import Lock
-
-class RateLimiter:
-    """Simple rate limiter using a sliding window."""
-    
-    def __init__(self, max_requests, time_window):
-        """
-        Args:
-            max_requests: Maximum number of requests allowed
-            time_window: Time window in seconds
-        """
-        self.max_requests = max_requests
-        self.time_window = time_window
-        self.requests = deque()
-        self.lock = Lock()
-    
-    def acquire(self):
-        """Wait if necessary to respect rate limit."""
-        with self.lock:
-            now = time.time()
-            
-            # Remove old requests outside the time window
-            while self.requests and self.requests[0] <= now - self.time_window:
-                self.requests.popleft()
-            
-            # Wait if at capacity
-            if len(self.requests) >= self.max_requests:
-                sleep_time = self.requests[0] + self.time_window - now
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
-                    return self.acquire()  # Recursive call after waiting
-            
-            # Record this request
-            self.requests.append(now)
-
-# Usage
-client = Incredible()
-rate_limiter = RateLimiter(max_requests=10, time_window=60)  # 10 requests per minute
-
-for i in range(20):
-    rate_limiter.acquire()  # Will wait if necessary
-    
-    response = client.messages.create(
-        model="small-1",
-        messages=[{"role": "user", "content": f"Request {i+1}"}],
-        max_tokens=50
-    )
-    print(f"Request {i+1} completed")
-```
-
-### Caching Responses
-
-Implement response caching to reduce API calls:
-
-```python
-import hashlib
-import json
-from functools import wraps
-
-class ResponseCache:
-    """Simple in-memory cache for API responses."""
-    
-    def __init__(self, ttl=3600):
-        """
-        Args:
-            ttl: Time to live in seconds (default: 1 hour)
-        """
-        self.cache = {}
-        self.ttl = ttl
-    
-    def _generate_key(self, *args, **kwargs):
-        """Generate cache key from arguments."""
-        key_data = json.dumps({"args": args, "kwargs": kwargs}, sort_keys=True)
-        return hashlib.md5(key_data.encode()).hexdigest()
-    
-    def get(self, key):
-        """Get cached response if not expired."""
-        if key in self.cache:
-            timestamp, value = self.cache[key]
-            if time.time() - timestamp < self.ttl:
-                return value
-            else:
-                del self.cache[key]
-        return None
-    
-    def set(self, key, value):
-        """Cache a response."""
-        self.cache[key] = (time.time(), value)
-    
-    def clear(self):
-        """Clear all cached responses."""
-        self.cache.clear()
-
-def cached_api_call(cache, ttl=3600):
-    """Decorator to cache API responses."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            cache_key = cache._generate_key(*args, **kwargs)
-            
-            # Try to get from cache
-            cached_response = cache.get(cache_key)
-            if cached_response is not None:
-                print(f"Cache hit for {func.__name__}")
-                return cached_response
-            
-            # Call API and cache result
-            print(f"Cache miss for {func.__name__}")
-            response = func(*args, **kwargs)
-            cache.set(cache_key, response)
-            return response
-        
-        return wrapper
-    return decorator
-
-# Usage
-cache = ResponseCache(ttl=3600)  # 1 hour TTL
-
-@cached_api_call(cache)
-def get_answer(query):
-    client = Incredible()
-    response = client.answer(query=query)
-    return response.answer
-
-# First call - hits API
-answer1 = get_answer("What is Python?")
-print(answer1)
-
-# Second call - uses cache
-answer2 = get_answer("What is Python?")
-print(answer2)
-```
-
-### Context Window Management
-
-Manage conversation context to stay within token limits:
-
-```python
-def count_tokens_estimate(text):
-    """
-    Rough estimate of token count.
-    Actual count may vary - use client.messages.count_tokens when available.
-    """
-    # Rough approximation: ~4 characters per token
-    return len(text) // 4
-
-def truncate_conversation(messages, max_tokens=4000):
-    """
-    Truncate conversation history to fit within token limit.
-    Keeps system message and recent messages.
-    """
-    if not messages:
-        return messages
-    
-    # Separate system messages from conversation
-    system_messages = [m for m in messages if m.get("role") == "system"]
-    conversation = [m for m in messages if m.get("role") != "system"]
-    
-    # Count tokens in system messages
-    system_tokens = sum(count_tokens_estimate(json.dumps(m)) for m in system_messages)
-    available_tokens = max_tokens - system_tokens
-    
-    # Add messages from most recent backwards
-    truncated = []
-    current_tokens = 0
-    
-    for message in reversed(conversation):
-        message_tokens = count_tokens_estimate(json.dumps(message))
-        if current_tokens + message_tokens > available_tokens:
-            break
-        truncated.insert(0, message)
-        current_tokens += message_tokens
-    
-    return system_messages + truncated
-
-# Usage
-client = Incredible()
-
-conversation_history = [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "Tell me about Python"},
-    {"role": "assistant", "content": "Python is a high-level programming language..."},
-    {"role": "user", "content": "What about its history?"},
-    {"role": "assistant", "content": "Python was created by Guido van Rossum..."},
-    # ... many more messages
-]
-
-# Truncate to fit within limits
-truncated = truncate_conversation(conversation_history, max_tokens=2000)
-
-response = client.messages.create(
-    model="small-1",
-    messages=truncated + [{"role": "user", "content": "Summarize what we discussed"}],
-    max_tokens=200
-)
-```
-
-### Streaming with Callbacks
-
-> **Note**: This feature is for future use when streaming is fully available. Currently in SDK version 0.1.2, streaming is still in development.
-
-Process streaming responses with custom callbacks:
-
-```python
-class StreamHandler:
-    """Handler for processing streaming responses."""
-    
-    def __init__(self):
-        self.full_text = ""
-        self.chunks = []
-    
-    def on_start(self):
-        """Called when stream starts."""
-        print("Stream started...")
-    
-    def on_chunk(self, chunk):
-        """Called for each chunk."""
-        self.chunks.append(chunk)
-        self.full_text += chunk
-        print(chunk, end="", flush=True)
-    
-    def on_complete(self):
-        """Called when stream completes."""
-        print("\n\nStream completed!")
-        print(f"Total chunks: {len(self.chunks)}")
-        print(f"Total length: {len(self.full_text)}")
-    
-    def on_error(self, error):
-        """Called on error."""
-        print(f"\nStream error: {error}")
-
-def stream_with_handler(client, messages, handler):
-    """Stream response with custom handler."""
-    try:
-        handler.on_start()
-        
-        stream = client.messages.stream(
-            model="small-1",
-            messages=messages,
-            max_tokens=500
-        )
-        
-        for event in stream.iter_lines():
-            content_block = event.get("content")
-            if isinstance(content_block, dict) and content_block.get("type") == "content_chunk":
-                handler.on_chunk(content_block.get("content", ""))
-        
-        handler.on_complete()
-        return handler.full_text
-        
-    except Exception as e:
-        handler.on_error(e)
-        raise
-
-# Usage
-client = Incredible()
-handler = StreamHandler()
-
-response_text = stream_with_handler(
-    client,
-    [{"role": "user", "content": "Write a short story about a robot"}],
-    handler
-)
-```
-
-### Multi-Step Workflows
-
-Chain multiple API calls for complex workflows:
-
-```python
-def research_and_summarize(topic, client):
-    """
-    Multi-step workflow: research a topic, then summarize findings.
-    """
-    print(f"Step 1: Researching {topic}...")
-    
-    # Step 1: Deep research
-    research = client.deep_research(
-        query=f"Comprehensive overview of {topic}",
-        depth="standard"
-    )
-    
-    print(f"Step 2: Extracting key points...")
-    
-    # Step 2: Extract key points
-    extraction = client.messages.create(
-        model="small-1",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Extract 5 key points from this research:\n\n{research.report}"
-            }
-        ],
-        max_tokens=300
-    )
-    
-    key_points = extraction.content[0]['text']
-    
-    print(f"Step 3: Creating executive summary...")
-    
-    # Step 3: Create executive summary
-    summary = client.messages.create(
-        model="small-1",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Create a one-paragraph executive summary based on these key points:\n\n{key_points}"
-            }
-        ],
-        max_tokens=200
-    )
-    
-    print(f"Step 4: Generating title...")
-    
-    # Step 4: Generate catchy title
-    title = client.messages.create(
-        model="small-1",
-        messages=[
-            {
-                "role": "user",
-                "content": f"Generate a catchy title for this summary:\n\n{summary.content[0]['text']}"
-            }
-        ],
-        max_tokens=50
-    )
-    
-    return {
-        "title": title.content[0]['text'].strip(),
-        "summary": summary.content[0]['text'],
-        "key_points": key_points,
-        "full_research": research.report,
-        "sources": research.sources
-    }
-
-# Usage
-client = Incredible()
-result = research_and_summarize("Quantum Computing Applications", client)
-
-print(f"\n{'='*60}")
-print(f"TITLE: {result['title']}")
-print(f"{'='*60}")
-print(f"\nSUMMARY:\n{result['summary']}")
-print(f"\nKEY POINTS:\n{result['key_points']}")
-print(f"\nSOURCES: {len(result['sources'])} sources consulted")
-```
+See the [Incredible API Cookbook](https://github.com/Norditech-AB/Incredible-API-Cookbook) for complete examples and use cases.
 
 ---
 
-## API Reference Summary
-
-Quick reference of all available endpoints:
-
-### Chat & Completions
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.messages.create()` | Chat completion | `model`, `messages`, `max_tokens`, `temperature` |
-| `client.messages.stream()` | Streaming chat | `model`, `messages`, `max_tokens` |
-| `client.completions.create()` | Text completion | `model`, `prompt`, `max_tokens`, `temperature` |
-
-### Models & Resources
-
-| Method | Description | Returns |
-|--------|-------------|---------|
-| `client.models.list()` | List available models | Array of model objects |
-
-### Specialized Services
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.answer()` | Simple Q&A | `query`, `model`, `max_tokens` |
-| `client.conversation()` | Multi-turn chat | `messages`, `model`, `temperature` |
-| `client.agent()` | Autonomous agent | `messages`, `tools`, `max_tokens` |
-| `client.web_search()` | Web search | `query`, `max_results` |
-| `client.deep_research()` | In-depth research | `query`, `depth`, `max_sources` |
-
-### Media Generation
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.generate_image()` | Generate images | `prompt`, `size`, `quality`, `style` |
-| `client.generate_video()` | Generate videos | `prompt`, `duration`, `resolution`, `fps` |
-
-### OCR
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.ocr.health()` | Check OCR service | None |
-| `client.ocr.image()` | Extract text from image | `image_url` or `image_file`, `language` |
-| `client.ocr.pdf()` | Extract text from PDF | `pdf_url` or `pdf_file`, `pages`, `language` |
-
-### Files
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.files.upload()` | Upload file | `file`, `purpose` |
-| `client.files.upload_url()` | Upload from URL | `url`, `purpose` |
-| `client.files.list()` | List files | None |
-| `client.files.metadata()` | Get file info | `file_id` |
-| `client.files.delete()` | Delete file | `file_id` |
-| `client.files.confirm_upload()` | Confirm upload | `file_id` |
-
-### Integrations
-
-| Method | Description | Key Parameters |
-|--------|-------------|----------------|
-| `client.integrations.list()` | List integrations | None |
-| `client.integrations.retrieve()` | Get integration details | `integration_id` |
-| `client.integrations.connect()` | Connect integration | `integration_id`, `user_id`, credentials |
-| `client.integrations.execute()` | Execute integration | `integration_id`, `user_id`, `feature_name`, `inputs` |
-
-### Helper Functions
-
-| Function | Description | Use Case |
-|----------|-------------|----------|
-| `helpers.build_tool_execution_plan()` | Parse tool calls | Function calling workflows |
-| `helpers.execute_plan()` | Execute tool plan | Run functions from registry |
-| `helpers.build_follow_up_messages()` | Build follow-up | Send results back to model |
-
----
-
-## Example Projects
-
-- `examples/demo.py`: An end-to-end script that hits chat, tool execution, streaming, and integrations.
-- `examples/testpypi_demo/basic_demo.py`: Minimal example installing the SDK from TestPyPI and running a quick chat.
-
-To run the TestPyPI demo:
-
-```bash
-cd examples/testpypi_demo
-python -m venv .venv-demo
-source .venv-demo/bin/activate    # Windows: .venv-demo\Scripts\activate
-pip install --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            incredible-python==0.1.1
-python basic_demo.py
-```
-
----
-
-## Known Limitations
-
-- **`messages.count_tokens`**: The live API has not enabled `/v1/messages/count_tokens` yet. The SDK keeps the method for forward compatibility; for now it returns 404 with an informative error message.
-- **Streaming**: Currently in development (SDK v0.1.2). The `client.messages.stream()` method exists but the `iter_lines()` interface is not yet available. Plan for a future SDK update that will formalize streaming support.
-- **Models API Response**: Returns a dictionary with a `data` key rather than an object with a `.data` attribute. Access models using `models['data']`.
-- **OCR Health Response**: Returns a dictionary. Access fields using dictionary notation: `health['status']` and `health['ocr_enabled']`.
-- **Integration Feature Names**: Feature names are integration-specific (e.g., "PERPLEXITYAI_PERPLEXITY_AI_SEARCH"). Always retrieve the correct feature name from `client.integrations.retrieve()` before execution.
-- **Large Context Data**: For multi-megabyte payloads (HTML, documents), **always register a tool** that fetches the data instead of injecting it directly into `messages`. The live API's context window will overflow if you paste large raw content.
-
----
-
-## Release History
-
-| Version | Date | Notes |
-| --- | --- | --- |
-| 0.1.2 | 2025-11-19 | Current production release. Includes all core features: messages, completions, models, answer, conversation, agent, web_search, deep_research, generate_image, generate_video, OCR, integrations. Streaming is in development. |
-| 0.1.1 | 2025-10-01 | Published to TestPyPI/PyPI, tool execution helpers, integration flow, token usage attached to responses. |
-| 0.1.0 | 2025-09-25 | Initial SDK release (basic chat + function calling). |
-
-**Note**: Documentation may reference features planned for version 1.0.0+ that are still in development.
-
----
-
-## See Also
+## Additional Resources
 
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
-  <Card title="Introduction" icon="book" href="/">
-    Overview and quickstart.
+  <Card title="API Reference" icon="book" href="/">
+    Complete API documentation.
   </Card>
   <Card title="Core Concepts" icon="lightbulb" href="/guides/core-concepts">
-    What makes Incredible different.
+    Understanding the Incredible API.
   </Card>
-  <Card title="Models Overview" icon="brain" href="/guides/models-overview">
-    Available models and capabilities.
-  </Card>
-  <Card title="Taking Actions" icon="wrench" href="/guides/function-calling">
+  <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
     Implement tool use.
-  </Card>
-  <Card title="Streaming Responses" icon="book" href="/guides/streaming-responses">
-    Handle SSE and streaming helpers.
-  </Card>
-  <Card title="Cookbook" icon="github" href="https://github.com/Norditech-AB/Incredible-API-Cookbook">
-    Examples and boilerplates.
-  </Card>
-  
-</div>
-
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', gap: '16px', marginTop: '16px' }}>
-  <Card title="Examples & cookbooks on GitHub" icon="github" href="https://github.com/Norditech-AB/Incredible-API-Cookbook">
-    Browse example projects and recipes.
   </Card>
 </div>

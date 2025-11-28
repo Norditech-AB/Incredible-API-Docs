@@ -47,7 +47,7 @@ const incredible = createOpenAICompatible({
 });
 ```
 
-- `createOpenAICompatible` gives you a drop-in client for any OpenAI-style model ID (use `small-2` for public access).
+- `createOpenAICompatible` gives you a drop-in client for any OpenAI-style model ID (use `conversation` for public access).
 - The optional `User-Agent` header mirrors the sample script; keep it if your environment standardises outbound requests.
 
 ---
@@ -59,7 +59,7 @@ The full sample streams tokens to `stdout` while keeping the rest of the script 
 ```ts
 async function main() {
   const prompt = process.argv[2] ?? 'Say hello in one sentence.';
-  const modelId = 'small-2';
+  const modelId = 'conversation';
 
   const result = await streamText({
     model: incredible(modelId),

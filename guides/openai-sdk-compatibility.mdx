@@ -1,7 +1,6 @@
 ---
-title: OpenAI SDK compatibility
+title: OpenAI
 description: Use the official OpenAI SDK to call Incredible’s OpenAI-compatible models.
-sidebarTitle: OpenAI SDK compatibility
 section: SDKs
 ---
 
@@ -24,7 +23,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="small-1",
+    model="conversation",
     messages=[
         {"role": "user", "content": "Hello, world"}
     ],
@@ -56,7 +55,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
+  model: process.env.INCREDIBLE_MODEL_ID ?? "conversation",
   messages: [{ role: "user", content: "Hello, world" }],
   temperature: 0.3,
 });
@@ -86,7 +85,7 @@ client = OpenAI(
 )
 
 stream = client.chat.completions.create(
-    model="small-1",
+    model="conversation",
     messages=[
         {"role": "user", "content": "Stream a short greeting."}
     ],
@@ -118,7 +117,7 @@ const client = new OpenAI({
 });
 
 const stream = await client.chat.completions.create({
-  model: process.env.INCREDIBLE_MODEL_ID ?? "small-1",
+  model: process.env.INCREDIBLE_MODEL_ID ?? "conversation",
   messages: [{ role: "user", content: "Stream a short greeting." }],
   temperature: 0.2,
   stream: true,
