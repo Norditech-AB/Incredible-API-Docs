@@ -1,8 +1,29 @@
 ---
 title: "Answer"
-description: "Get direct answers or structured JSON output. Perfect for Q&A, data extraction, and classification tasks."
+description: "Get direct answers to questions. Simple question-answering endpoint."
 openapi: "POST /v1/answer"
 ---
+
+<a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
+  <div style={{ 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '12px', 
+    padding: '20px', 
+    margin: '24px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  }}>
+    <div style={{ fontSize: '32px' }}>🔑</div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>Get your Incredible API key</div>
+      <div style={{ fontSize: '14px', color: '#6b7280' }}>Generate your API key to start using this endpoint</div>
+    </div>
+    <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
+  </div>
+</a>
 
 ## Examples
 
@@ -11,26 +32,14 @@ openapi: "POST /v1/answer"
 ```python Python SDK
 from incredible_python import Incredible
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 # Simple answer
-response = client.answer(query="What is the capital of France?")
-print(response.answer)
-
-# Structured output
-schema = {
-    "type": "object",
-    "properties": {
-        "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
-        "confidence": {"type": "number"}
-    }
-}
-
 response = client.answer(
-    query="Analyze this review: 'Great product, highly recommend!'",
-    response_format=schema
+    query="What is the meaning of life?"
 )
-print(response.data)  # {"sentiment": "positive", "confidence": 0.95}
+
+print(response.answer)
 ```
 
 ```ts TypeScript SDK
@@ -38,26 +47,11 @@ import { IncredibleClient } from '@incredible-ai/sdk';
 
 const client = new IncredibleClient();
 
-// Simple answer
 const response = await client.answer({
   query: 'What is the capital of France?'
 });
+
 console.log(response.answer);
-
-// Structured output
-const schema = {
-  type: 'object',
-  properties: {
-    sentiment: { type: 'string', enum: ['positive', 'negative', 'neutral'] },
-    confidence: { type: 'number' }
-  }
-};
-
-const structured = await client.answer({
-  query: 'Analyze sentiment: "Great product!"',
-  responseFormat: schema
-});
-console.log(structured.data);
 ```
 
 ```python OpenAI SDK
@@ -91,45 +85,12 @@ curl -X POST "https://api.incredible.one/v1/answer" \
 ## Parameters
 
 - **query** (required) — The question to answer
-- **response_format** (optional) — JSON schema for structured output
-- **file_ids** (optional) — List of file IDs to include with the query
-- **stream** (optional) — Enable streaming response
 
 ## Response
 
-**Simple mode:**
 ```json
 {
   "success": true,
   "answer": "The capital of France is Paris."
 }
 ```
-
-**Structured mode:**
-```json
-{
-  "success": true,
-  "data": {
-    "sentiment": "positive",
-    "confidence": 0.95
-  }
-}
-```
-
-## Using Files
-
-Attach files to your query using `file_ids`. Files are automatically processed and their content is included in the query context.
-
-```python
-# Upload file first (see Files API), then use file_id
-response = client.answer(
-    query="Summarize this document",
-    file_ids=["file-abc123", "file-def456"]
-)
-```
-
-<Info>
-**Upload Once, Reuse Forever**
-
-Upload files using the [Files API](/api-reference/files/overview) once, then reuse the `file_id` across unlimited requests. No need to re-upload the same file.
-</Info>

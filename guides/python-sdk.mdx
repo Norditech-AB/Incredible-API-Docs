@@ -11,6 +11,29 @@ The official Python SDK for the [Incredible API](https://docs.incredible.one/). 
 
 ---
 
+<a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
+  <div style={{ 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '12px', 
+    padding: '20px', 
+    margin: '24px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  }}>
+    <div style={{ fontSize: '32px' }}>🔑</div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>Get your Incredible API key</div>
+      <div style={{ fontSize: '14px', color: '#6b7280' }}>Generate your API key to start using the SDK</div>
+    </div>
+    <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
+  </div>
+</a>
+
+---
+
 ## Installation
 
 ```bash
@@ -26,7 +49,7 @@ The SDK requires Python 3.8 or higher.
 ```python
 from incredible_python import Incredible
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 # Simple chat completion
 response = client.messages.create(
@@ -121,7 +144,7 @@ print(f"Usage: {response.token_usage}")
 ```python
 from incredible_python import Incredible, helpers
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 functions = [
     {
@@ -162,7 +185,7 @@ if response.tool_calls:
         }
         
         # Execute tools
-        results = helpers.execute_plan(plan, registry=registry)
+    results = helpers.execute_plan(plan, registry=registry)
         
         # Build follow-up messages
         follow_up = helpers.build_follow_up_messages(
@@ -172,13 +195,13 @@ if response.tool_calls:
         )
         
         # Get final response
-        final = client.messages.create(
-            model="small-1",
-            max_tokens=256,
-            messages=follow_up,
-            functions=functions,
-        )
-        
+    final = client.messages.create(
+        model="small-1",
+        max_tokens=256,
+        messages=follow_up,
+        functions=functions,
+    )
+
         print(final.content[0]['text'])
 ```
 
@@ -220,24 +243,11 @@ Simple question-answering with optional structured output:
 
 ```python
 # Simple answer
-response = client.answer(query="What is the speed of light?")
-print(response.answer)
-
-# Structured output
-schema = {
-    "type": "object",
-    "properties": {
-        "result": {"type": "number"},
-        "explanation": {"type": "string"},
-    },
-    "required": ["result"],
-}
-
 response = client.answer(
-    query="What is 10% of 100?",
-    response_format=schema
+    query="What is the meaning of life?"
 )
-print(response.data)  # Structured data matching schema
+
+print(response.answer)
 ```
 
 ---
@@ -249,9 +259,9 @@ Multi-turn conversations with automatic context management:
 ```python
 response = client.conversation(
     messages=[
-        {"role": "user", "content": "Hi, I'm working on a Python project"},
-        {"role": "assistant", "content": "Hello! What are you building?"},
-        {"role": "user", "content": "I need to parse JSON files. Any suggestions?"}
+        {"role": "user", "content": "Hello!"},
+        {"role": "assistant", "content": "Hi there! How can I help you today?"},
+        {"role": "user", "content": "Tell me a joke"}
     ]
 )
 
@@ -267,29 +277,29 @@ Autonomous agents with tool calling:
 ```python
 tools = [
     {
-        "name": "web_search",
-        "description": "Search the web for information",
+        "name": "calculator",
+        "description": "Perform basic arithmetic calculations",
         "input_schema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "Search query"}
+                "expression": {"type": "string", "description": "Math expression to evaluate"}
             },
-            "required": ["query"]
+            "required": ["expression"]
         }
-    },
+    }
 ]
 
 response = client.agent(
-    messages=[{"role": "user", "content": "Search for the current Bitcoin price"}],
-    tools=tools,
-    max_tokens=500
+    messages=[{"role": "user", "content": "What is 25 * 4?"}],
+    tools=tools
 )
 
+# Check for tool calls
 if response.tool_calls:
     for call in response.tool_calls:
         print(f"Tool: {call.name}, Inputs: {call.inputs}")
 else:
-    print(response.content[0]['text'])
+    print(response.content)
 ```
 
 ---
@@ -298,14 +308,12 @@ else:
 
 ```python
 response = client.web_search(
-    query="Latest developments in quantum computing 2024",
-    max_results=5
+    query="Python programming language",
+    num_results=5
 )
 
-print("Answer:", response.answer)
-print("\nSources:")
-for source in response.sources:
-    print(f"- {source['title']}: {source['url']}")
+for result in response.results:
+    print(f"{result.title}: {result.url}")
 ```
 
 ---
@@ -316,15 +324,15 @@ In-depth research with multiple searches and synthesis:
 
 ```python
 response = client.deep_research(
-    query="Comprehensive analysis of renewable energy trends in 2024",
-    depth="thorough"  # Options: "quick", "standard", "thorough"
+    instructions="Research the history of Python programming language"
 )
 
-print("Research Report:")
-print(response.report)
-print("\nKey Findings:")
-for finding in response.key_findings:
-    print(f"- {finding}")
+print(response.output)
+
+if response.citations:
+    print(f"\nCitations: {len(response.citations)}")
+    for citation in response.citations:
+        print(f"  - {citation.title}: {citation.url}")
 ```
 
 ---
@@ -333,42 +341,49 @@ for finding in response.key_findings:
 
 ```python
 response = client.generate_image(
-    prompt="A serene mountain landscape at sunset, digital art style",
-    size="1024x1024",
-    quality="high"
+    prompt="A red circle",
+    aspect_ratio="1:1"
 )
 
 print("Image URL:", response.image_url)
-print("Revised prompt:", response.revised_prompt)
+print("Seed:", response.seed)
 ```
 
 **Parameters:**
 - `prompt` (required): Text description
-- `size` (optional): "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"
-- `quality` (optional): "standard" or "high"
-- `n` (optional): Number of images (default: 1)
-- `style` (optional): "vivid" or "natural"
+- `aspect_ratio` (optional): "1:1", "16:9", "9:16", "4:3", "3:4", "21:9", "9:21" (default: "16:9")
+- `output_format` (optional): "jpeg" or "png" (default: "jpeg")
+- `seed` (optional): Set a seed to reproduce the same style composition
+- `prompt_upsampling` (optional): Expand prompt with stylistic hints (default: False)
+- `safety_tolerance` (optional): Content moderation level 0-6 (default: 2)
 
 ---
 
 ## Video Generation
 
 ```python
+import base64
+
 response = client.generate_video(
-    prompt="A time-lapse of a flower blooming in spring",
-    duration=5,  # seconds
-    resolution="720p"
+    prompt="Ocean waves",
+    size="1280x720"
 )
 
-print("Video URL:", response.video_url)
-print("Status:", response.status)
+print(f"Video ID: {response.video_id}")
+print(f"Duration: {response.duration}s")
+
+# Extract base64 video data from data URI
+video_base64 = response.video_url.split(",", 1)[1]
+video_bytes = base64.b64decode(video_base64)
+
+with open("generated_video.mp4", "wb") as f:
+    f.write(video_bytes)
+print("Video saved!")
 ```
 
 **Parameters:**
 - `prompt` (required): Text description
-- `duration` (optional): Video duration in seconds (1-10)
-- `resolution` (optional): "480p", "720p", or "1080p"
-- `fps` (optional): Frames per second (default: 24)
+- `size` (optional): Video dimensions - "1280x720", "720x1280", "1920x1080", "1080x1920", "1024x1024" (default: "1280x720")
 
 ---
 
@@ -379,34 +394,37 @@ Extract text from images and PDFs:
 ### Image OCR
 
 ```python
-# From URL
-response = client.ocr.image(image_url="https://example.com/document.jpg")
-print(response.text)
+import base64
 
-# From local file
-with open("document.jpg", "rb") as f:
-    response = client.ocr.image(image_file=f)
-    print(response.text)
+# From local file (base64-encoded)
+with open("receipt.png", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.ocr.image(image=image_data)
+
+print("Extracted text:", response.text)
+print(f"Method: {response.method}")
 ```
 
 ### PDF OCR
 
 ```python
-# From URL
-response = client.ocr.pdf(
-    pdf_url="https://example.com/document.pdf",
-    pages="1-5"  # Extract specific pages
-)
+import base64
 
-print(f"Pages processed: {len(response.pages)}")
+# From local file (base64-encoded)
+with open("contract.pdf", "rb") as f:
+    pdf_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.ocr.pdf(pdf=pdf_data)
+
+print(f"Processed {response.pages_processed} of {response.total_pages} pages")
+print(f"Method: {response.method}")
+print("PDF text:", response.text[:500])
+
+# Access per-page results
 for page in response.pages:
     print(f"\n--- Page {page.page_number} ---")
-    print(page.text)
-
-# From local file
-with open("document.pdf", "rb") as f:
-    response = client.ocr.pdf(pdf_file=f)
-    print(response.text)
+    print(page.text[:200])
 ```
 
 ---
@@ -511,7 +529,7 @@ from incredible_python._exceptions import (
     APIError,
 )
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 try:
     response = client.messages.create(

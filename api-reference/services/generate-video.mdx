@@ -4,6 +4,27 @@ description: "Generate high-quality videos from text."
 openapi: "POST /v1/generate-video"
 ---
 
+<a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
+  <div style={{ 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '12px', 
+    padding: '20px', 
+    margin: '24px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  }}>
+    <div style={{ fontSize: '32px' }}>🔑</div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>Get your Incredible API key</div>
+      <div style={{ fontSize: '14px', color: '#6b7280' }}>Generate your API key to start using this endpoint</div>
+    </div>
+    <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
+  </div>
+</a>
+
 ## Examples
 
 <CodeGroup>
@@ -12,12 +33,15 @@ openapi: "POST /v1/generate-video"
 from incredible_python import Incredible
 import base64
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 response = client.generate_video(
-    prompt="A golden retriever playing in a sunny park",
+    prompt="Ocean waves",
     size="1280x720"
 )
+
+print(f"Video ID: {response.video_id}")
+print(f"Duration: {response.duration}s")
 
 # Extract and save video
 video_data = response.video_url.split(',')[1]
