@@ -4,6 +4,27 @@ description: "Multi-step web research. Get comprehensive reports with structured
 openapi: "POST /v1/deep-research"
 ---
 
+<a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
+  <div style={{ 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '12px', 
+    padding: '20px', 
+    margin: '24px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  }}>
+    <div style={{ fontSize: '32px' }}>🔑</div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>Get your Incredible API key</div>
+      <div style={{ fontSize: '14px', color: '#6b7280' }}>Generate your API key to start using this endpoint</div>
+    </div>
+    <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
+  </div>
+</a>
+
 ## Examples
 
 <CodeGroup>
@@ -11,17 +32,18 @@ openapi: "POST /v1/deep-research"
 ```python Python SDK
 from incredible_python import Incredible
 
-client = Incredible()
+client = Incredible(api_key="YOUR_API_KEY")
 
 response = client.deep_research(
-    query="Comprehensive analysis of renewable energy trends in 2024",
-    depth="standard"  # Options: "quick", "standard", "thorough"
+    instructions="Research the history of Python programming language"
 )
 
-print("Report:", response.report)
-print("\nKey Findings:")
-for finding in response.key_findings:
-    print(f"- {finding}")
+print(response.output)
+
+if response.citations:
+    print(f"\nCitations: {len(response.citations)}")
+    for citation in response.citations:
+        print(f"  - {citation.title}: {citation.url}")
 ```
 
 ```ts TypeScript SDK
