@@ -149,29 +149,8 @@
               "schema": {
                 "$ref": "#/components/schemas/AnswerRequest"
               },
-              "examples": {
-                "simple": {
-                  "summary": "Simple Answer",
-                  "value": {
-                    "query": "What is the capital of France?"
-                  }
-                },
-                "structured": {
-                  "summary": "Structured Output",
-                  "value": {
-                    "query": "Extract info: John Doe is a 30 year old software engineer in San Francisco",
-                    "response_format": {
-                      "type": "object",
-                      "properties": {
-                        "name": {"type": "string"},
-                        "age": {"type": "number"},
-                        "profession": {"type": "string"},
-                        "location": {"type": "string"}
-                      },
-                      "required": ["name", "age"]
-                    }
-                  }
-                }
+              "example": {
+                "query": "What is the capital of France?"
               }
             }
           }
@@ -184,26 +163,9 @@
                 "schema": {
                   "$ref": "#/components/schemas/AnswerResponse"
                 },
-                "examples": {
-                  "simple": {
-                    "summary": "Simple Answer",
-                    "value": {
-                      "success": true,
-                      "answer": "The capital of France is Paris."
-                    }
-                  },
-                  "structured": {
-                    "summary": "Structured Output",
-                    "value": {
-                      "success": true,
-                      "data": {
-                        "name": "John Doe",
-                        "age": 30,
-                        "profession": "software engineer",
-                        "location": "San Francisco"
-                      }
-                    }
-                  }
+                "example": {
+                  "success": true,
+                  "answer": "The capital of France is Paris."
                 }
               }
             }
@@ -558,40 +520,8 @@
               "schema": {
                 "$ref": "#/components/schemas/DeepResearchRequest"
               },
-              "examples": {
-                "simple": {
-                  "summary": "Simple Research",
-                  "value": {
-                    "instructions": "Research the latest developments in quantum computing"
-                  }
-                },
-                "structured": {
-                  "summary": "Structured Research",
-                  "value": {
-                    "instructions": "Compare flagship GPUs from NVIDIA, AMD, and Intel. Include model name, price, TDP, and launch date",
-                    "output_schema": {
-                      "type": "object",
-                      "required": ["gpus"],
-                      "properties": {
-                        "gpus": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "required": ["manufacturer", "model", "price", "tdp", "launchDate"],
-                            "properties": {
-                              "manufacturer": {"type": "string"},
-                              "model": {"type": "string"},
-                              "price": {"type": "number"},
-                              "tdp": {"type": "integer"},
-                              "launchDate": {"type": "string"}
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "model": "exa-research-pro"
-                  }
-                }
+              "example": {
+                "instructions": "Research the latest developments in quantum computing"
               }
             }
           }
@@ -1360,12 +1290,8 @@
         "properties": {
           "query": {
             "type": "string",
-            "description": "Your question, task, or text to analyze"
-          },
-          "response_format": {
-            "type": "object",
-            "description": "JSON schema defining the structure of the output. If omitted, returns plain text",
-            "additionalProperties": true
+            "description": "Your question, task, or text to analyze",
+            "default": "What is the capital of France?"
           }
         }
       },
@@ -1396,6 +1322,12 @@
             "type": "array",
             "description": "Conversation history with user and assistant messages",
             "minItems": 1,
+            "default": [
+              {
+                "role": "user",
+                "content": "Hello!"
+              }
+            ],
             "items": {
               "type": "object",
               "required": ["role", "content"],
@@ -1403,23 +1335,21 @@
                 "role": {
                   "type": "string",
                   "enum": ["user", "assistant"],
-                  "description": "Role of the message sender"
+                  "description": "Role of the message sender",
+                  "default": "user"
                 },
                 "content": {
                   "type": "string",
-                  "description": "Content of the message"
+                  "description": "Content of the message",
+                  "default": "Hello!"
                 }
               }
             }
           },
           "system_prompt": {
             "type": "string",
-            "description": "System prompt to guide the conversation. Defaults to 'You are a helpful assistant.'"
-          },
-          "stream": {
-            "type": "boolean",
-            "description": "Enable streaming response via Server-Sent Events",
-            "default": false
+            "description": "System prompt to guide the conversation. Defaults to 'You are a helpful assistant.'",
+            "default": "You are a helpful assistant."
           }
         }
       },
@@ -1445,6 +1375,12 @@
             "type": "array",
             "description": "Conversation history with user and assistant messages",
             "minItems": 1,
+            "default": [
+              {
+                "role": "user",
+                "content": "What is 25 * 4?"
+              }
+            ],
             "items": {
               "type": "object",
               "required": ["role", "content"],
@@ -1452,11 +1388,13 @@
                 "role": {
                   "type": "string",
                   "enum": ["user", "assistant"],
-                  "description": "Role of the message sender"
+                  "description": "Role of the message sender",
+                  "default": "user"
                 },
                 "content": {
                   "type": "string",
-                  "description": "Content of the message"
+                  "description": "Content of the message",
+                  "default": "What is 25 * 4?"
                 }
               }
             }
@@ -1465,33 +1403,65 @@
             "type": "array",
             "description": "List of tool definitions available to the agent",
             "minItems": 1,
+            "default": [
+              {
+                "name": "calculator",
+                "description": "Perform basic arithmetic calculations",
+                "input_schema": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "City name"
+                    },
+                    "expression": {
+                      "type": "string",
+                      "description": "Math expression to evaluate"
+                    }
+                  },
+                  "required": ["expression"]
+                }
+              }
+            ],
             "items": {
               "type": "object",
               "required": ["name", "description", "input_schema"],
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "Tool name (should be descriptive)"
+                  "description": "Tool name (should be descriptive)",
+                  "default": "calculator"
                 },
                 "description": {
                   "type": "string",
-                  "description": "What the tool does"
+                  "description": "What the tool does",
+                  "default": "Perform basic arithmetic calculations"
                 },
                 "input_schema": {
                   "type": "object",
-                  "description": "JSON schema defining tool inputs"
+                  "description": "JSON schema defining tool inputs",
+                  "default": {
+                    "type": "object",
+                    "properties": {
+                      "location": {
+                        "type": "string",
+                        "description": "City name"
+                      },
+                      "expression": {
+                        "type": "string",
+                        "description": "Math expression to evaluate"
+                      }
+                    },
+                    "required": ["expression"]
+                  }
                 }
               }
             }
           },
           "system_prompt": {
             "type": "string",
-            "description": "System prompt to guide the agent. Defaults to 'You are a helpful assistant with access to tools.'"
-          },
-          "stream": {
-            "type": "boolean",
-            "description": "Enable streaming response via Server-Sent Events",
-            "default": false
+            "description": "System prompt to guide the agent. Defaults to 'You are a helpful assistant with access to tools.'",
+            "default": "You are a helpful assistant with access to tools."
           }
         }
       },
@@ -1539,7 +1509,8 @@
           "prompt": {
             "type": "string",
             "description": "Text description of the image to generate",
-            "minLength": 1
+            "minLength": 1,
+            "default": "A majestic mountain landscape at sunset with vibrant colors"
           },
           "aspect_ratio": {
             "type": "string",
@@ -1604,7 +1575,8 @@
         "properties": {
           "query": {
             "type": "string",
-            "description": "The search query"
+            "description": "The search query",
+            "default": "latest AI developments"
           },
           "num_results": {
             "type": "integer",
@@ -1707,23 +1679,8 @@
         "properties": {
           "instructions": {
             "type": "string",
-            "description": "Research task instructions in natural language"
-          },
-          "output_schema": {
-            "type": "object",
-            "description": "JSON schema for structured output",
-            "additionalProperties": true
-          },
-          "model": {
-            "type": "string",
-            "enum": ["exa-research", "exa-research-pro"],
-            "default": "exa-research",
-            "description": "Model to use: 'exa-research' (standard) or 'exa-research-pro' (enhanced reasoning)"
-          },
-          "use_cache": {
-            "type": "boolean",
-            "default": true,
-            "description": "Use cached results for identical requests"
+            "description": "Research task instructions in natural language",
+            "default": "Research the latest developments in quantum computing"
           }
         }
       },
