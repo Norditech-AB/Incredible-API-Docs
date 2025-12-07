@@ -10,93 +10,114 @@
   "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
   "favicon": "/logo/Incredible-API-favicon.svg",
   "navigation": {
-    "tabs": [
+    "products": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "product": "API",
+        "description": "Incredible API Documentation",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "index"
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "index"
+                ]
+              },
+              {
+                "group": "Text",
+                "pages": [
+                  "api-reference/services/answer",
+                  "api-reference/services/conversation",
+                  "api-reference/services/agent"
+                ]
+              },
+              {
+                "group": "File Support",
+                "pages": [
+                  "api-reference/files/overview",
+                  "api-reference/files/upload-url",
+                  "api-reference/files/upload-file",
+                  "api-reference/files/confirm-upload",
+                  "api-reference/files/metadata"
+                ]
+              },
+              {
+                "group": "Research",
+                "pages": [
+                  "api-reference/services/web-search",
+                  "api-reference/services/deep-research"
+                ]
+              },
+              {
+                "group": "Media",
+                "pages": [
+                  "api-reference/services/generate-image",
+                  "api-reference/services/generate-video"
+                ]
+              },
+              {
+                "group": "OCR",
+                "pages": [
+                  "api-reference/ocr/image",
+                  "api-reference/ocr/pdf"
+                ]
+              }
             ]
           },
           {
-            "group": "Text",
-            "pages": [
-              "api-reference/services/answer",
-              "api-reference/services/conversation",
-              "api-reference/services/agent"
+            "tab": "SDKs",
+            "groups": [
+              {
+                "group": "SDKs",
+                "pages": [
+                  "guides/python-sdk",
+                  "guides/typescript-sdk"
+                ]
+              },
+              {
+                "group": "External SDKS",
+                "pages": [
+                  "guides/litellm-sdk",
+                  "guides/openai-sdk-compatibility",
+                  "guides/langchain-sdk",
+                  "guides/vercel-ai-sdk"
+                ]
+              }
             ]
           },
           {
-            "group": "File Support",
-            "pages": [
-              "api-reference/files/overview",
-              "api-reference/files/upload-url",
-              "api-reference/files/upload-file",
-              "api-reference/files/confirm-upload",
-              "api-reference/files/metadata"
-            ]
-          },
-          {
-            "group": "Research",
-            "pages": [
-              "api-reference/services/web-search",
-              "api-reference/services/deep-research"
-  
-            ]
-          },
-          {
-            "group": "Media",
-            "pages": [
-              "api-reference/services/generate-image",
-              "api-reference/services/generate-video"
-            ]
-          },
-       
-          
-          {
-            "group": "OCR",
-            "pages": [
-              "api-reference/ocr/image",
-              "api-reference/ocr/pdf"
+            "tab": "Legacy API",
+            "groups": [
+              {
+                "group": "Legacy Endpoints",
+                "pages": [
+                  "api-reference/models",
+                  "api-reference/chat/completion",
+                  "api-reference/endpoint/list-integrations",
+                  "api-reference/endpoint/get-integration",
+                  "api-reference/endpoint/connect-integration",
+                  "api-reference/endpoint/execute-feature"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "SDKs",
-        "groups": [
+        "product": "Agents",
+        "description": "Incredible Agents Platform",
+        "tabs": [
           {
-            "group": "SDKs",
-            "pages": [
-              "guides/python-sdk",
-              "guides/typescript-sdk"
-            ]
-          },
-          {
-            "group": "External SDKS",
-            "pages": [
-              "guides/litellm-sdk",
-              "guides/openai-sdk-compatibility",
-              "guides/langchain-sdk",
-              "guides/vercel-ai-sdk"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Legacy API",
-        "groups": [
-          {
-            "group": "Legacy Endpoints",
-            "pages": [
-              "api-reference/models",
-              "api-reference/chat/completion",
-              "api-reference/endpoint/list-integrations",
-              "api-reference/endpoint/get-integration",
-              "api-reference/endpoint/connect-integration",
-              "api-reference/endpoint/execute-feature"
+            "tab": "Learn Agents",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "agent/index",
+                  "agent/testing"
+                ]
+              }
             ]
           }
         ]
