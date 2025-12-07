@@ -142,15 +142,19 @@
             "BearerAuth": []
           }
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "label": "cURL",
+            "source": "curl --request POST \\\n  --url https://api.incredible.one/v1/answer \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"query\": \"What is the capital of France?\"\n  }'"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AnswerRequest"
-              },
-              "example": {
-                "query": "What is the capital of France?"
               }
             }
           }
@@ -1292,6 +1296,22 @@
             "type": "string",
             "description": "Your question, task, or text to analyze",
             "default": "What is the capital of France?"
+          },
+          "response_format": {
+            "type": "object",
+            "description": "JSON schema for structured output (optional)"
+          },
+          "file_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional array of file IDs to use as context"
+          },
+          "stream": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to stream the response"
           }
         }
       },
@@ -1350,6 +1370,11 @@
             "type": "string",
             "description": "System prompt to guide the conversation. Defaults to 'You are a helpful assistant.'",
             "default": "You are a helpful assistant."
+          },
+          "stream": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to stream the response"
           }
         }
       },
@@ -1462,6 +1487,11 @@
             "type": "string",
             "description": "System prompt to guide the agent. Defaults to 'You are a helpful assistant with access to tools.'",
             "default": "You are a helpful assistant with access to tools."
+          },
+          "stream": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to stream the response"
           }
         }
       },

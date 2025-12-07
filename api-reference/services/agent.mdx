@@ -1,7 +1,6 @@
 ---
 title: "Agent"
 description: "Agentic conversation with tool calling. Returns tool calls for the caller to execute."
-openapi: "POST /v1/agent"
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -126,6 +125,218 @@ curl -X POST "https://api.incredible.one/v1/agent" \
 - **messages** (required) — Conversation history
 - **tools** (required) — List of tool definitions with `name`, `description`, and `input_schema`
 - **system_prompt** (optional) — System prompt to guide the agent
+- **stream** (optional) — Whether to stream the response (default: false)
+
+## Using Files
+
+Agents can access file content when making tool calling decisions:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload a file
+with open("data.csv", "rb") as f:
+    file = client.files.upload(file=f, purpose="assistants")
+
+# Agent can use file context with tools
+tools = [
+    {
+        "name": "analyze_data",
+        "description": "Analyze data from the provided file",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "column": {"type": "string", "description": "Column to analyze"}
+            },
+            "required": ["column"]
+        }
+    }
+]
+
+response = client.agent(
+    messages=[
+        {"role": "user", "content": "Analyze the sales data", "file_ids": [file.id]}
+    ],
+    tools=tools
+)
+
+if response.tool_calls:
+    for call in response.tool_calls:
+        print(f"Tool: {call.name}, Inputs: {call.inputs}")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+import fs from 'fs';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Upload a file
+const fileStream = fs.createReadStream('data.csv');
+const file = await client.files.upload({
+  file: fileStream,
+  purpose: 'assistants'
+});
+
+// Agent can use file context with tools
+const response = await client.agent({
+  messages: [
+    { role: 'user', content: 'Analyze the sales data', file_ids: [file.id] }
+  ],
+  tools: [
+    {
+      name: 'analyze_data',
+      description: 'Analyze data from the provided file',
+      input_schema: {
+        type: 'object',
+        properties: {
+          column: { type: 'string', description: 'Column to analyze' }
+        },
+        required: ['column']
+      }
+    }
+  ]
+});
+
+if (response.tool_calls) {
+  response.tool_calls.forEach(call => {
+    console.log(`Tool: ${call.name}, Inputs:`, call.inputs);
+  });
+}
+```
+
+</CodeGroup>
+
+## Streaming Responses
+
+Enable real-time streaming for agent responses by setting `stream: true`. Watch as the agent thinks, plans tool calls, and generates responses in real-time.
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+tools = [
+    {
+        "name": "calculator",
+        "description": "Perform arithmetic calculations",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {"type": "string", "description": "Math expression to evaluate"}
+            },
+            "required": ["expression"]
+        }
+    }
+]
+
+# Stream agent response
+stream = client.agent(
+    messages=[{"role": "user", "content": "What is 157 * 23?"}],
+    tools=tools,
+    stream=True
+)
+
+# Process streaming chunks
+for chunk in stream:
+    if hasattr(chunk, 'thinking') and chunk.thinking:
+        print(f"[Thinking: {chunk.thinking}]")
+    if hasattr(chunk, 'tool_call') and chunk.tool_call:
+        print(f"[Tool call: {chunk.tool_call.name}({chunk.tool_call.inputs})]")
+    if hasattr(chunk, 'content') and chunk.content:
+        print(chunk.content, end='', flush=True)
+    if hasattr(chunk, 'done') and chunk.done:
+        print("\n[Stream complete]")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const tools = [
+  {
+    name: 'calculator',
+    description: 'Perform arithmetic calculations',
+    input_schema: {
+      type: 'object',
+      properties: {
+        expression: { type: 'string', description: 'Math expression to evaluate' }
+      },
+      required: ['expression']
+    }
+  }
+];
+
+// Stream agent response
+const stream = await client.agent({
+  messages: [{ role: 'user', content: 'What is 157 * 23?' }],
+  tools,
+  stream: true
+});
+
+// Process streaming events
+for await (const event of stream) {
+  if (event.thinking) {
+    console.log(`[Thinking: ${event.thinking}]`);
+  }
+  if (event.tool_call) {
+    console.log(`[Tool call: ${event.tool_call.name}(${JSON.stringify(event.tool_call.inputs)})]`);
+  }
+  if (event.content) {
+    process.stdout.write(event.content);
+  }
+  if (event.done) {
+    console.log('\n[Stream complete]');
+  }
+}
+```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/agent" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What is 157 * 23?"}
+    ],
+    "tools": [
+      {
+        "name": "calculator",
+        "description": "Perform arithmetic calculations",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "expression": {"type": "string", "description": "Math expression to evaluate"}
+          },
+          "required": ["expression"]
+        }
+      }
+    ],
+    "stream": true
+  }'
+```
+
+</CodeGroup>
+
+**Stream Event Types:**
+- `thinking` - Agent's reasoning process in real-time
+- `tool_call` - Tool call requests as they're decided
+- `content` - Text response chunks as they're generated
+- `done` - Signals completion of the stream
+- `error` - Any errors that occurred during generation
+
+**Benefits of Agent Streaming:**
+- See the agent's decision-making process live
+- Detect tool calls immediately without waiting
+- Provide real-time feedback to users
+- Handle long-running agent workflows efficiently
 
 ## Response
 

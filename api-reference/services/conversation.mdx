@@ -1,7 +1,6 @@
 ---
 title: "Conversation"
 description: "Multi-turn conversation endpoint. Fast and cost-effective for conversational tasks without tool calling."
-openapi: "POST /v1/conversation"
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -99,6 +98,138 @@ curl -X POST "https://api.incredible.one/v1/conversation" \
 
 - **messages** (required) — Conversation history with alternating user and assistant messages
 - **system_prompt** (optional) — System prompt to guide the conversation
+- **stream** (optional) — Whether to stream the response (default: false)
+
+## Using Files
+
+You can provide document context in conversations by uploading files and referencing them:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload a file
+with open("report.pdf", "rb") as f:
+    file = client.files.upload(file=f, purpose="assistants")
+
+# Use the file in a conversation
+response = client.conversation(
+    messages=[
+        {"role": "user", "content": "What's in this document?", "file_ids": [file.id]},
+        {"role": "assistant", "content": "This document contains a quarterly financial report."},
+        {"role": "user", "content": "What were the key findings?"}
+    ]
+)
+
+print(response.response)
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+import fs from 'fs';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Upload a file
+const fileStream = fs.createReadStream('report.pdf');
+const file = await client.files.upload({
+  file: fileStream,
+  purpose: 'assistants'
+});
+
+// Use the file in a conversation
+const response = await client.conversation({
+  messages: [
+    { role: 'user', content: "What's in this document?", file_ids: [file.id] },
+    { role: 'assistant', content: 'This document contains a quarterly financial report.' },
+    { role: 'user', content: 'What were the key findings?' }
+  ]
+});
+
+console.log(response.response);
+```
+
+</CodeGroup>
+
+## Streaming Responses
+
+Enable real-time streaming for conversational responses by setting `stream: true`. Receive message chunks as they're generated for a more interactive experience.
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Stream a conversation
+stream = client.conversation(
+    messages=[
+        {"role": "user", "content": "Tell me a story about a robot"},
+        {"role": "assistant", "content": "Once upon a time..."},
+        {"role": "user", "content": "What happened next?"}
+    ],
+    stream=True
+)
+
+# Process streaming chunks
+for chunk in stream:
+    if hasattr(chunk, 'content') and chunk.content:
+        print(chunk.content, end='', flush=True)
+    if hasattr(chunk, 'done') and chunk.done:
+        print("\n[Stream complete]")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Stream a conversation
+const stream = await client.conversation({
+  messages: [
+    { role: 'user', content: 'Tell me a story about a robot' },
+    { role: 'assistant', content: 'Once upon a time...' },
+    { role: 'user', content: 'What happened next?' }
+  ],
+  stream: true
+});
+
+// Process streaming events
+for await (const event of stream) {
+  if (event.content) {
+    process.stdout.write(event.content);
+  }
+  if (event.done) {
+    console.log('\n[Stream complete]');
+  }
+}
+```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/conversation" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Tell me a story about a robot"},
+      {"role": "assistant", "content": "Once upon a time..."},
+      {"role": "user", "content": "What happened next?"}
+    ],
+    "stream": true
+  }'
+```
+
+</CodeGroup>
+
+**Stream Event Types:**
+- `content` - Text chunks as they're generated
+- `thinking` - Internal reasoning process (if available)
+- `done` - Signals completion of the stream
+- `error` - Any errors that occurred during generation
 
 ## Response
 

@@ -1,7 +1,6 @@
 ---
 title: "Answer"
-description: "Get direct answers to questions. Simple question-answering endpoint."
-openapi: "POST /v1/answer"
+description: "Get direct answers or structured JSON output. Supports file context and custom response schemas."
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -85,12 +84,172 @@ curl -X POST "https://api.incredible.one/v1/answer" \
 ## Parameters
 
 - **query** (required) — The question to answer
+- **response_format** (optional) — JSON schema for structured output
+- **file_ids** (optional) — Array of file IDs to use as context
+- **stream** (optional) — Whether to stream the response (default: false)
 
-## Response
+## Using Files
 
-```json
-{
-  "success": true,
-  "answer": "The capital of France is Paris."
+You can provide document context by uploading files first, then referencing them in your answer request:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload a file
+with open("document.pdf", "rb") as f:
+    file = client.files.upload(file=f, purpose="assistants")
+
+# Use the file in an answer request
+response = client.answer(
+    query="Summarize the key points from the document",
+    file_ids=[file.id]
+)
+
+print(response.answer)
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+import fs from 'fs';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Upload a file
+const fileStream = fs.createReadStream('document.pdf');
+const file = await client.files.upload({
+  file: fileStream,
+  purpose: 'assistants'
+});
+
+// Use the file in an answer request
+const response = await client.answer({
+  query: 'Summarize the key points from the document',
+  file_ids: [file.id]
+});
+
+console.log(response.answer);
+```
+
+</CodeGroup>
+
+## Structured Output
+
+Request structured JSON output by providing a schema:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+schema = {
+    "type": "object",
+    "properties": {
+        "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
+        "confidence": {"type": "number"}
+    },
+    "required": ["sentiment"]
+}
+
+response = client.answer(
+    query="Analyze this review: 'Great product, highly recommend!'",
+    response_format=schema
+)
+
+print(response.data)  # {"sentiment": "positive", "confidence": 0.95}
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const schema = {
+  type: 'object',
+  properties: {
+    sentiment: { type: 'string', enum: ['positive', 'negative', 'neutral'] },
+    confidence: { type: 'number' }
+  },
+  required: ['sentiment']
+};
+
+const response = await client.answer({
+  query: "Analyze this review: 'Great product, highly recommend!'",
+  response_format: schema
+});
+
+console.log(response.data);  // {"sentiment": "positive", "confidence": 0.95}
+```
+
+</CodeGroup>
+
+## Streaming Responses
+
+Enable real-time streaming for longer answers by setting `stream: true`. Receive answer chunks as they're generated instead of waiting for the complete response.
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Stream an answer
+stream = client.answer(
+    query="Write a detailed explanation of quantum computing",
+    stream=True
+)
+
+# Process streaming chunks
+for chunk in stream:
+    if hasattr(chunk, 'content') and chunk.content:
+        print(chunk.content, end='', flush=True)
+    if hasattr(chunk, 'done') and chunk.done:
+        print("\n[Stream complete]")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Stream an answer
+const stream = await client.answer({
+  query: 'Write a detailed explanation of quantum computing',
+  stream: true
+});
+
+// Process streaming events
+for await (const event of stream) {
+  if (event.content) {
+    process.stdout.write(event.content);
+  }
+  if (event.done) {
+    console.log('\n[Stream complete]');
+  }
 }
 ```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Write a detailed explanation of quantum computing",
+    "stream": true
+  }'
+```
+
+</CodeGroup>
+
+**Stream Event Types:**
+- `content` - Text chunks as they're generated
+- `thinking` - Internal reasoning process (if available)
+- `done` - Signals completion of the stream
+- `error` - Any errors that occurred during generation
+
