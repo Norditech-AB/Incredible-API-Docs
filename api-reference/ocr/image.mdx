@@ -6,7 +6,76 @@ openapi: 'POST /ocr/image'
 
 ## Overview
 
-Extract text from a single image using state-of-the-art OCR powered by Azure Mistral Document AI. Perfect for receipts, invoices, screenshots, scanned documents, and more.
+The OCR Image endpoint extracts text from images using state-of-the-art Optical Character Recognition powered by Mistral Document AI. This endpoint can read printed text, handwriting, and structured documents from images in multiple formats, making it perfect for digitizing physical documents, automating data entry, and extracting information from visual content.
+
+**Key capabilities:**
+- **Multi-format support** - PNG, JPEG, GIF, WebP, and other common formats
+- **High accuracy** - Advanced AI models trained on diverse document types
+- **Structured output** - Returns both plain text and markdown-formatted results
+- **Layout preservation** - Maintains document structure and formatting
+- **Handwriting recognition** - Supports both printed and handwritten text
+- **Fast processing** - Typical extraction in 2-5 seconds
+
+**Real-world applications:**
+- **Document digitization** - Convert physical documents to searchable text
+- **Receipt processing** - Extract line items, totals, and merchant info
+- **Invoice automation** - Pull invoice details for accounting systems
+- **Forms processing** - Digitize handwritten or printed forms
+- **Business card scanning** - Extract contact information
+- **ID verification** - Read text from identity documents
+- **Screenshot analysis** - Extract text from UI screenshots
+- **Data entry automation** - Eliminate manual typing from documents
+- **Archive digitization** - Convert historical documents to searchable format
+
+## When to Use OCR Image vs OCR PDF
+
+**Use OCR Image for:**
+- Single-page documents captured as images
+- Photos of documents (receipts, business cards, signs)
+- Screenshots containing text
+- Scanned single pages
+- Social media images with text
+- Product labels and packaging
+
+**Use OCR PDF for:**
+- Multi-page PDF documents
+- Scanned PDFs
+- Digital PDFs with embedded images
+- Documents requiring page-by-page processing
+- Large document sets
+
+## How OCR Works
+
+The OCR process involves several sophisticated steps:
+
+1. **Image Preprocessing** - Image is analyzed and optimized for text extraction
+2. **Text Detection** - AI identifies regions containing text
+3. **Character Recognition** - Individual characters are recognized
+4. **Layout Analysis** - Document structure and reading order are determined
+5. **Post-processing** - Text is cleaned, formatted, and structured
+6. **Output Generation** - Results returned in both plain text and markdown formats
+
+**Processing time:** Typically 2-5 seconds per image, depending on resolution and complexity.
+
+## Best Practices for OCR Quality
+
+**Image Quality:**
+- Use high-resolution images (300 DPI or higher for scanned documents)
+- Ensure good lighting and contrast
+- Avoid blurry or out-of-focus images
+- Keep text horizontal (or provide properly oriented images)
+
+**Document Preparation:**
+- Remove shadows and glare
+- Ensure text is clearly visible
+- Crop to document boundaries when possible
+- Use white or light backgrounds for best contrast
+
+**Format Selection:**
+- PNG or JPEG for photos of documents
+- PNG for screenshots (lossless)
+- JPEG for scanned documents (with high quality settings)
+- Keep files under 10MB for optimal performance
 
 ## Authentication
 
@@ -235,10 +304,165 @@ reader.onload = async () => {
 
 **Status Code:** `400 Bad Request`
 
+## Understanding the Response
+
+The API returns both processed text and raw OCR data:
+
+**success** - Boolean indicating whether text was successfully extracted
+**text** - Clean, processed text extracted from the image (recommended for most use cases)
+**markdown** - Formatted text preserving structure (available in raw_response)
+**raw_response** - Complete Mistral Document AI response with detailed metadata
+
+**When to use each:**
+- Use `text` for simple text extraction and display
+- Use `markdown` (in raw_response) to preserve formatting and structure
+- Use `raw_response` when you need bounding boxes, confidence scores, or detailed metadata
+
+## Integration Patterns
+
+**Document Management Systems:**
+```python
+# Extract text from uploaded documents
+def process_uploaded_document(file):
+    response = requests.post(
+        "https://api.incredible.one/ocr/image",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        files={"file": file}
+    )
+    
+    if response.json()["success"]:
+        # Store extracted text in database
+        text = response.json()["text"]
+        save_to_database(text)
+    return text
+```
+
+**Receipt Processing:**
+```python
+# Extract and structure receipt data
+def process_receipt(receipt_image):
+    result = ocr_image(receipt_image)
+    
+    # Use AI to structure the extracted text
+    structured_data = client.answer(
+        query="Extract merchant name, date, items, and total",
+        response_format=receipt_schema,
+        context=result["text"]
+    )
+    return structured_data
+```
+
+**Batch Processing:**
+```python
+# Process multiple images in parallel
+import concurrent.futures
+
+def ocr_batch(image_paths):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(ocr_image, path) for path in image_paths]
+        results = [f.result() for f in concurrent.futures.as_completed(futures)]
+    return results
+```
+
+## Performance Optimization
+
+**Image Optimization:**
+- Resize very large images (4000x4000+) to reduce upload time
+- Use JPEG compression for photos (85-95% quality)
+- Use PNG for text-heavy images and screenshots
+- Crop unnecessary margins to focus on text areas
+
+**Processing Speed:**
+- Smaller files process faster (aim for < 2MB)
+- Clear, high-contrast images process more quickly
+- Parallel requests for multiple images
+- Consider caching results for frequently processed images
+
+**Cost Optimization:**
+- Batch similar documents together
+- Cache results to avoid reprocessing
+- Pre-process images to ensure good quality
+- Use appropriate resolution (don't oversample)
+
+## Error Handling
+
+Implement robust error handling for production use:
+
+```python
+def safe_ocr_image(image_path, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            with open(image_path, "rb") as f:
+                response = requests.post(
+                    "https://api.incredible.one/ocr/image",
+                    headers={"Authorization": f"Bearer {API_KEY}"},
+                    files={"file": f},
+                    timeout=30
+                )
+            
+            result = response.json()
+            
+            if result.get("success"):
+                return result["text"]
+            else:
+                logging.warning(f"OCR failed: {result.get('error')}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            logging.error(f"Timeout on attempt {attempt + 1}")
+            if attempt == max_retries - 1:
+                raise
+        except Exception as e:
+            logging.error(f"OCR error: {e}")
+            raise
+    
+    return None
+```
+
+## Common Issues and Solutions
+
+**Issue:** No text extracted from clear image
+- **Solution:** Check image orientation, try rotating 90/180/270 degrees
+- **Solution:** Increase image resolution or contrast
+- **Solution:** Verify text is actually present and legible
+
+**Issue:** Garbled or incorrect text
+- **Solution:** Improve image quality (better lighting, focus)
+- **Solution:** Ensure text is horizontal
+- **Solution:** Remove shadows and glare
+- **Solution:** Try preprocessing (contrast adjustment, noise reduction)
+
+**Issue:** Missing text sections
+- **Solution:** Check if text is very small or low contrast
+- **Solution:** Increase resolution
+- **Solution:** Verify entire document is within image bounds
+
+**Issue:** Slow processing
+- **Solution:** Reduce image size (resize before upload)
+- **Solution:** Compress images appropriately
+- **Solution:** Check network connectivity
+
 ## Performance Tips
 
-1. **Image Quality**: Higher resolution images produce better OCR results
-2. **File Format**: PNG and JPEG work best
-3. **File Size**: Keep images under 10MB for optimal performance
-4. **Parallel Processing**: For multiple images, make parallel requests
+**Image Quality:**
+- Use 300+ DPI for scanned documents
+- Ensure good lighting and minimal glare
+- Keep text horizontal and in focus
+- Use high-quality camera settings
+
+**File Optimization:**
+- PNG for screenshots and text-heavy images
+- JPEG (85-95% quality) for photos
+- Keep files under 10MB for optimal speed
+- Consider preprocessing (crop, rotate, enhance contrast)
+
+**Parallel Processing:**
+- Process multiple images concurrently
+- Use threading or async for batch operations
+- Implement request pooling for high-volume use
+
+**Caching:**
+- Cache OCR results for frequently accessed images
+- Store extracted text in database
+- Implement deduplication to avoid reprocessing identical images
 
