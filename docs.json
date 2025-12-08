@@ -185,8 +185,8 @@
   "navbar": {
     "links": [
       {
-        "label": "Blog",
-        "href": "https://web.incredible.one/blog"
+        "label": "Agents",
+        "href": "https://incredible.one/"
       }
     ],
     "primary": {
