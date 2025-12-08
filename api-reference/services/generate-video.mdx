@@ -24,6 +24,100 @@ description: "Generate high-quality videos from text."
   </div>
 </a>
 
+## Overview
+
+The Video Generation API creates high-quality short videos from text descriptions or reference images. Powered by advanced AI diffusion models, this endpoint produces smooth, realistic video clips that bring your concepts to life.
+
+**Key capabilities:**
+- **Text-to-video** - Generate videos from natural language descriptions
+- **Image-to-video** - Animate static images into dynamic videos
+- **Multiple resolutions** - From social media to high-definition formats
+- **Consistent motion** - Smooth, natural movement and transitions
+- **Temporal coherence** - Maintains visual consistency across frames
+
+**Real-world applications:**
+- **Social media content** - Create eye-catching videos for posts and Stories
+- **Marketing campaigns** - Generate product demos and promotional videos
+- **Content creation** - B-roll footage for videos and presentations
+- **E-commerce** - Product showcases with dynamic movement
+- **Prototyping** - Visualize concepts before expensive production
+- **Animation** - Quick animated sequences for various purposes
+- **Education** - Visual demonstrations and explainer content
+
+## How Video Generation Works
+
+Video generation is significantly more complex than image generation because it must maintain consistency across multiple frames while creating natural motion:
+
+1. **Prompt/Image Analysis** - Understanding what needs to be generated and how it should move
+2. **Motion Planning** - Determining camera movement, object motion, and scene dynamics
+3. **Frame Generation** - Creating each frame with temporal consistency
+4. **Motion Smoothing** - Ensuring smooth transitions between frames
+5. **Upscaling & Enhancement** - Improving quality and resolution
+6. **Encoding** - Compressing into MP4 format
+7. **Delivery** - Encoded as base64 data URI for transmission
+
+**Generation time:** 1-10 minutes depending on complexity, resolution, and current load. Video generation is computationally intensive—please be patient.
+
+**Video length:** Generated videos are 8 seconds long, providing enough time for a complete action or scene while keeping generation times reasonable.
+
+## Writing Effective Video Prompts
+
+Video prompts require thinking about motion and time, not just static scenes:
+
+### Prompt Structure for Videos
+
+**Template:**
+```
+[Subject] [action/motion] [environment] [camera movement] [style/mood]
+```
+
+**Good video prompts:**
+- ✅ "Ocean waves crashing against rocky cliffs, slow motion, cinematic"
+- ✅ "Golden retriever running through meadow, camera following, sunny day"
+- ✅ "City traffic at night, time lapse, neon lights, aerial view"
+- ✅ "Waterfall cascading down mountain, morning mist, drone footage"
+
+**Less effective:**
+- ❌ "Beach" (no motion described)
+- ❌ "Person standing still" (minimal movement)
+- ❌ "Multiple complex scenes" (too ambitious for 8 seconds)
+
+### Key Elements for Video Prompts
+
+**Motion & Action** - What's moving?
+- Natural motion: "leaves rustling in wind," "water flowing"
+- Object motion: "car driving," "bird flying," "person walking"
+- Camera motion: "camera panning," "zooming in," "orbiting around"
+
+**Environment** - Where is this happening?
+- Set the scene: "in a bustling city," "on a quiet beach," "through a forest"
+- Include atmosphere: "foggy morning," "golden hour," "stormy weather"
+
+**Camera Work** - How is it filmed?
+- "Slow motion," "time lapse," "steady cam," "drone footage"
+- "Close-up," "wide shot," "tracking shot," "aerial view"
+- "Handheld," "smooth pan," "dolly zoom"
+
+**Style & Mood**
+- "Cinematic," "documentary style," "dreamy," "dramatic"
+- "Realistic," "artistic," "commercial quality"
+
+### Video-Specific Tips
+
+**Do's:**
+- ✅ Describe movement clearly
+- ✅ Keep it simple - one main action or scene
+- ✅ Specify camera movement if important
+- ✅ Use temporal terms (slow motion, time lapse)
+- ✅ Focus on visually interesting subjects
+
+**Don'ts:**
+- ❌ Try to fit multiple scenes in 8 seconds
+- ❌ Describe complex narratives
+- ❌ Request rapid scene changes
+- ❌ Include dialogue or specific audio
+- ❌ Expect photorealistic human faces/actions (challenging for AI)
+
 ## Examples
 
 <CodeGroup>
@@ -82,11 +176,202 @@ curl -X POST "https://api.incredible.one/v1/generate-video" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **prompt** (required) — Text description of the video
-- **size** (optional) — Video dimensions: `1280x720`, `720x1280`, `1920x1080`, `1080x1920`, `1024x1024` (default: `1280x720`)
-- **input_reference** (optional) — Base64-encoded reference image for image-to-video
+### prompt (required)
+A detailed description of the video you want to generate, including motion, environment, and mood. Focus on describing dynamic elements and movement.
+
+**Prompt length:** 1-1000 characters. Optimal: 30-150 characters with clear action description.
+
+**See "Writing Effective Video Prompts" above for detailed guidance.**
+
+### size (optional)
+Video resolution and aspect ratio. Default: `1280x720` (720p landscape).
+
+**Available resolutions:**
+
+**1280x720 (720p Landscape)** - Default
+- Aspect ratio: 16:9
+- Best for: YouTube, presentations, website embeds
+- File size: Moderate
+- Generation time: Standard
+
+**720x1280 (720p Portrait)**
+- Aspect ratio: 9:16
+- Best for: Instagram/TikTok Stories, mobile-first content
+- File size: Moderate
+- Generation time: Standard
+
+**1920x1080 (1080p Landscape / Full HD)**
+- Aspect ratio: 16:9
+- Best for: High-quality YouTube, professional content
+- File size: Larger
+- Generation time: Longer
+
+**1080x1920 (1080p Portrait)**
+- Aspect ratio: 9:16
+- Best for: Premium mobile content, vertical video platforms
+- File size: Larger
+- Generation time: Longer
+
+**1024x1024 (Square)**
+- Aspect ratio: 1:1
+- Best for: Instagram posts, social feeds
+- File size: Moderate
+- Generation time: Standard
+
+**Selection guide:**
+- **Mobile/Social:** Use portrait (9:16) or square (1:1)
+- **YouTube/Web:** Use landscape (16:9)
+- **Quality vs Speed:** Lower resolutions generate faster
+- **File size:** Higher resolutions = larger files
+
+### input_reference (optional)
+A base64-encoded reference image to animate into video. This enables image-to-video generation where you provide a starting frame and the AI adds motion.
+
+**Use cases for image-to-video:**
+- **Animate photos** - Bring static images to life
+- **Product demonstrations** - Show products in motion
+- **Brand consistency** - Start from your existing visual assets
+- **Character animation** - Animate illustrations or artwork
+- **Architectural visualization** - Add life to renderings
+
+**How to use:**
+```python
+import base64
+
+# Load your image
+with open("reference.jpg", "rb") as f:
+    image_data = f.read()
+
+# Encode as base64
+encoded_image = base64.b64encode(image_data).decode('utf-8')
+
+# Generate video from image
+response = client.generate_video(
+    prompt="Camera slowly pans across the scene, gentle movement",
+    input_reference=encoded_image,
+    size="1280x720"
+)
+```
+
+**Tips for image-to-video:**
+- Start with high-quality, well-composed images
+- Describe the motion/animation you want
+- Keep motion expectations realistic (subtle movements work best)
+- Avoid images with too much complexity
+
+**Supported image formats:** JPEG, PNG, WebP (max 10MB)
+
+## Best Practices
+
+**Prompt Engineering for Videos:**
+- Focus on a single, clear action or scene
+- Describe motion explicitly ("waves crashing," "camera panning")
+- Include camera movement for more dynamic results
+- Use cinematic terms for professional looks
+- Specify pace (slow motion, time lapse)
+
+**Technical Considerations:**
+- Lower resolutions generate faster and use less bandwidth
+- Portrait formats are ideal for mobile platforms
+- Landscape formats for traditional viewing
+- Square for universal social media compatibility
+
+**Performance:**
+- Video generation takes 1-10 minutes - implement proper timeout handling
+- Consider queueing or background processing for user-facing apps
+- Cache frequently requested videos
+- Provide loading indicators and progress updates to users
+
+**Quality Optimization:**
+- Use clear, simple prompts
+- Avoid overly complex scenes
+- Natural phenomena work well (water, fire, clouds)
+- Camera movements are easier than complex object actions
+- Test with various prompts to learn what works best
+
+**Integration Patterns:**
+- **Async processing** - Start generation, notify user when complete
+- **Preview thumbnails** - Generate image first to preview before video
+- **Batch generation** - Queue multiple videos for efficient processing
+- **Fallback strategy** - Have backup content if generation fails
+
+## Handling Video Output
+
+Videos are returned as base64-encoded data URIs in the format:
+```
+data:video/mp4;base64,AAAIGZ0...
+```
+
+**Decoding and saving:**
+
+```python
+# Python
+import base64
+
+# Extract base64 data (remove data URI prefix)
+video_data = response.video_url.split(',')[1]
+
+# Decode and save
+with open('video.mp4', 'wb') as f:
+    f.write(base64.b64decode(video_data))
+```
+
+```typescript
+// TypeScript/Node.js
+import fs from 'fs';
+
+// Extract base64 data
+const base64Data = response.video_url.split(',')[1];
+
+// Decode and save
+const videoBuffer = Buffer.from(base64Data, 'base64');
+fs.writeFileSync('video.mp4', videoBuffer);
+```
+
+```javascript
+// Browser JavaScript
+// Create download link
+const link = document.createElement('a');
+link.href = response.video_url;
+link.download = 'generated_video.mp4';
+link.click();
+```
+
+**Why base64?**
+- Ensures reliable transmission over HTTP
+- No need for separate file hosting
+- Immediate availability
+- Simplified API response structure
+
+**File sizes:**
+- 720p: ~1-3MB for 8 seconds
+- 1080p: ~2-5MB for 8 seconds
+- Depends on complexity and motion
+
+## Important Notes
+
+**Generation Time:**
+Video generation is computationally intensive. Expect 1-10 minutes depending on:
+- Resolution requested
+- Scene complexity
+- Current server load
+- Whether using image-to-video
+
+**Implement appropriate timeout handling** (suggest 15-minute timeout).
+
+**Content Policy:**
+Videos must comply with content policies. Inappropriate content will be rejected.
+
+**Limitations:**
+- Video length: Fixed at 8 seconds
+- No audio generation (silent videos)
+- Best results with natural phenomena and simple motions
+- Complex human actions may not be photorealistic
+
+**Rate Limits:**
+Video generation has strict rate limits due to computational cost. Contact support for enterprise quotas.
 
 ## Response
 

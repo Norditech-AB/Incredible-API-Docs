@@ -1,0 +1,995 @@
+---
+title: "API Quickstart"
+description: "Build production AI features in minutes—from simple Q&A to autonomous agents with tool calling."
+---
+
+Welcome to the **Incredible API Quickstart**! This guide walks you through the core endpoints in the order you'll likely adopt them. Each section includes working code examples, response formats, and links to detailed documentation.
+
+**What you'll build:**
+- Single-turn Q&A with the Answer endpoint
+- Multi-turn conversations with context
+- Real-time streaming responses
+- Autonomous agents with tool calling
+- File-enhanced AI with document context
+- Advanced research capabilities
+
+<a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
+  <div style={{ 
+    border: '1px solid #e5e7eb', 
+    borderRadius: '12px', 
+    padding: '20px', 
+    margin: '24px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  }}>
+    <div style={{ fontSize: '32px' }}>🔑</div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>Get your Incredible API key</div>
+      <div style={{ fontSize: '14px', color: '#6b7280' }}>Generate a key to start calling the API—takes 30 seconds</div>
+    </div>
+    <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
+  </div>
+</a>
+
+## Quick Reference
+
+| Endpoint | Use Case | Key Feature |
+|----------|----------|-------------|
+| `/v1/answer` | Single-turn Q&A, JSON extraction | Stateless, fast responses |
+| `/v1/conversation` | Multi-turn chat, contextual dialogue | History-aware conversations |
+| `/v1/agent` | Tool calling, complex workflows | Autonomous function execution |
+| `/v1/web-search` | Real-time web search | Current information retrieval |
+| `/v1/deep-research` | Multi-step research | Comprehensive reports with citations |
+| `/v1/files/*` | Document processing | PDF, CSV, images with OCR |
+
+## 1) Answer - Single-turn Q&A
+
+The **Answer endpoint** is perfect for stateless interactions where you need a quick, direct response. No conversation history needed—just ask and get an answer.
+
+**Best for:**
+- FAQ systems and knowledge bases
+- Quick facts and definitions
+- JSON extraction from text
+- Data transformation tasks
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is Kubernetes in one sentence?"
+  }'
+```
+
+```javascript JavaScript
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const response = await client.answer({
+  query: "What is Kubernetes in one sentence?"
+});
+
+console.log(response.answer);
+// "Kubernetes is an open-source container orchestration platform..."
+```
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+response = client.answer(
+    query="What is Kubernetes in one sentence?"
+)
+
+print(response.answer)
+# "Kubernetes is an open-source container orchestration platform..."
+```
+
+</CodeGroup>
+
+**Response format:**
+
+```json
+{
+  "success": true,
+  "answer": "Kubernetes is an open-source container orchestration platform that automates deploying, scaling, and managing containerized applications."
+}
+```
+
+### Structured JSON Output
+
+The Answer endpoint can return structured data by providing a `response_format` schema:
+
+<CodeGroup>
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+response = client.answer(
+    query="Extract info from: John Doe, 30 years old, lives in San Francisco",
+    response_format={
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "age": {"type": "number"},
+            "city": {"type": "string"}
+        },
+        "required": ["name", "age", "city"]
+    }
+)
+
+print(response.data)
+# {"name": "John Doe", "age": 30, "city": "San Francisco"}
+```
+
+```javascript JavaScript
+const response = await client.answer({
+  query: "Analyze sentiment: 'This product is amazing!'",
+  response_format: {
+    type: "object",
+    properties: {
+      sentiment: { type: "string", enum: ["positive", "negative", "neutral"] },
+      confidence: { type: "number" }
+    },
+    required: ["sentiment"]
+  }
+});
+
+console.log(response.data);
+// {"sentiment": "positive", "confidence": 0.95}
+```
+
+</CodeGroup>
+
+**Learn more:** [Answer API Documentation](/api-reference/services/answer)
+
+## 2) Conversation - Multi-turn Dialogue
+
+The **Conversation endpoint** maintains context across multiple exchanges, making it ideal for chatbots and interactive applications. You provide the full conversation history with each request.
+
+**Best for:**
+- Chatbots and virtual assistants
+- Customer support interfaces
+- Interactive tutorials and guides
+- Contextual dialogue systems
+
+**Key difference from Answer:** Conversation understands previous messages and maintains context throughout the dialogue.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/conversation" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Plan a 2-day NYC trip."},
+      {"role": "assistant", "content": "I'\''d be happy to help! Do you prefer cultural experiences like museums, or food and nightlife?"},
+      {"role": "user", "content": "Definitely food and city views."}
+    ]
+  }'
+```
+
+```javascript JavaScript
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Build conversation history over multiple turns
+const messages = [
+  { role: "user", content: "Plan a 2-day NYC trip." },
+  { role: "assistant", content: "I'd be happy to help! Do you prefer cultural experiences like museums, or food and nightlife?" },
+  { role: "user", content: "Definitely food and city views." }
+];
+
+const response = await client.conversation({ messages });
+console.log(response.response);
+```
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Conversation history with context
+messages = [
+    {"role": "user", "content": "Plan a 2-day NYC trip."},
+    {"role": "assistant", "content": "I'd be happy to help! Do you prefer cultural experiences like museums, or food and nightlife?"},
+    {"role": "user", "content": "Definitely food and city views."}
+]
+
+response = client.conversation(messages=messages)
+print(response.response)
+```
+
+</CodeGroup>
+
+**Response format:**
+
+```json
+{
+  "success": true,
+  "response": "Perfect! Here's a food-focused 2-day itinerary:\n\nDay 1:\n- Morning: Breakfast at Russ & Daughters...\n- Afternoon: Walk the High Line for city views...\n\nDay 2:\n- Sunset: Top of the Rock for panoramic views..."
+}
+```
+
+### Adding System Instructions
+
+Control the assistant's behavior with a `system_prompt`:
+
+<CodeGroup>
+
+```python Python
+response = client.conversation(
+    messages=[
+        {"role": "user", "content": "How do I reset my password?"}
+    ],
+    system_prompt="You are a helpful customer service agent for TechCorp. Be friendly, concise, and always provide step-by-step instructions."
+)
+```
+
+```javascript JavaScript
+const response = await client.conversation({
+  messages: [
+    { role: "user", content: "Explain quantum computing" }
+  ],
+  system_prompt: "You are a physics teacher who explains complex concepts using simple analogies and avoids technical jargon."
+});
+```
+
+</CodeGroup>
+
+**Learn more:** [Conversation API Documentation](/api-reference/services/conversation)
+
+## 3) Streaming - Real-time Responses
+
+Add `stream: true` to any endpoint to receive responses as they're generated. This creates a natural, chat-like experience and reduces perceived latency.
+
+**Why use streaming:**
+- **Better UX** - Users see progress immediately instead of waiting
+- **Reduced perceived latency** - Engagement starts while the response generates
+- **Cancellation support** - Users can stop long responses early
+- **Natural feel** - Mimics human typing for chat interfaces
+
+**Works with:** Answer, Conversation, and Agent endpoints.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Explain how neural networks learn",
+    "stream": true
+  }'
+
+# Outputs streaming events:
+# data: {"content": "Neural", "done": false}
+# data: {"content": " networks", "done": false}
+# data: {"content": " learn through...", "done": false}
+# data: {"done": true}
+```
+
+```javascript JavaScript
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Stream an answer
+const stream = await client.answer({
+  query: "Write a product description for wireless headphones",
+  stream: true
+});
+
+// Process chunks in real-time
+for await (const event of stream) {
+  if (event.content) {
+    process.stdout.write(event.content);  // Display immediately
+  }
+  if (event.done) {
+    console.log("\n✓ Complete");
+  }
+}
+```
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Stream a conversation
+stream = client.conversation(
+    messages=[
+        {"role": "user", "content": "Tell me about the James Webb telescope"}
+    ],
+    stream=True
+)
+
+# Display tokens as they arrive
+for chunk in stream:
+    if hasattr(chunk, 'content') and chunk.content:
+        print(chunk.content, end='', flush=True)
+    if hasattr(chunk, 'done') and chunk.done:
+        print("\n✓ Stream complete")
+```
+
+</CodeGroup>
+
+**Stream event types:**
+- `content` - Text chunks as generated
+- `thinking` - Internal reasoning (visible with some models)
+- `done` - Completion signal
+- `error` - Error information if something fails
+
+**Learn more:** [Streaming Responses Guide](/guides/streaming-responses)
+
+## 4) Agent - Autonomous Tool Calling
+
+The **Agent endpoint** enables your AI to autonomously decide when and how to use tools (functions). Perfect for complex workflows, external integrations, and multi-step tasks.
+
+**Best for:**
+- Database queries and API calls
+- Mathematical calculations
+- External service integrations (email, CRM, payments)
+- Multi-step workflows
+- Real-time data lookups
+
+**How it works:**
+1. Define tools the agent can use
+2. Agent analyzes user request and decides which tools to call
+3. Agent returns tool calls with arguments (doesn't execute)
+4. Your app executes tools securely
+5. Send results back for final response
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/agent" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What'\''s 157 * 23?"}
+    ],
+    "tools": [
+      {
+        "name": "calculator",
+        "description": "Evaluate mathematical expressions. Use for arithmetic, algebra, and calculations.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "expression": {
+              "type": "string",
+              "description": "The math expression to evaluate (e.g., '\''157 * 23'\'')"
+            }
+          },
+          "required": ["expression"]
+        }
+      }
+    ]
+  }'
+```
+
+```javascript JavaScript
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Step 1: Define tools
+const tools = [
+  {
+    name: "get_weather",
+    description: "Get current weather for a city. Returns temperature, conditions, and forecast.",
+    input_schema: {
+      type: "object",
+      properties: {
+        location: { 
+          type: "string",
+          description: "City name, e.g. 'San Francisco' or 'Tokyo'"
+        }
+      },
+      required: ["location"]
+    }
+  }
+];
+
+// Step 2: Send request
+const response = await client.agent({
+  messages: [
+    { role: "user", content: "What's the weather in Paris?" }
+  ],
+  tools
+});
+
+// Step 3: Check for tool calls
+if (response.tool_calls) {
+  for (const call of response.tool_calls) {
+    console.log(`Agent wants to call: ${call.name}`);
+    console.log(`With arguments:`, call.inputs);
+    
+    // Step 4: Execute tool in your environment
+    const weather = await getWeather(call.inputs.location);
+    
+    // Step 5: Send results back (next request with tool results)
+    // ... see full pattern in documentation
+  }
+} else {
+  // Agent had enough info to respond directly
+  console.log(response.response);
+}
+```
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Define available tools
+tools = [
+    {
+        "name": "search_database",
+        "description": "Search product database by name or category. Returns product details and pricing.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search term or product name"
+                },
+                "category": {
+                    "type": "string",
+                    "enum": ["electronics", "clothing", "home"],
+                    "description": "Optional category filter"
+                }
+            },
+            "required": ["query"]
+        }
+    }
+]
+
+# Agent decides if/when to use tools
+response = client.agent(
+    messages=[
+        {"role": "user", "content": "Find me wireless headphones under $100"}
+    ],
+    tools=tools
+)
+
+# Handle response
+if response.tool_calls:
+    for call in response.tool_calls:
+        print(f"🔧 Tool call: {call.name}")
+        print(f"   Args: {call.inputs}")
+        # Execute your tool here
+else:
+    print(response.response)
+```
+
+</CodeGroup>
+
+**Response with tool call:**
+
+```json
+{
+  "success": true,
+  "response": "I'll search for wireless headphones for you.",
+  "tool_calls": [
+    {
+      "id": "call_abc123",
+      "name": "search_database",
+      "inputs": {
+        "query": "wireless headphones",
+        "category": "electronics"
+      }
+    }
+  ]
+}
+```
+
+### Complete Tool Calling Pattern
+
+Here's the full agentic workflow:
+
+<CodeGroup>
+
+```python Python - Full Pattern
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Your actual tool implementations
+def get_weather(location):
+    # Call weather API
+    return {"temp": 72, "condition": "sunny"}
+
+def get_time(location):
+    # Get current time
+    return "3:45 PM"
+
+tools = [
+    {
+        "name": "get_weather",
+        "description": "Get weather for a location",
+        "input_schema": {
+            "type": "object",
+            "properties": {"location": {"type": "string"}},
+            "required": ["location"]
+        }
+    },
+    {
+        "name": "get_time",
+        "description": "Get current time for a location",
+        "input_schema": {
+            "type": "object",
+            "properties": {"location": {"type": "string"}},
+            "required": ["location"]
+        }
+    }
+]
+
+# Initial request
+response = client.agent(
+    messages=[{"role": "user", "content": "What's the weather and time in Tokyo?"}],
+    tools=tools
+)
+
+# Execute tools if requested
+if response.tool_calls:
+    tool_results = []
+    
+    for call in response.tool_calls:
+        # Execute the appropriate tool
+        if call.name == "get_weather":
+            result = get_weather(call.inputs["location"])
+        elif call.name == "get_time":
+            result = get_time(call.inputs["location"])
+        
+        tool_results.append({
+            "tool_call_id": call.id,
+            "result": result
+        })
+    
+    # Send results back to agent for final response
+    final_response = client.agent(
+        messages=[
+            {"role": "user", "content": "What's the weather and time in Tokyo?"},
+            {"role": "assistant", "tool_calls": response.tool_calls},
+            {"role": "tool", "tool_call_results": tool_results}
+        ],
+        tools=tools
+    )
+    
+    print(final_response.response)
+    # "In Tokyo, it's currently 72°F and sunny, and the local time is 3:45 PM."
+```
+
+</CodeGroup>
+
+**Pro tips:**
+- **Descriptive tool names** - Use clear names like `search_products` not `search_db`
+- **Detailed descriptions** - Explain what the tool does, when to use it, and what it returns
+- **Parameter descriptions** - Describe each input parameter clearly
+- **Error handling** - Always handle tool execution failures gracefully
+- **Security** - Validate tool inputs and restrict dangerous operations
+
+**Learn more:** [Agent API Documentation](/api-reference/services/agent) · [Function Calling Guide](/guides/function-calling)
+
+## 5) Files - Document Context
+
+Upload files **once** and reuse them across unlimited API requests. The Files API supports PDFs, images, spreadsheets, and more with automatic OCR and content extraction.
+
+**Best for:**
+- Document Q&A and analysis
+- Resume parsing and extraction
+- Invoice and receipt processing
+- Report summarization
+- Image analysis with text
+
+**Supported formats:**
+- **PDFs** - Automatic OCR text extraction
+- **Images** - PNG, JPEG, GIF, WebP with OCR
+- **Spreadsheets** - CSV, Excel with column analysis
+- **Documents** - TXT, Markdown, JSON
+
+**Important:** Upload once, store the `file_id`, reuse forever. Don't re-upload the same file repeatedly.
+
+<CodeGroup>
+
+```bash cURL - Complete Flow
+# Step 1: Request upload URL
+curl -X POST "https://api.incredible.one/v1/files/upload-url" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "quarterly_report.pdf"}'
+
+# Response: {"file_id": "file_abc123", "upload_url": "https://..."}
+
+# Step 2: Upload file directly to storage
+curl -X PUT "UPLOAD_URL_FROM_STEP_1" \
+  -H "Content-Type: application/pdf" \
+  --data-binary @quarterly_report.pdf
+
+# Step 3: Confirm upload (triggers processing)
+curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "file_abc123",
+    "filename": "quarterly_report.pdf",
+    "file_size": 245678
+  }'
+
+# Step 4: Use file in requests (unlimited times!)
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What were Q3 revenue numbers?",
+    "file_ids": ["file_abc123"]
+  }'
+```
+
+```javascript JavaScript - SDK
+import { IncredibleClient } from "@incredible-ai/sdk";
+import fs from "fs";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Upload file once
+const fileStream = fs.createReadStream("quarterly_report.pdf");
+const file = await client.files.upload({
+  file: fileStream,
+  purpose: "assistants"
+});
+
+console.log(`Uploaded: ${file.id}`);
+// 💾 Store this file_id in your database!
+
+// Use in Answer request
+const answer = await client.answer({
+  query: "Summarize Q3 performance",
+  file_ids: [file.id]
+});
+console.log(answer.answer);
+
+// Use in Conversation
+const chat = await client.conversation({
+  messages: [
+    { 
+      role: "user", 
+      content: "What were the key findings?", 
+      file_ids: [file.id] 
+    }
+  ]
+});
+console.log(chat.response);
+
+// Use in Agent workflows
+const agent = await client.agent({
+  messages: [
+    { 
+      role: "user", 
+      content: "Create a chart from the revenue data", 
+      file_ids: [file.id] 
+    }
+  ],
+  tools: [/* your tools */]
+});
+```
+
+```python Python - SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload once
+with open("quarterly_report.pdf", "rb") as f:
+    file = client.files.upload(file=f, purpose="assistants")
+
+print(f"Uploaded: {file.id}")
+# 💾 Store this file.id in your database!
+
+# Reuse across all endpoints
+# Answer
+answer = client.answer(
+    query="What was Q3 revenue?",
+    file_ids=[file.id]
+)
+
+# Conversation
+chat = client.conversation(
+    messages=[
+        {
+            "role": "user",
+            "content": "Analyze the revenue trends",
+            "file_ids": [file.id]
+        }
+    ]
+)
+
+# Agent
+agent = client.agent(
+    messages=[
+        {
+            "role": "user",
+            "content": "Extract key metrics to a database",
+            "file_ids": [file.id]
+        }
+    ],
+    tools=my_tools
+)
+```
+
+</CodeGroup>
+
+### What Happens During Processing
+
+When you confirm upload, files are automatically processed:
+
+| File Type | Processing | Extracted Data |
+|-----------|------------|----------------|
+| **PDF** | OCR text extraction | Page count, full text, structure |
+| **Images** | Vision + OCR | Text from image, visual analysis |
+| **CSV/Excel** | Structure parsing | Columns, types, row count, preview |
+| **JSON** | Schema analysis | Keys, structure, data types |
+
+Processing usually takes 2-10 seconds depending on file size.
+
+### Best Practices
+
+**Upload once, reuse forever:**
+```python
+# ✅ GOOD - Upload once, store ID
+file = client.files.upload(...)
+db.save(user_id, file.id)  # Store in database
+
+# Use file_id many times
+response1 = client.answer(query="Q1?", file_ids=[file.id])
+response2 = client.answer(query="Q2?", file_ids=[file.id])
+
+# ❌ BAD - Re-uploading same file
+file1 = client.files.upload(...)  # Waste of time and resources
+file2 = client.files.upload(...)  # Same file, different ID
+```
+
+**Check file status:**
+```python
+# Get file metadata and processing status
+metadata = client.files.metadata(file_id=file.id)
+print(f"Status: {metadata.status}")  # "processing", "ready", "failed"
+print(f"Pages: {metadata.pages}")
+```
+
+**Learn more:** [Files API Documentation](/api-reference/files/overview)
+
+## 6) Web Search - Real-time Information
+
+Access current web information with the **Web Search endpoint**. Perfect for AI applications that need real-time data beyond the model's training cutoff.
+
+**Best for:**
+- Current events and news
+- Real-time data lookups
+- Fact-checking with sources
+- Research and discovery
+
+<CodeGroup>
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Semantic web search
+response = client.web_search(
+    query="latest developments in AI regulation 2024",
+    num_results=5
+)
+
+for result in response.results:
+    print(f"{result.title}")
+    print(f"URL: {result.url}")
+    print(f"Snippet: {result.snippet}\n")
+```
+
+```javascript JavaScript
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const response = await client.webSearch({
+  query: "best practices for API security",
+  num_results: 5,
+  get_content: true  // Retrieve full page content
+});
+
+response.results.forEach(result => {
+  console.log(`${result.title} - ${result.url}`);
+});
+```
+
+</CodeGroup>
+
+**Learn more:** [Web Search API](/api-reference/services/web-search)
+
+## 7) Deep Research - Comprehensive Reports
+
+For complex research tasks, **Deep Research** conducts autonomous multi-step investigations and generates comprehensive reports with citations.
+
+**Best for:**
+- Market research
+- Competitive analysis
+- Academic literature reviews
+- Due diligence
+- Strategic planning
+
+<CodeGroup>
+
+```python Python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Autonomous research
+response = client.deep_research(
+    instructions="Research the current state of quantum computing and its commercial applications",
+    depth="standard"  # "quick", "standard", or "thorough"
+)
+
+print(response.output)  # Comprehensive report
+print(f"\nCitations: {len(response.citations)}")
+```
+
+```javascript JavaScript
+const response = await client.deepResearch({
+  instructions: "Analyze the competitive landscape for electric vehicle manufacturers",
+  depth: "thorough"
+});
+
+console.log(response.output);  // Detailed report with sources
+```
+
+</CodeGroup>
+
+**Research depths:**
+- `quick` - 10-15 sources, 5-10 min
+- `standard` - 20-30 sources, 10-20 min
+- `thorough` - 40+ sources, 20-40 min
+
+**Learn more:** [Deep Research API](/api-reference/services/deep-research)
+
+---
+
+## Next Steps & Resources
+
+### 📚 Explore the Docs
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginTop: '16px' }}>
+  <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px' }}>
+    <strong>Core Endpoints</strong>
+    <ul style={{ marginTop: '8px', fontSize: '14px' }}>
+      <li><a href="/api-reference/services/answer">Answer API</a></li>
+      <li><a href="/api-reference/services/conversation">Conversation API</a></li>
+      <li><a href="/api-reference/services/agent">Agent API</a></li>
+      <li><a href="/api-reference/files/overview">Files API</a></li>
+    </ul>
+  </div>
+  
+  <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px' }}>
+    <strong>Advanced Features</strong>
+    <ul style={{ marginTop: '8px', fontSize: '14px' }}>
+      <li><a href="/guides/function-calling">Function Calling</a></li>
+      <li><a href="/guides/streaming-responses">Streaming Patterns</a></li>
+      <li><a href="/api-reference/services/web-search">Web Search</a></li>
+      <li><a href="/api-reference/services/deep-research">Deep Research</a></li>
+    </ul>
+  </div>
+  
+  <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px' }}>
+    <strong>SDK Guides</strong>
+    <ul style={{ marginTop: '8px', fontSize: '14px' }}>
+      <li><a href="/guides/python-sdk">Python SDK</a></li>
+      <li><a href="/guides/typescript-sdk">TypeScript SDK</a></li>
+      <li><a href="/guides/openai-sdk-compatibility">OpenAI SDK</a></li>
+      <li><a href="/guides/vercel-ai-sdk">Vercel AI SDK</a></li>
+    </ul>
+  </div>
+</div>
+
+### 💡 Quick Tips
+
+**Authentication:**
+- Get your API key from the [platform dashboard](https://platform.incredible.one/settings/api-keys)
+- Include in headers: `Authorization: Bearer YOUR_API_KEY`
+- Keep keys secure, never commit to version control
+
+**Error Handling:**
+```python
+try:
+    response = client.answer(query="...")
+except Exception as e:
+    print(f"Error: {e}")
+    # Handle rate limits, network issues, etc.
+```
+
+**Rate Limits:**
+- Generous limits on all plans
+- 429 status code if exceeded
+- Implement exponential backoff for retries
+
+**Best Practices:**
+- Use Answer for single-turn, Conversation for multi-turn
+- Only use Agent when you need tool calling
+- Upload files once, store and reuse file_id
+- Enable streaming for better UX on long responses
+- Write clear, descriptive tool definitions
+
+### 🔧 Common Patterns
+
+**Building a chatbot:**
+```python
+# Maintain conversation history in your app
+history = []
+
+while True:
+    user_msg = input("You: ")
+    history.append({"role": "user", "content": user_msg})
+    
+    response = client.conversation(messages=history)
+    history.append({"role": "assistant", "content": response.response})
+    
+    print(f"Bot: {response.response}")
+```
+
+**Structured data extraction:**
+```python
+# Extract structured data from text
+schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "email": {"type": "string"},
+        "phone": {"type": "string"}
+    }
+}
+
+result = client.answer(
+    query="Extract contact info: John Doe, john@example.com, 555-0100",
+    response_format=schema
+)
+# Returns: {"name": "John Doe", "email": "john@example.com", "phone": "555-0100"}
+```
+
+**Document Q&A system:**
+```python
+# Upload document library once
+file_ids = []
+for doc in documents:
+    file = client.files.upload(file=doc)
+    file_ids.append(file.id)
+    db.save(file.id)  # Store in database
+
+# Answer questions about any document
+def answer_question(question, doc_id):
+    return client.answer(
+        query=question,
+        file_ids=[doc_id]
+    )
+```
+
+### 🆘 Need Help?
+
+- **API Status:** [status.incredible.one](https://status.incredible.one)
+- **Discord Community:** [Join Discord](https://discord.com/invite/pNmdkxgBe2)
+- **GitHub Examples:** [API Cookbook](https://github.com/Norditech-AB/Incredible-API-Cookbook)
+- **Blog & Tutorials:** [web.incredible.one/blog](https://web.incredible.one/blog)
+
