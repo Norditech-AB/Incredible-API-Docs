@@ -1,0 +1,84 @@
+---
+title: 'Meeting Prep'
+description: 'Get research on meeting attendees delivered before every meeting.'
+---
+
+## What This Agent Does
+
+Before your meetings, the agent researches attendees and sends you a brief. Know who you're meeting with without manual research.
+
+**Example output:** 30 minutes before your 2pm call with Acme Corp, you receive an email with background on the attendees—their roles, recent company news, and talking points.
+
+## Setup
+
+<Steps>
+  <Step title="Create the agent">
+    From the homepage, enter this prompt:
+    
+    ```
+    30 minutes before each meeting on my calendar, research the attendees.
+    Find their role, company, and any recent news about their company.
+    Email me a brief with this information and 3 suggested talking points.
+    Send to [your-email@example.com].
+    ```
+  </Step>
+  
+  <Step title="Connect Google Calendar">
+    When prompted, connect your Google account to access your calendar.
+  </Step>
+  
+  <Step title="Set up the trigger">
+    Click **Add Trigger** (⚡) → **Google Calendar** → **Event Starting Soon**.
+    Set to trigger 30 minutes before.
+  </Step>
+  
+  <Step title="Test with an upcoming meeting">
+    Click **Test** (🚀). Create a test meeting with an external attendee.
+    Check that the research email arrives.
+  </Step>
+  
+  <Step title="Publish">
+    Click **Publish** to go live. You'll get prep briefs before every meeting.
+  </Step>
+</Steps>
+
+## Example Prompt
+
+```
+30 minutes before each meeting on my Google Calendar:
+
+1. Get the meeting title and attendee list
+2. For each external attendee (not from my company @mycompany.com):
+   - Find their name, role, and company
+   - Search for recent news about their company
+   - Find their LinkedIn profile if available
+
+3. Create a brief that includes:
+   - Meeting title and time
+   - Attendee summaries
+   - 3 suggested talking points based on their company's recent news
+
+4. Email the brief to [YOUR EMAIL] with subject "Meeting Prep: [MEETING TITLE]"
+
+Skip meetings with only internal attendees.
+```
+
+## Variations
+
+| Use Case | Modification |
+|----------|-------------|
+| **Slack instead of email** | "Send the brief to #meeting-prep on Slack" |
+| **Only external meetings** | "Skip meetings where all attendees are from @mycompany.com" |
+| **Include past interactions** | "Check my email history for past conversations with these people" |
+| **Different lead time** | "15 minutes before" or "1 hour before" |
+
+## Tips
+
+<Tip>
+**Filter out internal meetings.** Add "Skip meetings with only internal attendees from @mycompany.com" to avoid unnecessary briefs.
+</Tip>
+
+- Specify your company's email domain to identify internal vs external attendees
+- Include your email address for delivery
+- Test with a real external meeting to verify the research quality
+

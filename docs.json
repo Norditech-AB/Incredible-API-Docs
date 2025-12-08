@@ -155,6 +155,26 @@
                 ]
               }
             ]
+          },
+          {
+            "tab": "How-to Guides",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "agents/guides/index"
+                ]
+              },
+              {
+                "group": "Let's Create Together",
+                "pages": [
+                  "agents/guides/daily-news-digest",
+                  "agents/guides/lead-research",
+                  "agents/guides/meeting-prep",
+                  "agents/guides/competitor-monitoring"
+                ]
+              }
+            ]
           }
         ]
       }

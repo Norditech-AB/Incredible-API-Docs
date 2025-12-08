@@ -1,0 +1,86 @@
+---
+title: 'Lead Research'
+description: 'Automatically research new leads and enrich your CRM data.'
+---
+
+## What This Agent Does
+
+When a new lead appears in your spreadsheet, the agent researches their company and fills in missing information. Sales teams save hours of manual research.
+
+**Example output:** A new row is added to your Leads sheet. Within minutes, the agent fills in company size, industry, recent news, and LinkedIn profile.
+
+## Setup
+
+<Steps>
+  <Step title="Create the agent">
+    From the homepage, enter this prompt:
+    
+    ```
+    When a new row is added to my Leads spreadsheet, research the company.
+    Find their company size, industry, and any recent news.
+    Update the row with this information.
+    
+    Spreadsheet: [PASTE YOUR GOOGLE SHEETS LINK]
+    Company name is in column B.
+    Fill in: Company size (column D), Industry (column E), Recent news (column F).
+    ```
+  </Step>
+  
+  <Step title="Connect Google Sheets">
+    When prompted, connect your Google account to access the spreadsheet.
+  </Step>
+  
+  <Step title="Set up the trigger">
+    Click **Add Trigger** (⚡) → **Google Sheets** → **New Row Added**.
+    Select your spreadsheet.
+  </Step>
+  
+  <Step title="Test with a real lead">
+    Click **Test** (🚀). Add a test row to your spreadsheet with a company name.
+    Watch the agent research and fill in the data.
+  </Step>
+  
+  <Step title="Publish">
+    Click **Publish** to go live. New leads will be researched automatically.
+  </Step>
+</Steps>
+
+## Example Prompt
+
+```
+When a new row is added to my Leads spreadsheet at [SPREADSHEET URL]:
+
+1. Get the company name from column B
+2. Search the web for information about this company
+3. Find:
+   - Company size (employees)
+   - Industry
+   - One sentence about recent news or what they do
+
+4. Update the same row:
+   - Company size in column D
+   - Industry in column E
+   - Recent news in column F
+
+If any information can't be found, leave that cell empty.
+```
+
+## Variations
+
+| Use Case | Modification |
+|----------|-------------|
+| **Find LinkedIn profiles** | "Also find the company's LinkedIn URL and add to column G" |
+| **Notify sales team** | "After updating, send a Slack message to #new-leads with the company summary" |
+| **Score the lead** | "Rate the lead 1-5 based on company size and add to column H" |
+| **Research contacts** | "Find the CEO's name and LinkedIn profile" |
+
+## Tips
+
+<Tip>
+**Always specify column letters.** The agent can't guess which column is which—be explicit about where data goes.
+</Tip>
+
+- Include the full spreadsheet URL in your prompt
+- Tell the agent what to do if information isn't found
+- Test with a few leads before going live
+
