@@ -17,8 +17,9 @@
           {
             "group": "Getting Started",
             "pages": [
-              "index"
-            ]
+          "index",
+          "api-quickstart"
+        ]
           },
           {
             "group": "Text",
