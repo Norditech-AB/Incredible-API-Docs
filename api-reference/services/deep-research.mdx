@@ -1,7 +1,6 @@
 ---
 title: "Deep Research"
 description: "Multi-step web research. Get comprehensive reports with structured output and citations."
-openapi: "POST /v1/deep-research"
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -24,6 +23,63 @@ openapi: "POST /v1/deep-research"
     <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
   </div>
 </a>
+
+## Overview
+
+Deep Research is an advanced AI research assistant that conducts comprehensive, multi-step investigations on any topic. Unlike simple web search, Deep Research autonomously explores topics in depth, synthesizes information from multiple sources, and produces structured, citation-backed reports.
+
+**What makes Deep Research powerful:**
+- **Autonomous research** - Conducts multi-step investigations without human intervention
+- **Source synthesis** - Combines information from multiple sources into coherent insights
+- **Structured output** - Returns organized, formatted research reports
+- **Citation tracking** - Maintains source attribution throughout the research process
+- **Depth control** - Adjust research thoroughness based on your needs
+
+**Real-world applications:**
+- **Market research** - Analyze industries, competitors, and trends
+- **Academic research** - Literature reviews and topic exploration
+- **Due diligence** - Company research and background checks
+- **Content creation** - Research for articles, reports, and presentations
+- **Decision support** - Gather comprehensive information for strategic decisions
+- **Competitive analysis** - Deep dives into competitors and market position
+
+Deep Research is like having a research assistant that can read hundreds of sources, identify key insights, and compile professional reports in minutes instead of hours.
+
+## How Deep Research Works
+
+Deep Research uses an agentic workflow to conduct thorough investigations:
+
+### Research Process
+
+1. **Query Understanding** - Analyzes your research instructions to identify key topics and questions
+2. **Research Planning** - Creates a research strategy and identifies information needs
+3. **Multi-Step Search** - Performs multiple targeted searches to gather comprehensive information
+4. **Source Evaluation** - Assesses source credibility and relevance
+5. **Information Synthesis** - Combines insights from multiple sources into coherent findings
+6. **Report Generation** - Produces structured output with citations
+7. **Quality Check** - Verifies completeness and accuracy
+
+### Research Depths
+
+**Quick (5-10 minutes)**
+- 10-15 sources consulted
+- High-level overview
+- Key facts and basic insights
+- Best for: Quick briefings, initial exploration
+
+**Standard (10-20 minutes)**
+- 20-30 sources consulted
+- Balanced depth and breadth
+- Comprehensive key findings
+- Best for: Most research tasks, reports, decision support
+
+**Thorough (20-40 minutes)**
+- 40+ sources consulted
+- In-depth analysis
+- Detailed insights and connections
+- Best for: Academic research, strategic planning, comprehensive reports
+
+The research process is asynchronous - the API will work through multiple search iterations, analyze sources, and compile findings before returning the complete report.
 
 ## Examples
 
@@ -74,12 +130,168 @@ curl -X POST "https://api.incredible.one/v1/deep-research" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **query** (required) — Research topic or question
-- **depth** (optional) — Research depth: "quick", "standard", or "thorough"
-- **max_sources** (optional) — Maximum sources to consult
-- **response_format** (optional) — JSON schema for structured output
+### instructions (required)
+Your research task described in natural language. Be as specific as possible about what you want to learn, what format you prefer, and any particular angles or perspectives to explore.
+
+**Effective research instructions:**
+
+**Good examples:**
+- ✅ "Research the current state of quantum computing, focusing on commercial applications and major players. Include market size estimates and recent breakthroughs."
+- ✅ "Analyze the impact of remote work on tech company productivity between 2020-2024. Compare different company approaches and outcomes."
+- ✅ "Investigate the environmental impact of electric vehicles, considering battery production, charging infrastructure, and lifecycle emissions. Compare with traditional vehicles."
+
+**Less effective:**
+- ❌ "Tell me about AI" (too broad, no specific angle)
+- ❌ "What is blockchain?" (too simple, better suited for Answer API)
+- ❌ "Research everything about climate change" (too vast, needs focus)
+
+**Tips for better results:**
+- **Be specific** - Define scope, time period, geographic region
+- **State your goal** - "for a presentation," "to make a decision," "for an article"
+- **Specify format** - "executive summary," "pros and cons list," "timeline"
+- **Include constraints** - "focusing on US market," "from 2020-2024," "excluding speculative sources"
+
+### depth (optional)
+Controls how thorough the research should be. Options: `"quick"`, `"standard"` (default), `"thorough"`.
+
+**Quick Research (5-10 minutes)**
+- Fast turnaround for basic questions
+- 10-15 sources
+- High-level overview and key facts
+- Best for: Briefings, quick fact-checking, initial exploration
+
+**Standard Research (10-20 minutes)**
+- Balanced approach for most use cases
+- 20-30 sources
+- Comprehensive coverage of main topics
+- Best for: Business reports, decision support, content research
+
+**Thorough Research (20-40 minutes)**
+- Deep investigation with extensive source analysis
+- 40+ sources
+- Detailed insights, connections, and nuances
+- Best for: Academic research, strategic planning, comprehensive analysis
+
+**Cost vs Quality tradeoff:**
+- Quick = Lower cost, faster results, less comprehensive
+- Thorough = Higher cost, slower results, more comprehensive
+- Standard = Balanced for most needs
+
+### max_sources (optional)
+Maximum number of sources to consult during research. Range: 5-100.
+
+This parameter allows fine-grained control over research scope:
+- `5-10` - Quick fact checks
+- `20-30` - Standard research (recommended)
+- `50-100` - Exhaustive analysis
+
+**Note:** More sources = longer research time and higher cost. The AI will prioritize quality over quantity, so it may use fewer sources than the maximum if sufficient information is found.
+
+### response_format (optional)
+A JSON schema defining the structure of the research output. When provided, Deep Research will format findings according to your schema.
+
+**Common structured formats:**
+
+**Executive Summary:**
+```python
+{
+  "type": "object",
+  "properties": {
+    "executive_summary": {"type": "string"},
+    "key_findings": {"type": "array", "items": {"type": "string"}},
+    "recommendations": {"type": "array", "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"type": "string"}}
+  }
+}
+```
+
+**Competitive Analysis:**
+```python
+{
+  "type": "object",
+  "properties": {
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "strengths": {"type": "array"},
+          "weaknesses": {"type": "array"},
+          "market_share": {"type": "string"}
+        }
+      }
+    }
+  }
+}
+```
+
+**Timeline:**
+```python
+{
+  "type": "object",
+  "properties": {
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {"type": "string"},
+          "event": {"type": "string"},
+          "impact": {"type": "string"}
+        }
+      }
+    }
+  }
+}
+```
+
+Structured output is powerful for:
+- Feeding research directly into applications
+- Creating consistent report formats
+- Building dashboards and visualizations
+- Automating workflows based on research findings
+
+## Best Practices
+
+**Research Design:**
+- **Start with a clear question** - Well-defined research goals produce better results
+- **Scope appropriately** - Narrow topics get better depth, broad topics need "standard" or "thorough"
+- **Specify time periods** - "in 2024," "since 2020," "historical perspective"
+- **Define success criteria** - What information would make this research complete?
+
+**Depth Selection:**
+- Use **quick** for time-sensitive decisions or initial exploration
+- Use **standard** as the default for most business and content needs
+- Use **thorough** for high-stakes decisions or academic research
+- Consider cost and time constraints when choosing depth
+
+**Structured Output:**
+- Design schemas that match your application's needs
+- Include optional fields for flexibility
+- Use enums for constrained values
+- Test schemas with sample research first
+
+**Quality Control:**
+- Review citations to verify source quality
+- Cross-check key facts if stakes are high
+- Consider running multiple research sessions with different angles
+- Combine Deep Research with human expertise for critical decisions
+
+**Performance Optimization:**
+- Cache research results for repeated queries
+- Use appropriate depth levels to balance cost and quality
+- Consider batching related research queries
+- Monitor API usage to optimize costs
+
+**Integration Patterns:**
+- **Automated reporting** - Schedule regular research on tracked topics
+- **Decision support** - Research before major business decisions
+- **Content pipeline** - Research for article/content creation
+- **Competitive intelligence** - Regular deep dives on competitors
+- **Market monitoring** - Track industry trends and developments
 
 ## Response
 
