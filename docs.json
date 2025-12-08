@@ -10,94 +10,172 @@
   "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
   "favicon": "/logo/Incredible-API-favicon.svg",
   "navigation": {
-    "tabs": [
+    "products": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "product": "API",
+        "description": "Incredible API Documentation",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-          "index",
-          "api-quickstart"
-        ]
-          },
-          {
-            "group": "Text",
-            "pages": [
-              "api-reference/services/answer",
-              "api-reference/services/conversation",
-              "api-reference/services/agent"
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "index",
+                  "api-quickstart",
+                  "api-reference/services/agent-max-engine"
+                ]
+              },
+              {
+                "group": "Text",
+                "pages": [
+                  "api-reference/services/answer",
+                  "api-reference/services/conversation",
+                  "api-reference/services/agent"
+                ]
+              },
+              {
+                "group": "File Support",
+                "pages": [
+                  "api-reference/files/overview",
+                  "api-reference/files/upload-url",
+                  "api-reference/files/upload-file",
+                  "api-reference/files/confirm-upload",
+                  "api-reference/files/metadata"
+                ]
+              },
+              {
+                "group": "Research",
+                "pages": [
+                  "api-reference/services/web-search",
+                  "api-reference/services/deep-research"
+                ]
+              },
+              {
+                "group": "Media",
+                "pages": [
+                  "api-reference/services/generate-image",
+                  "api-reference/services/generate-video"
+                ]
+              },
+              {
+                "group": "OCR",
+                "pages": [
+                  "api-reference/ocr/image",
+                  "api-reference/ocr/pdf"
+                ]
+              }
             ]
           },
           {
-            "group": "File Support",
-            "pages": [
-              "api-reference/files/overview",
-              "api-reference/files/upload-url",
-              "api-reference/files/upload-file",
-              "api-reference/files/confirm-upload",
-              "api-reference/files/metadata"
+            "tab": "SDKs",
+            "groups": [
+              {
+                "group": "SDKs",
+                "pages": [
+                  "guides/python-sdk",
+                  "guides/typescript-sdk"
+                ]
+              },
+              {
+                "group": "External SDKS",
+                "pages": [
+                  "guides/litellm-sdk",
+                  "guides/openai-sdk-compatibility",
+                  "guides/langchain-sdk",
+                  "guides/vercel-ai-sdk"
+                ]
+              }
             ]
           },
           {
-            "group": "Research",
-            "pages": [
-              "api-reference/services/web-search",
-              "api-reference/services/deep-research"
-  
-            ]
-          },
-          {
-            "group": "Media",
-            "pages": [
-              "api-reference/services/generate-image",
-              "api-reference/services/generate-video"
-            ]
-          },
-       
-          
-          {
-            "group": "OCR",
-            "pages": [
-              "api-reference/ocr/image",
-              "api-reference/ocr/pdf"
+            "tab": "Legacy API",
+            "groups": [
+              {
+                "group": "Legacy Endpoints",
+                "pages": [
+                  "api-reference/models",
+                  "api-reference/chat/completion",
+                  "api-reference/endpoint/list-integrations",
+                  "api-reference/endpoint/get-integration",
+                  "api-reference/endpoint/connect-integration",
+                  "api-reference/endpoint/execute-feature"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "SDKs",
-        "groups": [
+        "product": "Agents",
+        "description": "Incredible Agents Platform",
+        "tabs": [
           {
-            "group": "SDKs",
-            "pages": [
-              "guides/python-sdk",
-              "guides/typescript-sdk"
+            "tab": "Learn Agents",
+            "groups": [
+              {
+                "group": "Start Here",
+                "pages": [
+                  "agents/index",
+                  "agents/getting-started",
+                  "agents/tutorial"
+                ]
+              },
+              {
+                "group": "Understanding Agents",
+                "pages": [
+                  "agents/what-is-an-agent",
+                  "agents/agent-max"
+                ]
+              },
+              {
+                "group": "Configuration",
+                "pages": [
+                  "agents/triggers",
+                  "agents/integrations"
+                ]
+              },
+              {
+                "group": "Best Practices",
+                "pages": [
+                  "agents/prompting-best-practices",
+                  "agents/cost-optimization",
+                  "agents/testing"
+                ]
+              },
+              {
+                "group": "Community",
+                "pages": [
+                  "agents/community"
+                ]
+              },
+              {
+                "group": "Help",
+                "pages": [
+                  "agents/faq",
+                  "agents/delete-account"
+                ]
+              }
             ]
           },
           {
-            "group": "External SDKS",
-            "pages": [
-              "guides/litellm-sdk",
-              "guides/openai-sdk-compatibility",
-              "guides/langchain-sdk",
-              "guides/vercel-ai-sdk"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Legacy API",
-        "groups": [
-          {
-            "group": "Legacy Endpoints",
-            "pages": [
-              "api-reference/models",
-              "api-reference/chat/completion",
-              "api-reference/endpoint/list-integrations",
-              "api-reference/endpoint/get-integration",
-              "api-reference/endpoint/connect-integration",
-              "api-reference/endpoint/execute-feature"
+            "tab": "How-to Guides",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "agents/guides/index"
+                ]
+              },
+              {
+                "group": "Let's Create Together",
+                "pages": [
+                  "agents/guides/daily-news-digest",
+                  "agents/guides/lead-research",
+                  "agents/guides/meeting-prep",
+                  "agents/guides/competitor-monitoring"
+                ]
+              }
             ]
           }
         ]
@@ -130,8 +208,8 @@
   "navbar": {
     "links": [
       {
-        "label": "Blog",
-        "href": "https://web.incredible.one/blog"
+        "label": "Agents",
+        "href": "https://incredible.one/"
       }
     ],
     "primary": {

@@ -1,0 +1,157 @@
+---
+title: 'Testing Agents'
+description: 'Verify your agent works before it runs automatically.'
+---
+
+## What This Covers
+
+This page explains how to test your agent before publishing. Testing catches problems before your agent runs automatically.
+
+## Why Test
+
+- **Catch errors early** — Find problems before they affect real workflows
+- **Verify output format** — Make sure results look right
+- **Confirm destination** — Check that data goes where you expect
+- **Build confidence** — Know your agent does what you intended
+
+## Two Testing Methods
+
+<Tabs>
+  <Tab title="Quick Test (Play Button)">
+    **When to use:** Any agent. Best for scheduled agents or when you want to test immediately.
+    
+    **How it works:** Click Play, and your agent runs right now. You watch each step execute in real time.
+    
+    <Steps>
+      <Step title="Click Play">
+        Find the **Play** button (▶️) in the topbar on the right side.
+      </Step>
+      <Step title="Watch execution">
+        See each step as it happens: data fetched, actions taken, results generated.
+      </Step>
+      <Step title="Check output">
+        Verify the final result. Did the email arrive? Is the spreadsheet row correct? Is the Slack message formatted right?
+      </Step>
+      <Step title="Review run details">
+        Click on any step to see exactly what data was used and what was returned.
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Trigger Test (Event Triggers Only)">
+    **When to use:** Agents with an event trigger configured (new email, form submission, calendar event, etc.)
+    
+    **How it works:** Click Test, then perform the trigger action. The agent waits for the real event, captures the data, and shows you how it responds.
+    
+    <Info>
+    The **Test** button only appears after you've configured an event trigger. For scheduled agents, use the Play button instead.
+    </Info>
+    
+    <Steps>
+      <Step title="Click Test">
+        Find the **Test** button (🚀) in the topbar. This appears next to the Publish button for event-triggered agents.
+      </Step>
+      <Step title="Wait for the modal">
+        A "Listening for trigger" modal appears with a timer. Your agent is now waiting for the event.
+      </Step>
+      <Step title="Trigger the event">
+        Do the action that triggers your agent: send a test email, add a spreadsheet row, create a calendar event.
+      </Step>
+      <Step title="Watch the capture">
+        When the event is detected (usually within 1-2 minutes), the modal shows "Trigger received!" and your agent starts running.
+      </Step>
+      <Step title="Review the run">
+        See how your agent processed the trigger and what output it produced.
+      </Step>
+    </Steps>
+    
+    <Warning>
+    If no event is detected within the timeout period, the test session expires. Click Test again to start a new session.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## What to Verify
+
+<Check>**Data retrieved correctly** — Does the agent get the right information?</Check>
+<Check>**Processing accurate** — Are summaries, calculations, or transformations correct?</Check>
+<Check>**Output format right** — Does the result look how you expected?</Check>
+<Check>**Delivered to correct place** — Did it go to the right email, channel, or spreadsheet?</Check>
+<Check>**Handles edge cases** — What happens if data is missing or unexpected?</Check>
+
+## Viewing Run History
+
+Every run is saved so you can review what happened.
+
+**Where to find it:** Click the **History** button (🕐 clock icon) in the topbar.
+
+### What You'll See
+
+| Element | Meaning |
+|---------|---------|
+| Run number (#1, #2, etc.) | Order of execution, newest first |
+| Time | When the run started |
+| **Triggered** badge | Run was automatic (from schedule or event) |
+| Blue highlight | You haven't viewed this run yet |
+
+### Reviewing a Run
+
+Click any run to see:
+- Each step the agent took
+- Data retrieved from apps
+- Actions performed
+- Final output delivered
+- Any errors that occurred
+
+<Tip>
+New background runs (from schedules or triggers) show a notification badge on the History button. Click to review them.
+</Tip>
+
+## Common Issues
+
+| Symptom | Likely cause | What to check |
+|---------|-------------|---------------|
+| Agent doesn't find data | Wrong time range or filter | Check your date ranges and search criteria |
+| Output goes to wrong place | Incorrect destination in instructions | Verify email addresses, channel names, spreadsheet links |
+| Format looks wrong | Instructions unclear about format | Be more specific about how output should look |
+| Agent errors on a step | App not connected or permission issue | Click **Accounts** in topbar to reconnect |
+| Trigger not detected | Trigger not published or wrong config | Ensure event trigger shows green "Live" status |
+| Results are empty | No data matches criteria | Broaden your search or check that source data exists |
+| Test button missing | No event trigger configured | Test button only appears for event-triggered agents |
+
+## After Testing
+
+Once testing confirms your agent works:
+
+<Steps>
+  <Step title="Save the version">
+    Your agent saves automatically whenever you make changes.
+  </Step>
+  <Step title="Set your trigger">
+    Configure when the agent runs: schedule (daily, weekly) or event trigger (new email, etc.).
+  </Step>
+  <Step title="Activate">
+    - **For schedules:** Click **Enable** in the schedule settings. The schedule activates immediately.
+    - **For event triggers:** Click **Publish** in the topbar. Status changes from Draft (amber) to Live (green).
+  </Step>
+  <Step title="Monitor first runs">
+    Check the first few automatic runs in **History** (🕐) to confirm everything works.
+  </Step>
+</Steps>
+
+<Tip>
+**Test after changes.** Whenever you modify your agent's instructions or app connections, test again before relying on automatic runs.
+</Tip>
+
+## Testing Checklist
+
+<Check>Run a quick test with Play button</Check>
+<Check>Check that output appears in the correct destination</Check>
+<Check>Verify output format matches expectations</Check>
+<Check>For event-triggered agents, do a trigger test with real event</Check>
+<Check>Review any errors in History (🕐)</Check>
+<Check>Enable schedule or publish event trigger only after successful test</Check>
+
+---
+
+**Next:** [Triggers — Schedule and Event-Based Automation →](/agent/triggers)

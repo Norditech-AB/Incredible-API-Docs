@@ -1,0 +1,76 @@
+---
+title: 'Daily News Digest'
+description: 'Get a personalized news summary delivered to your inbox every morning.'
+---
+
+## What This Agent Does
+
+Searches for news on topics you care about and emails you a summary every morning. No more scrolling through news sites—get the highlights delivered automatically.
+
+**Example output:** Every day at 8am, you receive an email with the top 5 AI industry stories from the past 24 hours.
+
+## Setup
+
+<Steps>
+  <Step title="Create the agent">
+    From the homepage, enter this prompt:
+    
+    ```
+    Every morning at 8am, search for news about artificial intelligence 
+    from the last 24 hours. Find the top 5 most relevant stories. 
+    Email me a summary with headlines, sources, and a 2-sentence 
+    description of each story. Send to [your-email@example.com].
+    ```
+  </Step>
+  
+  <Step title="Customize the topic">
+    In the chat, tell Incredible what you want to track:
+    - "Focus on AI startups and funding news"
+    - "Include news about OpenAI, Anthropic, and Google AI"
+    - "Skip opinion pieces, only factual news"
+  </Step>
+  
+  <Step title="Set the schedule">
+    Click **Add Trigger** (⚡) → **Schedule** → Daily at 8:00 AM.
+  </Step>
+  
+  <Step title="Test and enable">
+    Click **Play** (▶️) to test. Check your inbox. If it looks good, click **Enable** on your schedule.
+  </Step>
+</Steps>
+
+## Example Prompt
+
+```
+Every morning at 8am, search for news about [YOUR TOPIC] from the last 24 hours.
+
+Find the top 5 most relevant stories. For each story include:
+- Headline
+- Source name
+- 2-sentence summary
+- Link to the article
+
+Email the digest to [YOUR EMAIL] with subject "Daily [TOPIC] News - [DATE]".
+
+Skip opinion pieces and focus on factual news from reputable sources.
+```
+
+## Variations
+
+| Use Case | Modification |
+|----------|-------------|
+| **Competitor news** | "Search for news about [Company A], [Company B], and [Company C]" |
+| **Industry trends** | "Search for news about [industry] trends, funding, and product launches" |
+| **Weekly instead of daily** | Change schedule to weekly on Monday mornings |
+| **Slack instead of email** | "Post the summary to #news-updates on Slack" |
+
+## Tips
+
+<Tip>
+**Be specific about sources.** Adding "from TechCrunch, The Verge, and Reuters" improves relevance.
+</Tip>
+
+- Include your email address in the prompt
+- Specify the number of stories you want
+- Define what "relevant" means to you (recent funding, product launches, etc.)
+

@@ -1,0 +1,90 @@
+---
+title: 'Competitor Monitoring'
+description: 'Track competitor news and get alerts when something important happens.'
+---
+
+## What This Agent Does
+
+Monitors news about your competitors and alerts you when something significant happens—funding rounds, product launches, leadership changes, or partnerships.
+
+**Example output:** Every Friday, you receive a summary of what your top 3 competitors did this week. If something major happens (like a funding round), you get an immediate alert.
+
+## Setup
+
+<Steps>
+  <Step title="Create the agent">
+    From the homepage, enter this prompt:
+    
+    ```
+    Every Friday at 9am, search for news about [Competitor A], [Competitor B], 
+    and [Competitor C] from the past week. 
+    
+    Create a summary of significant news: funding, product launches, 
+    partnerships, and leadership changes.
+    
+    Email the summary to [your-email@example.com] with subject 
+    "Weekly Competitor Update - [DATE]".
+    ```
+  </Step>
+  
+  <Step title="List your competitors">
+    In the chat, be specific about who to track:
+    - "Track Notion, Coda, and Airtable"
+    - "Include their parent companies if they have one"
+  </Step>
+  
+  <Step title="Set the schedule">
+    Click **Add Trigger** (⚡) → **Schedule** → Weekly on Friday at 9:00 AM.
+  </Step>
+  
+  <Step title="Test and enable">
+    Click **Play** (▶️) to test. Review the summary. Click **Enable** to start weekly updates.
+  </Step>
+</Steps>
+
+## Example Prompt
+
+```
+Every Friday at 9am, research my competitors from the past 7 days.
+
+Competitors to track:
+- [Competitor 1]
+- [Competitor 2]  
+- [Competitor 3]
+
+For each competitor, find news about:
+- Funding rounds or acquisitions
+- New product launches or features
+- Partnerships or integrations
+- Leadership changes
+- Major customer wins
+
+Create a summary organized by competitor. Include:
+- Headline and source for each story
+- 2-sentence summary
+- Why it matters (my assessment)
+
+Email to [YOUR EMAIL] with subject "Weekly Competitor Update - [DATE]".
+
+If no significant news was found for a competitor, note "No major updates this week."
+```
+
+## Variations
+
+| Use Case | Modification |
+|----------|-------------|
+| **Daily monitoring** | Change schedule to daily for fast-moving markets |
+| **Slack alerts** | "Post to #competitive-intel on Slack" |
+| **Add to spreadsheet** | "Also add each news item as a row to my Competitor Tracker spreadsheet" |
+| **Include social media** | "Check their Twitter/X accounts for announcements too" |
+
+## Tips
+
+<Tip>
+**Be specific about what matters.** "Funding rounds over $10M" or "Enterprise customer announcements" helps filter noise.
+</Tip>
+
+- Name competitors explicitly—don't use generic terms
+- Define what counts as "significant" for your industry
+- Consider a daily schedule for fast-moving competitive landscapes
+

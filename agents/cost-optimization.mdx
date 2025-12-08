@@ -1,0 +1,105 @@
+---
+title: 'Managing Costs'
+description: 'Run your agents efficiently with fewer resources.'
+---
+
+## What This Covers
+
+This page explains how agent costs work and how to reduce them without affecting results.
+
+## How Costs Work
+
+Each time your agent runs, it uses processing resources. The main factor affecting cost is how many **features** are enabled.
+
+```
+More enabled features → More processing required → Higher cost per run
+```
+
+Each connected app has multiple features (actions it can perform). An app like Gmail might have 15+ features: read emails, send emails, add labels, search, delete, and more. Your agent only needs the features relevant to its task.
+
+## Reducing Costs
+
+### 1. Disable Unused Features
+
+This is the most effective way to reduce costs.
+
+**Where to find it:** Click the **gear icon** (⚙️) next to your connected apps, or click on any app pill to open the feature manager.
+
+**What you'll see:** Each connected app shows a list of features with toggles. A counter shows how many are enabled (e.g., "5/15 enabled").
+
+<Steps>
+  <Step title="Open feature manager">
+    Click the **⚙️ gear icon** next to your apps, or click on any app pill directly.
+  </Step>
+  <Step title="Select an app">
+    Click on the app you want to optimize.
+  </Step>
+  <Step title="Review features">
+    Look at what's enabled. Ask: "Does my task actually need this?"
+  </Step>
+  <Step title="Disable unused features">
+    Toggle off anything your task doesn't use.
+  </Step>
+</Steps>
+
+**Example:**
+
+| Task | App | Features needed | Features to disable |
+|------|-----|-----------------|---------------------|
+| Read and summarize emails | Gmail | Read messages, Search | Send, Delete, Labels, Draft, etc. |
+| Post updates to Slack | Slack | Send message | Read messages, Reactions, Channels, etc. |
+| Add rows to spreadsheet | Sheets | Add row, Read sheet | Delete, Format, Create sheet, etc. |
+
+### 2. Remove Unused Apps
+
+If your agent doesn't use an app at all, remove it entirely.
+
+**How:** Click the **⚙️ gear icon** next to your apps, find the app to remove, and click **Remove this app**.
+
+<Warning>
+Only remove apps your agent truly doesn't use. If you're unsure, test your agent with the Play button first.
+</Warning>
+
+### 3. Write Clear Instructions
+
+Unclear instructions cause agents to take extra steps or retry actions.
+
+- **Vague:** Costs more because agent tries multiple approaches
+- **Specific:** Agent takes the direct path, fewer resources used
+
+See [Writing Instructions](/agents/prompting-best-practices) for how to be specific.
+
+## Before and After
+
+| Configuration | Features enabled | Result |
+|---------------|-----------------|--------|
+| All Gmail features on | 15 features | Higher cost per run |
+| Only needed features | 3 features | ~70% lower cost, same results |
+
+The output is identical—your agent does the same task. The difference is how much processing is required to load and consider those features.
+
+<Tip>
+**Incredible helps automatically.** When you describe your task in the chat, Incredible analyzes it and selects only the features your agent needs. Manual optimization is only necessary if you want to fine-tune further or if your task changes.
+</Tip>
+
+## Cost Review Checklist
+
+<Check>Open Manage Apps for your agent</Check>
+<Check>Review each connected app's enabled features</Check>
+<Check>Disable any features your task doesn't use</Check>
+<Check>Remove any apps not needed for the task</Check>
+<Check>Test that your agent still works after changes</Check>
+
+## Why Fewer Features Helps
+
+| Benefit | Explanation |
+|---------|-------------|
+| **Lower cost** | Less processing per run |
+| **Faster execution** | Agent considers fewer options |
+| **More accurate** | Agent stays focused on relevant actions |
+| **Clearer debugging** | If something fails, fewer places to check |
+
+---
+
+**Next:** [Testing Agents →](/agents/testing)
+

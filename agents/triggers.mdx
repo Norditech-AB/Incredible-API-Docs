@@ -1,0 +1,186 @@
+---
+title: 'Triggers'
+description: 'Set up when your agent runs automatically—on a schedule or when events happen.'
+---
+
+## What This Covers
+
+This page explains the two ways to trigger your agent: schedules (time-based) and event triggers (app-based). You'll learn how each works and when to use them.
+
+## Two Types of Triggers
+
+| Type | How it works | Best for |
+|------|-------------|----------|
+| **Schedule** | Runs at specific times (daily, weekly, monthly) | Reports, summaries, regular tasks |
+| **Event** | Runs when something happens in an app | Reacting to emails, form submissions, updates |
+
+<Info>
+**Important:** Agents can have either a schedule OR an event trigger—not both at the same time. To switch trigger types, disable the current one first.
+</Info>
+
+## Schedule Triggers
+
+Schedule triggers run your agent at specific times you configure.
+
+### Setting Up a Schedule
+
+<Steps>
+  <Step title="Open trigger settings">
+    Click **Add Trigger** (⚡) in the topbar, then select **Schedule**.
+  </Step>
+  <Step title="Choose frequency">
+    Select how often to run:
+    - **Daily:** Runs every day at the same time
+    - **Weekly:** Runs on selected days of the week
+    - **Monthly:** Runs on selected days of the month
+  </Step>
+  <Step title="Set the time">
+    Choose what time the agent should run. Your timezone is auto-detected, or you can select a different one.
+  </Step>
+  <Step title="Select days (if applicable)">
+    - **Weekly:** Check which days (Monday, Tuesday, etc.)
+    - **Monthly:** Check which dates (1st, 15th, etc.)
+  </Step>
+  <Step title="Enable">
+    Click **Enable** to activate. The schedule starts immediately.
+  </Step>
+</Steps>
+
+### Schedule Indicators
+
+When a schedule is active, you'll see:
+- A **blue pill** in the topbar showing the schedule (e.g., "Daily at 9:00 AM")
+- **Next run time** displayed in the schedule settings
+
+### Managing Schedules
+
+| Action | How to do it |
+|--------|-------------|
+| View schedule | Click the blue schedule pill in topbar |
+| Change settings | Click schedule pill → adjust time/frequency |
+| Disable temporarily | Click schedule pill → **Disable** |
+| Remove entirely | Click schedule pill → **Remove schedule** |
+
+<Tip>
+Disabling a schedule preserves your settings. You can re-enable it later without reconfiguring.
+</Tip>
+
+## Event Triggers
+
+Event triggers run your agent when something happens in a connected app—like receiving an email, a new row in a spreadsheet, or a message in Slack.
+
+### Available Events
+
+Common event triggers include:
+
+| App | Example Triggers |
+|-----|-----------------|
+| Gmail | New email received, New email with label |
+| Google Sheets | New row added, Row updated |
+| Slack | New message in channel, New direct message |
+| Calendar | New event created, Event starting soon |
+| GitHub | New issue, New pull request |
+| Forms | Form submission received |
+
+<Info>
+Not all apps have event triggers. When configuring a trigger, you'll see which events are available for each app.
+</Info>
+
+### Setting Up an Event Trigger
+
+<Steps>
+  <Step title="Open trigger settings">
+    Click **Add Trigger** (⚡) in the topbar.
+  </Step>
+  <Step title="Browse triggers">
+    You'll see two sections:
+    - **Your Apps:** Triggers for apps already in your agent
+    - **All Apps:** Triggers for any available app
+  </Step>
+  <Step title="Select a trigger">
+    Click the event you want (e.g., "New Gmail Message").
+  </Step>
+  <Step title="Configure (if needed)">
+    Some triggers have configuration options:
+    - Gmail: Filter by label or sender
+    - Sheets: Specify which spreadsheet
+    - Slack: Choose the channel
+    
+    Fill in required fields (marked with *).
+  </Step>
+  <Step title="Connect the app">
+    If you haven't connected this app yet, you'll be prompted to sign in.
+  </Step>
+  <Step title="Save">
+    Click **Let's go!** to save the trigger.
+  </Step>
+</Steps>
+
+### Draft vs Live
+
+Event triggers have two states:
+
+| State | Indicator | What happens |
+|-------|-----------|--------------|
+| **Draft** | Amber/yellow pill | Trigger saved but not active. Agent won't run automatically. |
+| **Live** | Green pill with pulse | Trigger active. Agent runs when event occurs. |
+
+### Publishing Your Trigger
+
+After saving, your trigger starts as **Draft**. To activate:
+
+1. The **Publish** button appears in the topbar
+2. Click **Publish** to go live
+3. Status changes to green "Live" indicator
+
+To pause automatic runs, click the Live indicator → **Unpublish**. Your trigger returns to Draft mode.
+
+### Testing Event Triggers
+
+Before publishing, test with real event data:
+
+1. Click **Test** (🚀) in the topbar
+2. A "Listening for trigger" modal appears
+3. Perform the action (send an email, add a row, etc.)
+4. When detected, your agent runs with the real data
+5. Review the results before publishing
+
+<Warning>
+Test sessions expire after a few minutes. If no event is detected, click Test again to start a new session.
+</Warning>
+
+## Switching Trigger Types
+
+You can't have both a schedule and event trigger active simultaneously.
+
+**To switch from schedule to event trigger:**
+1. Click the schedule pill → **Remove schedule**
+2. Click **Add Trigger** → select your event
+
+**To switch from event trigger to schedule:**
+1. Click the trigger pill → **Remove trigger**
+2. Click **Add Trigger** → select **Schedule**
+
+## Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Can't enable schedule | Event trigger exists | Remove event trigger first |
+| Can't add event trigger | Schedule is active | Disable or remove schedule first |
+| Trigger not firing | Still in Draft mode | Click Publish to go Live |
+| Event not detected | App not connected | Check Accounts in topbar |
+| Wrong data captured | Trigger misconfigured | Review trigger settings (labels, filters, etc.) |
+
+## Trigger Checklist
+
+<Check>Decide: schedule (time-based) or event (app-based)?</Check>
+<Check>Configure settings (time, frequency, or event type)</Check>
+<Check>Connect required apps</Check>
+<Check>Test before going live</Check>
+<Check>Enable (schedule) or Publish (event trigger)</Check>
+<Check>Monitor first automatic runs in History</Check>
+
+---
+
+**Next:** [Integrations — Connect Your Apps →](/agent/integrations)
+

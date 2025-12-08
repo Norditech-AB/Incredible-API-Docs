@@ -1,0 +1,256 @@
+---
+title: 'Agent MAX Engine'
+description: 'Deep Work capabilities that power reliable, long-running AI agents.'
+---
+
+Agent MAX is the execution engine behind Incredible's agent capabilities. It's designed for **Deep Work**—complex, multi-step tasks that require accuracy, persistence, and autonomous error recovery.
+
+This page provides technical details on each capability. For the user-facing overview, see [Agent MAX (Agents docs)](/agents/agent-max).
+
+## Deep Work Features
+
+Agent MAX includes 11 core capabilities that ensure agents complete tasks reliably:
+
+<img
+  src="/images/agent_max_small_banner.png"
+  alt="Agent MAX Deep Work Features"
+  style={{ width: '100%', borderRadius: '12px', marginTop: '16px', marginBottom: '24px' }}
+/>
+
+## Anti-Hallucination
+
+Agents map real data from context and validate every action before executing.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Input validation against available context; output verification before committing |
+| **Result** | Near-zero hallucination on function calls |
+| **Guarantee** | No fabricated data, no wrong parameters |
+
+**Technical details:**
+- All function call parameters are validated against schema definitions
+- Outputs are traced to source data in connected apps
+- Agents reject requests that require information not present in context
+
+---
+
+## Anti-Loop
+
+Agents detect stuck states and repeated action patterns, terminating cleanly instead of running indefinitely.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Pattern detection for repeated actions; stuck-state recognition |
+| **Result** | Clean termination when no progress is possible |
+| **Guarantee** | No infinite loops, no runaway costs |
+
+**Technical details:**
+- Action history is analyzed for repetition patterns
+- Stuck detection triggers after configurable thresholds
+- Graceful shutdown preserves partial results where possible
+
+---
+
+## Laser Focus
+
+Agents maintain goal alignment across long-context, multi-step workflows—even 20+ step tasks.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Goal anchoring; intermediate output filtering |
+| **Result** | Consistent task completion without drift |
+| **Guarantee** | No distraction from intermediate outputs |
+
+**Technical details:**
+- Primary goal is preserved and re-referenced throughout execution
+- Intermediate results are evaluated for relevance before influencing next steps
+- Long tasks are chunked with goal validation at each checkpoint
+
+---
+
+## Start to Finish
+
+Agents execute end-to-end with built-in completeness checks. All steps are verified before marking done.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Step verification; completeness validation |
+| **Result** | Full task execution with confirmation |
+| **Guarantee** | No partial outputs, no silent failures |
+
+**Technical details:**
+- Each step produces verifiable outputs
+- Final validation checks all expected deliverables
+- Incomplete runs are flagged with specific failure points
+
+---
+
+## Precision Actions
+
+Agents validate inputs and outputs on every function call with near-perfect parameter accuracy.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Schema validation; type checking; constraint enforcement |
+| **Result** | Exact execution of requested actions |
+| **Guarantee** | Agents do exactly what was asked |
+
+**Technical details:**
+- Function schemas define required and optional parameters
+- Type coercion follows strict rules
+- Out-of-bounds values trigger validation errors, not silent failures
+
+---
+
+## Deep Memory™
+
+Agents compress context automatically—up to 90% more efficient. Smart caching keeps relevant information available across long tasks.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Context compression; relevance-weighted caching |
+| **Result** | 10x more context capacity without forgetting |
+| **Guarantee** | Large tasks and datasets stay in focus |
+
+**Technical details:**
+- Automatic summarization of older context
+- Key facts are preserved at full fidelity
+- Cache invalidation based on task relevance
+
+---
+
+## Safety Built In
+
+Agents include guardrails out of the box: validation, error handling, stuck detection, and auto-termination.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Multi-layer validation; error boundaries; automatic shutdown |
+| **Result** | Protected execution without additional configuration |
+| **Guarantee** | No safety engineering required |
+
+**Technical details:**
+- Input sanitization on all external data
+- Error boundaries prevent cascade failures
+- Resource limits enforced at runtime
+- Automatic termination on unsafe states
+
+---
+
+## Fast Retries
+
+Agents cache context between actions. Retries rebuild from cache, not from scratch.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Context caching; incremental retry |
+| **Result** | 80% lower retry costs |
+| **Guarantee** | Mistakes don't compound |
+
+**Technical details:**
+- Successful action results are cached
+- Failed actions retry with cached context
+- Cache persistence configurable per task type
+
+---
+
+## Self-Heal
+
+Agents validate inputs in real-time and adapt when something fails. Built-in feedback loops enable automatic adjustment and retry.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Real-time validation; adaptive retry; feedback loops |
+| **Result** | Automatic error recovery |
+| **Guarantee** | Errors get fixed without restarting the task |
+
+**Technical details:**
+- Failure patterns are analyzed for root cause
+- Alternative approaches are attempted automatically
+- Learning from failures improves subsequent attempts
+
+---
+
+## Adaptive Routing
+
+Agents select the optimal model for each step. Lightweight models handle simple actions; powerful models handle complex reasoning.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Task complexity analysis; dynamic model selection |
+| **Result** | Optimal cost/performance balance |
+| **Guarantee** | Faster and cheaper, automatically |
+
+**Technical details:**
+- Step complexity is estimated before execution
+- Model routing based on reasoning requirements
+- Cost optimization without quality degradation
+
+---
+
+## Agentic Reasoning
+
+Agents use chain-of-thought planning before execution, built on 30+ prompting frameworks from frontier AI research.
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Mechanism** | Chain-of-thought planning; multi-framework prompting |
+| **Result** | Better sequencing and higher reliability |
+| **Guarantee** | Agents think before they act |
+
+**Technical details:**
+- Planning phase generates execution strategy
+- Multiple reasoning frameworks available
+- Step sequencing optimized for task requirements
+
+---
+
+## Feature Comparison
+
+| Feature | Technical Description | User Benefit |
+|---------|----------------------|--------------|
+| **Anti-Hallucination** | Near-zero hallucination, validated outputs | Uses real info, no made-up data |
+| **Anti-Loop** | Stuck detection, clean termination | Knows when to stop |
+| **Laser Focus** | Goal alignment across long tasks | Doesn't lose track |
+| **Start to Finish** | End-to-end with completeness checks | Finishes the whole job |
+| **Precision Actions** | Validated inputs/outputs, exact execution | Does exactly what you asked |
+| **Deep Memory™** | 90% compression, 10x capacity | Remembers way more |
+| **Safety Built In** | Guardrails out of the box | Errors handled automatically |
+| **Fast Retries** | Context caching, 80% cheaper | Second tries are cheap |
+| **Self-Heal** | Real-time validation, auto-retry | Fixes its own mistakes |
+| **Adaptive Routing** | Optimal model per step | Right power, right price |
+| **Agentic Reasoning** | Chain-of-thought planning | Thinks before it acts |
+
+---
+
+## Using Agent MAX via API
+
+Agent MAX powers the `/agent` endpoint. All capabilities are enabled by default.
+
+```bash
+curl -X POST https://api.incredible.one/v1/agent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Research competitors and create a summary report",
+    "integrations": ["web_search", "gmail"],
+    "user_id": "user_123"
+  }'
+```
+
+For full API documentation, see [Agent Endpoint](/api-reference/services/agent).
+
+---
+
+## When to Use Agent MAX
+
+Agent MAX is designed for tasks that require:
+
+- **Multi-step execution** — 5+ steps with dependencies
+- **Long-running processes** — Tasks that take minutes, not seconds
+- **High accuracy requirements** — Financial data, customer communications
+- **Autonomous operation** — Scheduled or triggered runs without supervision
+- **Error resilience** — Tasks that must complete despite API failures or edge cases
+
+For simple, single-step operations, the standard [Answer](/api-reference/services/answer) or [Conversation](/api-reference/services/conversation) endpoints may be more appropriate.
+
