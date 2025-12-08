@@ -1,0 +1,152 @@
+---
+title: 'Writing Instructions'
+description: 'How to write task descriptions that produce reliable results.'
+---
+
+## What This Covers
+
+This page explains how to write effective instructions for your agents. Clear instructions lead to consistent, accurate results.
+
+**Where to write instructions:**
+- When creating an agent, type your task in the input on the homepage
+- For existing agents, use the chat (left panel) to describe what you want—Incredible updates your agent automatically
+- You can also directly edit the task in the right panel
+
+## The Formula
+
+<Info>
+Every effective instruction has three parts:
+
+1. **Where to get information** — Which app, what data, what timeframe
+2. **What to do with it** — Summarize, copy, calculate, filter, etc.
+3. **Where to put the result** — Email, Slack, spreadsheet, etc.
+</Info>
+
+**Example using the formula:**
+
+```
+1. Get all emails from Gmail with "invoice" in the subject from the last 7 days
+2. Extract the sender, amount, and due date from each
+3. Add a row for each invoice to my "Invoices" spreadsheet at [link]
+```
+
+## Being Specific
+
+<Tabs>
+  <Tab title="Good">
+    ```
+    Every morning at 8am, search for news about artificial intelligence 
+    from the last 24 hours. Find the top 5 stories by relevance. 
+    Email a summary to sarah@company.com with the subject 
+    "AI News - [today's date]".
+    ```
+    
+    **Why this works:**
+    - Specific time and frequency
+    - Clear search topic
+    - Defined number of results
+    - Exact email address
+    - Defined subject line format
+  </Tab>
+  <Tab title="Needs work">
+    ```
+    Check for interesting AI news and send me updates.
+    ```
+    
+    **Problems:**
+    - When should it run?
+    - What counts as "interesting"?
+    - How many stories?
+    - Send to where?
+    - What format?
+  </Tab>
+</Tabs>
+
+## Details to Include
+
+| Detail type | Example | Why it matters |
+|-------------|---------|----------------|
+| **Links** | `https://docs.google.com/spreadsheets/d/abc123` | Agent can't guess which spreadsheet you mean |
+| **Email addresses** | `team@company.com` | "Email me" requires knowing where |
+| **Channel names** | `#sales-updates` | Slack has many channels |
+| **Time ranges** | "last 24 hours", "from Dec 1-7" | Prevents unbounded searches |
+| **Quantities** | "top 5", "all", "first 10" | Sets clear expectations |
+| **Column names** | "the 'Status' column" | Identifies exact data location |
+| **Filters** | "with label 'urgent'" | Narrows scope precisely |
+
+## Full Example
+
+```
+Get all new rows added to the "Leads" sheet in this spreadsheet 
+https://docs.google.com/spreadsheets/d/1abc123/edit 
+from the last 24 hours (the "Created At" column has the timestamp).
+
+For each new lead:
+1. Search the web for information about their company (domain is in column C)
+2. Find company size, industry, and recent news
+
+Update each row with the research:
+- Company size in column F
+- Industry in column G  
+- One-sentence summary of recent news in column H
+
+After updating all rows, post a message in #sales-leads on Slack:
+"Added research for [number] new leads. Check the spreadsheet."
+```
+
+**Why this works:**
+- Exact spreadsheet link provided
+- Time range and timestamp column specified
+- Clear list of what to research
+- Specific columns for each data point
+- Defined notification channel and message format
+
+## Common Mistakes
+
+| Mistake | Problem | How to fix |
+|---------|---------|-----------|
+| "Check my calendar" | Which calendar app? | "Check my Google Calendar" |
+| "Send to the team" | Who specifically? | "Send to #team-updates in Slack" |
+| "Recent emails" | How recent? | "Emails from the last 48 hours" |
+| "Important items" | What criteria? | "Items with 'urgent' in subject or from @vip.com" |
+| "Add to my spreadsheet" | Which one? | Include the full spreadsheet URL |
+| "Summarize the data" | Deliver where? | "Email the summary to me at [address]" |
+| Schedule in task | Causes confusion | Set schedule separately using Add Trigger (⚡) |
+
+## Checklist Before Running
+
+<Check>Task describes where to get data</Check>
+<Check>Task describes what to do with it</Check>
+<Check>Task describes where results go</Check>
+<Check>All links and addresses included</Check>
+<Check>Time ranges specified</Check>
+<Check>Quantities defined (how many)</Check>
+
+<Accordion title="Advanced patterns">
+
+**Conditional logic:**
+```
+For each email, if the sender domain is in my "VIP List" spreadsheet, 
+forward to #urgent-inbox. Otherwise, add to the daily digest.
+```
+
+**Multiple outputs:**
+```
+Create a summary and:
+1. Email it to sarah@company.com
+2. Post in #weekly-updates on Slack
+3. Add as a new row to the Reports spreadsheet
+```
+
+**Handling missing data:**
+```
+For each lead, find their LinkedIn profile. 
+If no LinkedIn found, leave column D empty and continue to the next lead.
+```
+
+</Accordion>
+
+---
+
+**Next:** [Managing Costs →](/agents/cost-optimization)
+

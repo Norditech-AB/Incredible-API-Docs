@@ -1,0 +1,149 @@
+---
+title: 'What is an Agent?'
+description: 'How Incredible Agents work and what they can do for you.'
+---
+
+## What This Covers
+
+This page explains what an Incredible Agent is, how it processes tasks, and what kinds of work it handles well.
+
+## What an Agent Is
+
+An Incredible Agent is an AI that connects to your apps, follows your instructions, and completes tasks without you watching. You set it up once, and it runs automatically—on a schedule or when something triggers it.
+
+**How an agent works:**
+
+```
+Trigger (schedule or event)
+    ↓
+Agent receives task + context
+    ↓
+Plans the steps needed
+    ↓
+Takes actions in your apps
+    ↓
+Delivers results to your destination
+```
+
+## How Agents Think
+
+When your agent runs, it:
+
+1. **Receives the task** — Your instructions plus any context (like "new email arrived" if triggered by email)
+2. **Plans the approach** — Determines what steps to take and in what order
+3. **Executes actions** — Reads data, processes it, writes to destinations
+4. **Validates results** — Checks that actions completed successfully
+5. **Retries if needed** — Adapts when something fails instead of stopping
+
+This is different from simple automation that follows fixed steps. Agents understand your goal and figure out how to achieve it, even when data varies.
+
+## Comparison
+
+| Approach | Thinks through task | Runs without you | Adapts to changes |
+|----------|:------------------:|:----------------:|:-----------------:|
+| Chatbots | ✓ | ✗ | ✓ |
+| Workflow builders | ✗ | ✓ | ✗ |
+| **Incredible Agents** | ✓ | ✓ | ✓ |
+
+## What Agents Do Well
+
+<CardGroup cols={2}>
+  <Card title="Scheduled summaries">
+    Daily or weekly reports pulled from your apps and delivered to email, Slack, or elsewhere.
+  </Card>
+  <Card title="Data sync">
+    Copy information between apps when new records appear.
+  </Card>
+  <Card title="Monitoring">
+    Watch for changes and alert you when something happens.
+  </Card>
+  <Card title="Research">
+    Gather information from the web and compile it into reports.
+  </Card>
+  <Card title="Triggered workflows">
+    React to events—new emails, form submissions, calendar events—and take action.
+  </Card>
+  <Card title="Multi-step tasks">
+    Handle sequences of actions that would take you 15-30 minutes manually.
+  </Card>
+</CardGroup>
+
+## What Agents Need From You
+
+For reliable results, agents need:
+
+| Requirement | Example | Why it matters |
+|-------------|---------|----------------|
+| Clear instructions | "Search for AI news from the last 24 hours" | Vague tasks produce inconsistent results |
+| Connected apps | Gmail, Slack, Sheets | Agent can only use apps you've connected |
+| Specific details | Email addresses, channel names, spreadsheet links | Agent can't guess what you mean |
+
+See [Writing Instructions](/agents/prompting-best-practices) for how to write effective task descriptions.
+
+## What Agents Cannot Do
+
+- **Use apps not available in Incredible** — The agent works only with connected integrations
+- **Guess missing information** — If you don't specify an email address or channel, the agent can't infer it
+- **Make judgment calls you haven't defined** — "Important" emails need criteria like sender, subject keywords, or labels
+- **Access data you haven't connected** — Private documents, databases, or systems require integration
+
+## Version History
+
+Every time your agent is updated, a version is saved automatically. You can review previous versions and restore them if needed.
+
+### Where to Find It
+
+Click the **version badge** (shows v1, v2, etc.) in the topbar to open version history.
+
+### What's Saved in Each Version
+
+| Saved | Not Saved |
+|-------|-----------|
+| Task instructions (prompt) | Schedule settings |
+| Connected apps | Trigger configuration |
+| Agent description | Enabled features |
+| Agent icon | Run history |
+
+### Restoring a Previous Version
+
+1. Click the version badge in the topbar
+2. Browse the version list (newest at top)
+3. Click a version to see what it contained
+4. Select a version to restore your agent to that state
+
+<Info>
+Restoring a version updates your task, apps, and description—but keeps your current schedule and trigger settings.
+</Info>
+
+<Accordion title="Common questions">
+
+**How long do agents take to run?**
+
+Simple tasks (search and email) take 30-60 seconds. Complex tasks with many steps can take several minutes.
+
+**Can I watch an agent run?**
+
+Yes. Click **Play** (▶️) to run your agent and watch each step execute in real time.
+
+**What happens if an agent fails?**
+
+You're notified of the error. Click **History** (🕐) to see what happened, adjust your configuration, and test again.
+
+**Can I pause an agent?**
+
+Yes. For schedules, click the schedule pill and disable. For event triggers, click the Live indicator and unpublish. Your configuration is preserved.
+
+**How many agents can I have?**
+
+This depends on your plan. Check [incredible.one](https://incredible.one) for current limits.
+
+**Can I undo changes to my agent?**
+
+Yes. Use version history (click the v1, v2, etc. badge) to restore a previous configuration.
+
+</Accordion>
+
+---
+
+**Next:** [Agent MAX — Why Agents Work Reliably →](/agents/agent-max)
+

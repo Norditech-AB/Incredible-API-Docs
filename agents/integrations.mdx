@@ -1,0 +1,186 @@
+---
+title: 'Integrations'
+description: 'Connect your apps and manage what your agents can access.'
+---
+
+## What This Covers
+
+This page explains how to browse available integrations, connect your apps, and manage what features each agent can use.
+
+## Available Integrations
+
+Incredible connects to hundreds of apps across categories:
+
+| Category | Examples |
+|----------|----------|
+| **Productivity** | Gmail, Google Sheets, Google Docs, Google Calendar, Google Drive, Notion, Todoist |
+| **Communication** | Slack, Discord, Microsoft Teams, WhatsApp, Intercom |
+| **CRM & Sales** | HubSpot, Salesforce, Pipedrive, Apollo |
+| **Project Management** | Linear, Jira, Trello, Asana, ClickUp, Monday |
+| **Development** | GitHub, GitLab, Supabase |
+| **E-commerce** | Shopify, Stripe |
+| **Marketing** | Mailchimp, SendGrid, Brevo |
+| **Accounting** | QuickBooks, Xero |
+
+<Info>
+New integrations are added regularly. If you don't see an app you need, [let us know on Discord](https://discord.gg/pNmdkxgBe2).
+</Info>
+
+## Browsing Integrations
+
+When creating or editing an agent, you can browse available apps:
+
+<Steps>
+  <Step title="Open the app browser">
+    In your agent workspace, click the **+** button next to your connected apps.
+  </Step>
+  <Step title="Search or browse">
+    - Type to search by name
+    - Scroll to browse all available apps
+    - Apps are organized by category
+  </Step>
+  <Step title="Add an app">
+    Click an app to add it to your agent. If it requires connection, you'll be prompted to sign in.
+  </Step>
+</Steps>
+
+## Connecting Apps
+
+Most apps require you to sign in once. After that, the connection is available for all your agents.
+
+### Connection Methods
+
+| Method | How it works | Examples |
+|--------|-------------|----------|
+| **OAuth** | Click Connect → Sign in with the app | Gmail, Slack, Google Sheets |
+| **API Key** | Enter your API key from the app | Some developer tools |
+| **No Auth** | Works immediately, no sign-in needed | Web Search, Email Me |
+
+### First-Time Connection
+
+<Steps>
+  <Step title="Add the app">
+    Click **+** and select the app you want to use.
+  </Step>
+  <Step title="Connect when prompted">
+    If the app requires authentication, click **Connect** to sign in.
+  </Step>
+  <Step title="Authorize">
+    Follow the app's sign-in flow and grant the required permissions.
+  </Step>
+  <Step title="Done">
+    The connection is saved. You can now use this app in any agent.
+  </Step>
+</Steps>
+
+<Tip>
+**Connections persist across agents.** Connect Gmail once, and all your agents can use it. No need to sign in repeatedly.
+</Tip>
+
+## Managing Connections
+
+### Viewing Connected Accounts
+
+Click the **Accounts** button in the topbar (shows app icons) to see:
+- All apps connected for this agent
+- Connection status for each app
+- Options to reconnect if needed
+
+### Reconnecting an App
+
+If a connection expires or stops working:
+
+1. Click **Accounts** in the topbar
+2. Find the app with issues
+3. Click **Reconnect**
+4. Sign in again to refresh the connection
+
+### Disconnecting an App
+
+To remove an app from your agent:
+
+1. Click the **gear icon** (⚙️) next to your connected apps
+2. Find the app to remove
+3. Click **Remove this app**
+
+<Warning>
+Removing an app from your agent doesn't delete the connection. Other agents can still use it. To fully disconnect from Incredible, contact support.
+</Warning>
+
+## Managing Features
+
+Each app has multiple features (actions it can perform). You can control which features your agent can use.
+
+### Why Manage Features?
+
+| Benefit | Explanation |
+|---------|-------------|
+| **Lower cost** | Fewer features = less processing per run |
+| **Faster execution** | Agent considers fewer options |
+| **More accurate** | Agent stays focused on relevant actions |
+
+### Viewing Features
+
+1. Click the **gear icon** (⚙️) next to your connected apps, or click on any app pill
+2. See all features for that app with toggles
+3. A counter shows how many are enabled (e.g., "5/15 enabled")
+
+### Enabling/Disabling Features
+
+<Steps>
+  <Step title="Open Manage Apps">
+    Click the **gear icon** (⚙️) next to your connected apps.
+  </Step>
+  <Step title="Select an app">
+    Click on the app you want to configure.
+  </Step>
+  <Step title="Toggle features">
+    Turn features on/off based on what your agent needs.
+  </Step>
+</Steps>
+
+**Example:** For an agent that only reads and summarizes emails:
+- ✅ Enable: Read messages, Search messages
+- ❌ Disable: Send email, Create draft, Delete, Add label, etc.
+
+<Tip>
+**Incredible auto-selects features.** When you describe your task, Incredible automatically enables only the features needed. Manual adjustment is optional for fine-tuning.
+</Tip>
+
+## Common Integration Questions
+
+<Accordion title="What if my app isn't available?">
+If you need an integration that isn't listed:
+1. Check if it's available under a different name
+2. Request it in our [Discord community](https://discord.gg/pNmdkxgBe2)
+3. Some apps can be connected via generic integrations (webhooks, APIs)
+</Accordion>
+
+<Accordion title="Can I use multiple accounts for the same app?">
+Currently, each app is connected to one account per user. If you need multiple accounts (e.g., two Gmail addresses), contact support for options.
+</Accordion>
+
+<Accordion title="What permissions does Incredible request?">
+Incredible requests only the permissions needed for the features you use. You can review permissions during the OAuth sign-in flow. We never access more than necessary.
+</Accordion>
+
+<Accordion title="Is my data safe?">
+Yes. Incredible:
+- Only accesses data when your agent runs
+- Never stores your app credentials (OAuth handles this securely)
+- Processes data in real-time without long-term storage
+- See our [privacy policy](https://incredible.one/privacy) for details
+</Accordion>
+
+## Integration Checklist
+
+<Check>Add apps your agent needs (+ button)</Check>
+<Check>Connect apps when prompted</Check>
+<Check>Review enabled features (gear icon)</Check>
+<Check>Disable features you don't need for cost savings</Check>
+<Check>Test your agent to verify connections work</Check>
+
+---
+
+**Next:** [Community — Discover and Share Agents →](/agent/community)
+

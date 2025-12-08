@@ -1,0 +1,137 @@
+---
+title: 'Your First Agent'
+description: 'Create an agent that runs automatically. Takes about 10 minutes.'
+---
+
+## What You'll Build
+
+By the end of this tutorial, you'll have an agent that searches for news and emails you a daily summary. The same process works for any task—data syncing, monitoring, reports, or anything else you want to automate.
+
+**Example result:** Every morning at 8am, you receive an email with the top 5 AI news stories from the past 24 hours.
+
+## Before You Start
+
+- An Incredible account ([sign up free](https://incredible.one))
+- About 10 minutes
+
+## Steps
+
+<Steps>
+  <Step title="Create your agent">
+    From the homepage, type what you want to automate in the input field:
+    
+    ```
+    Every morning, search for AI news from the last 24 hours and email me a summary of the top 5 stories.
+    ```
+    
+    Click **Create**. This opens your agent workspace.
+  </Step>
+  
+  <Step title="Review the workspace">
+    Your workspace has two sides:
+    
+    - **Left panel:** Chat with Incredible. This is where you refine your task and make changes.
+    - **Right panel:** Your agent's current configuration—the task description, connected apps, and controls.
+    
+    Incredible has already interpreted your request and set up the initial configuration.
+  </Step>
+  
+  <Step title="Refine with Incredible">
+    Incredible may ask clarifying questions:
+    
+    - "What email address should I send to?"
+    - "Any specific sources you want me to check?"
+    
+    Answer in the chat. Incredible updates your agent automatically.
+    
+    You can also ask for changes:
+    - "Add a summary of competitor news too"
+    - "Send to Slack instead of email"
+    - "Run at 7am instead"
+  </Step>
+  
+  <Step title="Connect your apps">
+    If your agent needs apps you haven't connected yet, Incredible will prompt you.
+    
+    Click the app name to connect. You'll sign in once—Incredible remembers your connection for future agents.
+    
+    <Info>
+    **For this example:** The built-in Web Search and Email features don't require app connections. You can test immediately.
+    </Info>
+  </Step>
+  
+  <Step title="Test your agent">
+    Click the **Play** button (▶️ in the topbar, right side) to run your agent now.
+    
+    Watch it work:
+    - You'll see each step as it executes
+    - Search results appear as the agent finds them
+    - The final email is composed and sent
+    
+    Check your inbox to verify the result.
+  </Step>
+  
+  <Step title="Set up a schedule">
+    Click **Add Trigger** (⚡ in the topbar) and select **Schedule**.
+    
+    Configure when your agent runs:
+    - **Frequency:** Daily, Weekly, or Monthly
+    - **Time:** 8:00 AM (or your preferred time)
+    - **Timezone:** Auto-detected, or select manually
+    - **Days:** For weekly schedules, select which days to run
+    
+    The schedule saves automatically as you configure it.
+  </Step>
+  
+  <Step title="Enable your schedule">
+    Click **Enable** to activate your schedule. Your agent will now run automatically at the configured time.
+    
+    You'll see a blue schedule indicator in the topbar showing when the next run occurs.
+    
+    <Tip>
+    To stop automatic runs, return to the schedule settings and click **Disable** or **Remove schedule**.
+    </Tip>
+  </Step>
+</Steps>
+
+## What to Expect
+
+**First automatic run:**
+- Your agent runs at the scheduled time
+- Results are delivered to your specified destination
+- A notification appears in your run history
+
+**Where to see results:**
+- Check the destination you specified (email, Slack, spreadsheet, etc.)
+- Click the **History** button (🕐 clock icon in topbar) to see all past runs
+- Click any run to review exactly what happened step by step
+
+**If something goes wrong:**
+- Incredible notifies you of errors
+- Open **History** → click the failed run to see what went wrong
+- Adjust your task description and test again with the Play button
+
+## After Your First Agent
+
+<Accordion title="Troubleshooting common issues">
+
+| Symptom | Likely cause | What to check |
+|---------|-------------|---------------|
+| No email received | Wrong email address | Check the email address in your task description |
+| Results seem wrong | Task description unclear | Be more specific about what you want |
+| Agent didn't run | Schedule not enabled | Check that schedule shows in the topbar (blue indicator) |
+| App not working | Connection expired | Click **Accounts** in topbar to reconnect |
+
+</Accordion>
+
+## Before Going Live Checklist
+
+<Check>Test your agent with the Play button</Check>
+<Check>Verify results appear in the right place</Check>
+<Check>Set your schedule or trigger</Check>
+<Check>Enable your schedule (or publish your event trigger)</Check>
+
+---
+
+**Next:** [How Agents Work →](/agents/what-is-an-agent)
+

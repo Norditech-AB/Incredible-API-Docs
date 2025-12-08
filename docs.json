@@ -112,10 +112,45 @@
             "tab": "Learn Agents",
             "groups": [
               {
-                "group": "Getting Started",
+                "group": "Start Here",
                 "pages": [
-                  "agent/index",
-                  "agent/testing"
+                  "agents/index",
+                  "agents/getting-started",
+                  "agents/tutorial"
+                ]
+              },
+              {
+                "group": "Understanding Agents",
+                "pages": [
+                  "agents/what-is-an-agent",
+                  "agents/agent-max"
+                ]
+              },
+              {
+                "group": "Configuration",
+                "pages": [
+                  "agents/triggers",
+                  "agents/integrations"
+                ]
+              },
+              {
+                "group": "Best Practices",
+                "pages": [
+                  "agents/prompting-best-practices",
+                  "agents/cost-optimization",
+                  "agents/testing"
+                ]
+              },
+              {
+                "group": "Community",
+                "pages": [
+                  "agents/community"
+                ]
+              },
+              {
+                "group": "Account",
+                "pages": [
+                  "agents/delete-account"
                 ]
               }
             ]
