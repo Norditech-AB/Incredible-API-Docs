@@ -24,6 +24,47 @@ description: "Agentic conversation with tool calling. Returns tool calls for the
   </div>
 </a>
 
+## Overview
+
+The Agent API enables autonomous AI systems that can decide when and how to use tools (functions) to accomplish complex tasks. Unlike simple conversational endpoints, agents can break down multi-step problems, call appropriate tools, and use the results to provide comprehensive answers.
+
+**What makes agents special:**
+- **Tool awareness** - Agents understand what tools are available and when to use them
+- **Multi-step reasoning** - Can plan and execute complex workflows
+- **Autonomous decision-making** - Decides which tools to call and in what order
+- **Result integration** - Uses tool outputs to inform subsequent actions and final responses
+
+**Real-world use cases:**
+- **Data lookup and retrieval** - Query databases, search APIs, fetch external data
+- **Calculations and analysis** - Perform computations, analyze data, generate reports
+- **External integrations** - Interact with third-party services, send notifications, create records
+- **Workflow automation** - Orchestrate multi-step business processes
+- **Dynamic content generation** - Fetch real-time data to generate accurate, current responses
+
+## How Agent Tool Calling Works
+
+The Agent endpoint follows a request-response pattern for tool calling:
+
+1. **Initial Request** - You send messages and define available tools
+2. **Agent Planning** - The model analyzes the request and decides which tools to call
+3. **Tool Call Response** - The API returns tool calls with arguments (doesn't execute them)
+4. **Your Execution** - Your application executes the tool calls in your environment
+5. **Follow-up Request** - You send the tool results back to the agent
+6. **Final Response** - The agent uses tool results to generate the final answer
+
+This design gives you complete control over tool execution, security, and side effects. The agent plans what to do, but you control what actually happens.
+
+## Defining Tools
+
+Tools are defined using JSON Schema to specify their name, description, and input parameters. The agent uses these definitions to understand what each tool does and how to call it correctly.
+
+**Tool definition components:**
+- **name** - A clear, descriptive identifier for the tool
+- **description** - Explains what the tool does (helps the agent decide when to use it)
+- **input_schema** - JSON Schema defining required and optional parameters
+
+The quality of your tool descriptions directly impacts how well the agent uses them. Be specific about what each tool does, its limitations, and when it should be used.
+
 ## Examples
 
 <CodeGroup>
@@ -120,14 +161,66 @@ curl -X POST "https://api.incredible.one/v1/agent" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **messages** (required) — Conversation history
-- **tools** (required) — List of tool definitions with `name`, `description`, and `input_schema`
-- **system_prompt** (optional) — System prompt to guide the agent
-- **stream** (optional) — Whether to stream the response (default: false)
+### messages (required)
+The conversation history as an array of message objects. Each message should have a `role` ("user" or "assistant") and `content`. The agent uses this context to understand the task and previous interactions.
 
-## Using Files
+For multi-turn agent workflows, include previous tool call results in the message history so the agent can build on prior actions.
+
+### tools (required)
+An array of tool definitions that the agent can choose to call. Each tool must specify:
+
+**name** - The function identifier (e.g., `"get_weather"`, `"search_database"`)
+- Use clear, descriptive names that indicate the tool's purpose
+- Follow snake_case convention for consistency
+
+**description** - A natural language explanation of what the tool does
+- Be specific about the tool's capabilities and limitations
+- Include when the tool should (and shouldn't) be used
+- This is critical - the agent relies on descriptions to choose the right tool
+
+**input_schema** - A JSON Schema object defining the tool's parameters
+- Specify the `type`, `properties`, and `required` fields
+- Include `description` for each parameter to guide the agent
+- The agent will generate arguments matching this schema
+
+**Example tool definition:**
+```json
+{
+  "name": "search_products",
+  "description": "Search the product catalog by name, category, or keyword. Returns up to 10 matching products with prices and availability.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "The search term or keyword"
+      },
+      "category": {
+        "type": "string",
+        "enum": ["electronics", "clothing", "home"],
+        "description": "Optional category filter"
+      }
+    },
+    "required": ["query"]
+  }
+}
+```
+
+### system_prompt (optional)
+Instructions that define the agent's behavior, personality, and constraints. Use this to:
+- Set the agent's role and expertise level
+- Define boundaries and limitations
+- Specify preferred tools or strategies
+- Control tone and response style
+
+**Example:** `"You are a helpful assistant with access to tools. Always verify information with the search tool before answering. Be concise and cite your sources."`
+
+### stream (optional)
+Enable real-time streaming to watch the agent's thinking process, tool calls, and responses as they happen. Default is `false`.
+
+## Working with Files in Agent Workflows
 
 Agents can access file content when making tool calling decisions:
 
@@ -211,9 +304,20 @@ if (response.tool_calls) {
 
 </CodeGroup>
 
-## Streaming Responses
+## Streaming Agent Responses
 
-Enable real-time streaming for agent responses by setting `stream: true`. Watch as the agent thinks, plans tool calls, and generates responses in real-time.
+Agent streaming is particularly powerful because it provides visibility into the agent's decision-making process. You can watch in real-time as the agent:
+- Reasons through the problem (`thinking` events)
+- Decides which tools to call (`tool_call` events)
+- Generates its final response (`content` events)
+
+This transparency is valuable for:
+- **Debugging** - See exactly how the agent interprets tasks and why it chooses certain tools
+- **User Experience** - Show users what's happening during complex multi-step workflows
+- **Early Intervention** - Detect and handle issues before the agent completes its full response
+- **Progress Indication** - Provide real-time feedback for long-running agent tasks
+
+Enable streaming by setting `stream: true`:
 
 <CodeGroup>
 
@@ -358,7 +462,111 @@ curl -X POST "https://api.incredible.one/v1/agent" \
 
 ## Tool Execution Pattern
 
-1. Agent returns tool calls
-2. You execute the tools
-3. Provide results back in the next request as assistant messages
-4. Agent uses results to respond
+Implementing agentic workflows requires a specific pattern for handling tool calls. Here's the complete flow with implementation guidance:
+
+### Step 1: Initial Request
+Send your user's message along with tool definitions:
+
+```python
+response = client.agent(
+    messages=[
+        {"role": "user", "content": "What's the weather in Tokyo and what time is it there?"}
+    ],
+    tools=[weather_tool, time_tool]
+)
+```
+
+### Step 2: Check for Tool Calls
+The agent analyzes the request and decides if tools are needed:
+
+```python
+if response.tool_calls:
+    # Agent wants to use tools
+    print(f"Agent needs {len(response.tool_calls)} tools")
+    for call in response.tool_calls:
+        print(f"- {call.name} with args: {call.inputs}")
+else:
+    # Agent has sufficient information to respond
+    print(response.response)
+    return
+```
+
+### Step 3: Execute Tools
+Your application executes the requested tools in your environment. This is where you maintain security, rate limiting, and control:
+
+```python
+tool_results = []
+for call in response.tool_calls:
+    if call.name == "get_weather":
+        result = get_weather(call.inputs["location"])
+    elif call.name == "get_time":
+        result = get_time(call.inputs["timezone"])
+    
+    tool_results.append({
+        "tool_call_id": call.id,
+        "result": result
+    })
+```
+
+### Step 4: Send Results Back
+Create a follow-up request with the tool results. The agent needs to see both the original tool calls and their results:
+
+```python
+follow_up_messages = [
+    {"role": "user", "content": "What's the weather in Tokyo and what time is it there?"},
+    {
+        "role": "assistant",
+        "tool_calls": response.tool_calls  # What the agent requested
+    },
+    {
+        "role": "tool",
+        "tool_call_results": tool_results  # What actually happened
+    }
+]
+
+final_response = client.agent(
+    messages=follow_up_messages,
+    tools=[weather_tool, time_tool]
+)
+```
+
+### Step 5: Final Response
+The agent processes the tool results and generates a comprehensive answer:
+
+```python
+print(final_response.response)
+# "It's currently 15°C and partly cloudy in Tokyo. The local time is 3:45 PM JST."
+```
+
+## Best Practices
+
+**Tool Design:**
+- Keep tools focused - each tool should do one thing well
+- Write clear, detailed descriptions - they're critical for agent decision-making
+- Include examples in descriptions when behavior might be ambiguous
+- Validate inputs before execution - don't trust the agent's arguments blindly
+
+**Error Handling:**
+- Always handle tool execution failures gracefully
+- Return error messages to the agent so it can adapt
+- Implement timeouts for long-running tools
+- Consider fallback strategies when tools fail
+
+**Security:**
+- Never expose dangerous operations directly as tools
+- Implement authorization checks before executing tools
+- Sanitize tool inputs to prevent injection attacks
+- Rate limit tool executions to prevent abuse
+- Log tool calls for audit trails
+
+**Performance:**
+- Execute independent tool calls in parallel when possible
+- Cache tool results for repeated queries
+- Set reasonable timeout limits
+- Consider async execution for slow tools
+
+**User Experience:**
+- Use streaming to show progress during multi-step workflows
+- Provide clear feedback when tools are being executed
+- Allow users to cancel long-running agent tasks
+- Display tool call details for transparency

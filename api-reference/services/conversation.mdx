@@ -24,6 +24,27 @@ description: "Multi-turn conversation endpoint. Fast and cost-effective for conv
   </div>
 </a>
 
+## Overview
+
+The Conversation API is designed for multi-turn dialogues where context and conversation history matter. Unlike the Answer API which handles single questions, Conversation maintains the flow of discussion across multiple exchanges, making it ideal for chatbots, virtual assistants, and interactive applications.
+
+**Key characteristics:**
+- **Stateless but context-aware** - You provide the full conversation history with each request
+- **Optimized for dialogue** - Faster and more cost-effective than the Agent endpoint when you don't need tool calling
+- **Flexible context** - Supports alternating user and assistant messages
+- **Document-aware** - Can reference uploaded files for context-rich conversations
+
+**When to use Conversation vs other endpoints:**
+- Use **Conversation** for multi-turn dialogue without needing tools or function calling
+- Use **Answer** for single-question scenarios or stateless Q&A
+- Use **Agent** when you need autonomous tool calling and complex workflows
+
+## How it works
+
+The Conversation endpoint processes a sequence of messages representing the dialogue history. Each message has a `role` (either "user" or "assistant") and `content`. The API uses this context to generate a contextually appropriate response.
+
+You're responsible for managing the conversation state in your application. Each request should include the full history you want the model to consider. This gives you complete control over context management and allows you to implement features like context pruning or conversation forking.
+
 ## Examples
 
 <CodeGroup>
@@ -94,13 +115,38 @@ curl -X POST "https://api.incredible.one/v1/conversation" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **messages** (required) — Conversation history with alternating user and assistant messages
-- **system_prompt** (optional) — System prompt to guide the conversation
-- **stream** (optional) — Whether to stream the response (default: false)
+### messages (required)
+An array of message objects representing the conversation history. Each message must have:
+- **role**: Either `"user"` (for user messages) or `"assistant"` (for AI responses)
+- **content**: The text content of the message
+- **file_ids** (optional): Array of file IDs to attach to a specific message
 
-## Using Files
+Messages are processed in order, allowing the model to understand the full context of the conversation. You can include as much history as needed, though very long conversations may need to be pruned to stay within context limits.
+
+**Best practices:**
+- Always provide enough context for the model to understand the current query
+- Consider implementing conversation summarization for very long dialogues
+- Alternate between user and assistant messages naturally
+- Don't include messages that are no longer relevant to the current topic
+
+### system_prompt (optional)
+A system-level instruction that defines the AI's behavior, personality, and constraints throughout the conversation. This is set once and influences all responses.
+
+**Examples of system prompts:**
+- `"You are a helpful customer service representative for Acme Corp."`
+- `"You are a technical expert who explains concepts in simple terms."`
+- `"You are a creative writing assistant who helps brainstorm story ideas."`
+
+The system prompt shapes the assistant's tone, expertise level, and boundaries. It's applied before any user messages and remains active throughout the conversation.
+
+### stream (optional)
+Enable real-time streaming of responses. When `true`, you'll receive message chunks as they're generated rather than waiting for the complete response. Default is `false`.
+
+## Attaching Files to Conversations
+
+Files can be attached to individual messages within a conversation, allowing the AI to reference document content when generating responses. This is powerful for document Q&A, report analysis, and context-specific assistance.
 
 You can provide document context in conversations by uploading files and referencing them:
 
@@ -156,7 +202,15 @@ console.log(response.response);
 
 ## Streaming Responses
 
-Enable real-time streaming for conversational responses by setting `stream: true`. Receive message chunks as they're generated for a more interactive experience.
+Streaming creates a more natural, chat-like experience by delivering responses in real-time as they're generated. Instead of waiting for the complete message, your users see text appearing progressively, similar to how a human types.
+
+**Benefits of streaming in conversations:**
+- **Reduced perceived latency** - Users see progress immediately
+- **Better engagement** - The typing effect feels more natural and interactive  
+- **Improved UX** - Users can start reading while the response is still being generated
+- **Cancellation support** - Users can interrupt long responses they don't need
+
+Enable streaming by setting `stream: true` in your request:
 
 <CodeGroup>
 

@@ -24,6 +24,59 @@ description: "Semantic web search. Search with filters, retrieve content, and ge
   </div>
 </a>
 
+## Overview
+
+The Web Search API provides semantic search capabilities powered by advanced AI, allowing you to find relevant information across the web using natural language queries. Unlike traditional keyword-based search, this endpoint understands the intent and context of your query to return more relevant results.
+
+**Key features:**
+- **Semantic understanding** - Searches by meaning, not just keyword matching
+- **Neural and keyword modes** - Choose between AI-powered semantic search or traditional exact matching
+- **Advanced filtering** - Filter by domain, date range, content type, and category
+- **Content retrieval** - Optionally fetch full text, highlights, and summaries
+- **Autoprompt enhancement** - Automatically improves queries for better results
+
+**When to use Web Search:**
+- Real-time information retrieval from the web
+- Research and fact-checking
+- Content discovery and aggregation
+- Building knowledge-enhanced AI applications
+- Augmenting responses with current data
+
+Web Search is perfect when your AI application needs access to current, real-world information that isn't in the model's training data. It's the bridge between your AI and the constantly evolving web.
+
+## How it Works
+
+The Web Search API uses neural search technology to understand the semantic meaning of queries. When you search for "how to reduce carbon emissions," it understands you're looking for environmental solutions, not just pages containing those exact words.
+
+The search process:
+1. **Query analysis** - Your query is processed to understand intent and context
+2. **Autoprompt (optional)** - The query is enhanced for better results
+3. **Neural ranking** - Results are ranked by semantic relevance
+4. **Content extraction** - Optionally retrieves and summarizes content
+5. **Response formatting** - Returns structured results with metadata
+
+## Search Modes
+
+### Neural Search (Default)
+Uses AI to understand query meaning and find semantically relevant results. Best for:
+- Natural language questions
+- Conceptual searches
+- Research queries
+- Discovery and exploration
+
+**Example:** `"companies working on renewable energy storage"`
+
+### Keyword Search
+Traditional exact-match search. Best for:
+- Specific terms or phrases
+- Technical identifiers
+- Known titles or names
+- Precise matching requirements
+
+**Example:** `"Tesla Model 3 specifications 2024"`
+
+Set `type: "keyword"` to use keyword mode.
+
 ## Examples
 
 <CodeGroup>
@@ -73,15 +126,156 @@ curl -X POST "https://api.incredible.one/v1/web-search" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **query** (required) — Search query
-- **max_results** (optional) — Number of results to return
-- **include_domains** (optional) — Filter to specific domains
-- **exclude_domains** (optional) — Exclude specific domains
-- **start_published_date** (optional) — Filter by date range
-- **end_published_date** (optional) — Filter by date range
-- **category** (optional) — Filter by category (company, research paper, news, github, tweet, pdf)
+### query (required)
+Your search query in natural language or keywords. The API will interpret the query based on the search type (neural vs keyword).
+
+**Tips for effective queries:**
+- **Be specific** - "climate change solutions 2024" vs "climate"
+- **Use natural language for neural** - "How do neural networks learn?"
+- **Use exact terms for keyword** - "iPhone 15 Pro Max technical specifications"
+- **Include context** - "startup funding trends in AI" vs just "funding"
+
+### num_results (optional)
+Number of search results to return. Range: 1-100, default: 10.
+
+**Guidelines:**
+- Use 5-10 for focused queries
+- Use 20-50 for research and comprehensive coverage
+- Use 100 for data collection and analysis
+- More results = longer response time and higher cost
+
+### type (optional)
+Search algorithm to use: `"neural"` (default) or `"keyword"`.
+
+**Neural (Semantic Search):**
+- Understands query intent and meaning
+- Finds conceptually related content
+- Better for exploratory research
+- Handles natural language queries
+
+**Keyword (Exact Match):**
+- Matches exact terms in content
+- More predictable results
+- Better for specific lookups
+- Faster for simple queries
+
+### use_autoprompt (optional)
+Boolean flag to enable query enhancement. Default: `true`.
+
+When enabled, the API automatically improves your query for better results. For example:
+- "tesla" → "Tesla Inc. electric vehicle company"
+- "rust" → "Rust programming language"
+
+Disable if you want complete control over the exact query terms used.
+
+### include_domains (optional)
+Array of domains to exclusively search. Only results from these domains will be returned.
+
+**Example use cases:**
+- Academic research: `["arxiv.org", "scholar.google.com"]`
+- Company research: `["techcrunch.com", "crunchbase.com"]`
+- News: `["reuters.com", "apnews.com", "bbc.com"]`
+
+```python
+response = client.web_search(
+    query="machine learning research",
+    include_domains=["arxiv.org", "papers.nips.cc"]
+)
+```
+
+### exclude_domains (optional)
+Array of domains to exclude from results. Useful for filtering out unwanted sources.
+
+**Common exclusions:**
+- Social media: `["facebook.com", "twitter.com"]`
+- Low-quality content farms
+- Paywalled sites if you can't access them
+- Competitor sites
+
+### start_published_date / end_published_date (optional)
+Filter results by publication date range. Format: `YYYY-MM-DD`.
+
+**Use cases:**
+- Recent news: `start_published_date: "2024-01-01"`
+- Historical research: `end_published_date: "2020-12-31"`
+- Specific periods: Both parameters for a date range
+
+```python
+response = client.web_search(
+    query="AI regulations",
+    start_published_date="2024-01-01",
+    end_published_date="2024-12-31"
+)
+```
+
+### category (optional)
+Filter by content type category.
+
+**Available categories:**
+- `"company"` - Company websites and corporate information
+- `"research paper"` - Academic papers and research
+- `"news"` - News articles and journalism
+- `"github"` - GitHub repositories and code
+- `"tweet"` - Twitter/X posts
+- `"pdf"` - PDF documents
+- `"financial"` - Financial reports and data
+- `"personal site"` - Blogs and personal websites
+
+**Example:**
+```python
+# Find academic papers only
+response = client.web_search(
+    query="quantum computing algorithms",
+    category="research paper"
+)
+```
+
+### contents (optional)
+Specify what content to retrieve from each result. Object with boolean flags:
+- `text`: Full text content
+- `highlights`: Key excerpts and highlights
+- `summary`: AI-generated summary
+
+**Performance note:** Retrieving content increases response time. Only request what you need.
+
+```python
+response = client.web_search(
+    query="climate change solutions",
+    contents={
+        "text": True,
+        "highlights": True,
+        "summary": True
+    }
+)
+```
+
+## Best Practices
+
+**Query Optimization:**
+- Start broad, then narrow with filters
+- Use neural search for discovery, keyword for precision
+- Experiment with autoprompt on/off for best results
+- Include year in query for time-sensitive topics
+
+**Performance:**
+- Request fewer results when possible (5-10 is often sufficient)
+- Only enable content retrieval when you need the full text
+- Use domain filters to reduce result set size
+- Cache results to avoid duplicate searches
+
+**Quality:**
+- Use `include_domains` for trusted sources
+- Use `exclude_domains` to filter noise
+- Combine date filters with queries about recent events
+- Use category filters for specific content types
+
+**Integration Patterns:**
+- **RAG (Retrieval Augmented Generation)** - Search first, then send results to Answer/Conversation endpoint
+- **Fact checking** - Search to verify AI-generated claims
+- **Research assistant** - Combine multiple searches with different filters
+- **Content discovery** - Use for finding sources on specific topics
 
 ## Response
 
