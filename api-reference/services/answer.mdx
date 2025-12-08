@@ -1,7 +1,6 @@
 ---
 title: "Answer"
-description: "Get direct answers to questions. Simple question-answering endpoint."
-openapi: "POST /v1/answer"
+description: "Get direct answers or structured JSON output. Supports file context and custom response schemas."
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -24,6 +23,22 @@ openapi: "POST /v1/answer"
     <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
   </div>
 </a>
+
+## Overview
+
+The Answer API provides a streamlined way to get direct, concise answers to questions without the complexity of managing conversation history or tool calling. It's optimized for single-turn Q&A use cases where you need a quick response.
+
+This endpoint is particularly useful when you need to:
+- Extract specific information from your knowledge base
+- Generate quick responses to user queries
+- Transform unstructured text into structured JSON data
+- Provide answers based on document context
+
+Unlike the Conversation or Agent endpoints, Answer is designed for stateless interactions - each request is independent, making it perfect for FAQ systems, information retrieval, and data extraction tasks.
+
+## Making Requests
+
+To use the Answer API, send a POST request to `/v1/answer` with your question in the `query` parameter. The API will process your request and return a direct answer.
 
 ## Examples
 
@@ -82,15 +97,220 @@ curl -X POST "https://api.incredible.one/v1/answer" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **query** (required) — The question to answer
+The Answer API accepts the following parameters to customize how your request is processed:
 
-## Response
+### query (required)
+The question or prompt you want answered. This can be a simple question, a complex query, or instructions for data transformation. The API will analyze your query and generate an appropriate response.
 
-```json
-{
-  "success": true,
-  "answer": "The capital of France is Paris."
+**Best practices:**
+- Be specific and clear in your questions
+- Include relevant context within the query if not using files
+- For complex queries, consider breaking them into smaller questions
+
+### response_format (optional)
+A JSON schema that defines the structure you want the answer to follow. When provided, the API will return structured data matching your schema instead of plain text. This is powerful for extracting structured information from unstructured sources.
+
+**Use cases:**
+- Extracting entities from text
+- Converting natural language to structured data
+- Building forms from descriptions
+- Data normalization and transformation
+
+### file_ids (optional)
+An array of file IDs to use as context for answering the query. Files must be uploaded first using the Files API. The Answer endpoint will use the content of these files to provide more accurate, context-aware responses.
+
+**Supported file types:**
+- PDFs, Word documents, text files
+- Spreadsheets (CSV, Excel)
+- Images (with OCR)
+
+### stream (optional)
+Boolean flag to enable streaming responses. When `true`, the API will return chunks of the answer as they're generated, allowing for real-time display. Default is `false`.
+
+## Working with Files
+
+You can enhance the Answer API's responses by providing document context. This is especially useful for answering questions about specific documents, analyzing reports, or extracting information from files.
+
+You can provide document context by uploading files first, then referencing them in your answer request:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload a file
+with open("document.pdf", "rb") as f:
+    file = client.files.upload(file=f, purpose="assistants")
+
+# Use the file in an answer request
+response = client.answer(
+    query="Summarize the key points from the document",
+    file_ids=[file.id]
+)
+
+print(response.answer)
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+import fs from 'fs';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Upload a file
+const fileStream = fs.createReadStream('document.pdf');
+const file = await client.files.upload({
+  file: fileStream,
+  purpose: 'assistants'
+});
+
+// Use the file in an answer request
+const response = await client.answer({
+  query: 'Summarize the key points from the document',
+  file_ids: [file.id]
+});
+
+console.log(response.answer);
+```
+
+</CodeGroup>
+
+## Structured Output
+
+The Answer API can return data in any JSON structure you define, making it incredibly powerful for data extraction and transformation tasks. By providing a `response_format` schema, you instruct the API to return structured data instead of plain text.
+
+This feature is ideal for:
+- **Sentiment analysis** - Extract sentiment and confidence scores
+- **Entity extraction** - Pull out names, dates, locations from text
+- **Form generation** - Convert descriptions into structured form data
+- **Data validation** - Transform unstructured input into validated structures
+- **API integration** - Get responses in formats that match your application's data models
+
+Here's how to request structured output:
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+schema = {
+    "type": "object",
+    "properties": {
+        "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
+        "confidence": {"type": "number"}
+    },
+    "required": ["sentiment"]
+}
+
+response = client.answer(
+    query="Analyze this review: 'Great product, highly recommend!'",
+    response_format=schema
+)
+
+print(response.data)  # {"sentiment": "positive", "confidence": 0.95}
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const schema = {
+  type: 'object',
+  properties: {
+    sentiment: { type: 'string', enum: ['positive', 'negative', 'neutral'] },
+    confidence: { type: 'number' }
+  },
+  required: ['sentiment']
+};
+
+const response = await client.answer({
+  query: "Analyze this review: 'Great product, highly recommend!'",
+  response_format: schema
+});
+
+console.log(response.data);  // {"sentiment": "positive", "confidence": 0.95}
+```
+
+</CodeGroup>
+
+## Streaming Responses
+
+For longer answers or when you want to provide immediate feedback to users, enable streaming by setting `stream: true`. Instead of waiting for the complete answer, you'll receive chunks of text as they're generated, creating a more interactive and responsive experience.
+
+**When to use streaming:**
+- Long-form answers or explanations
+- Interactive user interfaces where immediate feedback is valuable
+- Reducing perceived latency for users
+- Building chat-like experiences
+
+**How it works:**
+The API sends answer fragments in real-time as they're generated. Your application can display these fragments immediately, creating a typewriter effect that keeps users engaged while the full response is being computed.
+
+<CodeGroup>
+
+```python Python SDK
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Stream an answer
+stream = client.answer(
+    query="Write a detailed explanation of quantum computing",
+    stream=True
+)
+
+# Process streaming chunks
+for chunk in stream:
+    if hasattr(chunk, 'content') and chunk.content:
+        print(chunk.content, end='', flush=True)
+    if hasattr(chunk, 'done') and chunk.done:
+        print("\n[Stream complete]")
+```
+
+```ts TypeScript SDK
+import { IncredibleClient } from '@incredible-ai/sdk';
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+// Stream an answer
+const stream = await client.answer({
+  query: 'Write a detailed explanation of quantum computing',
+  stream: true
+});
+
+// Process streaming events
+for await (const event of stream) {
+  if (event.content) {
+    process.stdout.write(event.content);
+  }
+  if (event.done) {
+    console.log('\n[Stream complete]');
+  }
 }
 ```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Write a detailed explanation of quantum computing",
+    "stream": true
+  }'
+```
+
+</CodeGroup>
+
+**Stream Event Types:**
+- `content` - Text chunks as they're generated
+- `thinking` - Internal reasoning process (if available)
+- `done` - Signals completion of the stream
+- `error` - Any errors that occurred during generation
+
