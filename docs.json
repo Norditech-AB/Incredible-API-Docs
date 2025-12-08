@@ -149,8 +149,9 @@
                 ]
               },
               {
-                "group": "Account",
+                "group": "Help",
                 "pages": [
+                  "agents/faq",
                   "agents/delete-account"
                 ]
               }
