@@ -694,16 +694,16 @@ client = Incredible(api_key="YOUR_API_KEY")
 
 # Upload once
 with open("quarterly_report.pdf", "rb") as f:
-    file = client.files.upload(file=f, purpose="assistants")
+    file = client.files.upload(file=f)
 
-print(f"Uploaded: {file.id}")
-# 💾 Store this file.id in your database!
+print(f"Uploaded: {file.file_id}")
+# 💾 Store this file.file_id in your database!
 
 # Reuse across all endpoints
 # Answer
 answer = client.answer(
     query="What was Q3 revenue?",
-    file_ids=[file.id]
+    file_ids=[file.file_id]
 )
 
 # Conversation
@@ -712,7 +712,7 @@ chat = client.conversation(
         {
             "role": "user",
             "content": "Analyze the revenue trends",
-            "file_ids": [file.id]
+            "file_ids": [file.file_id]
         }
     ]
 )
@@ -723,7 +723,7 @@ agent = client.agent(
         {
             "role": "user",
             "content": "Extract key metrics to a database",
-            "file_ids": [file.id]
+            "file_ids": [file.file_id]
         }
     ],
     tools=my_tools
@@ -751,11 +751,11 @@ Processing usually takes 2-10 seconds depending on file size.
 ```python
 # ✅ GOOD - Upload once, store ID
 file = client.files.upload(...)
-db.save(user_id, file.id)  # Store in database
+db.save(user_id, file.file_id)  # Store in database
 
 # Use file_id many times
-response1 = client.answer(query="Q1?", file_ids=[file.id])
-response2 = client.answer(query="Q2?", file_ids=[file.id])
+response1 = client.answer(query="Q1?", file_ids=[file.file_id])
+response2 = client.answer(query="Q2?", file_ids=[file.file_id])
 
 # ❌ BAD - Re-uploading same file
 file1 = client.files.upload(...)  # Waste of time and resources
@@ -765,7 +765,7 @@ file2 = client.files.upload(...)  # Same file, different ID
 **Check file status:**
 ```python
 # Get file metadata and processing status
-metadata = client.files.metadata(file_id=file.id)
+metadata = client.files.metadata(file_id=file.file_id)
 print(f"Status: {metadata.status}")  # "processing", "ready", "failed"
 print(f"Pages: {metadata.pages}")
 ```
@@ -975,8 +975,8 @@ result = client.answer(
 file_ids = []
 for doc in documents:
     file = client.files.upload(file=doc)
-    file_ids.append(file.id)
-    db.save(file.id)  # Store in database
+    file_ids.append(file.file_id)
+    db.save(file.file_id)  # Store in database
 
 # Answer questions about any document
 def answer_question(question, doc_id):

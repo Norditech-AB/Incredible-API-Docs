@@ -201,7 +201,7 @@ client = Incredible(api_key="YOUR_API_KEY")
 
 # Upload a file
 with open("data.csv", "rb") as f:
-    file = client.files.upload(file=f, purpose="assistants")
+    file = client.files.upload(file=f)
 
 # Agent can use file context with tools
 tools = [
@@ -220,7 +220,7 @@ tools = [
 
 response = client.agent(
     messages=[
-        {"role": "user", "content": "Analyze the sales data", "file_ids": [file.id]}
+        {"role": "user", "content": "Analyze the sales data", "file_ids": [file.file_id]}
     ],
     tools=tools
 )
