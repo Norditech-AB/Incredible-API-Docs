@@ -112,28 +112,6 @@ response = client.answer(
 print(response.answer)
 ```
 
-```ts TypeScript SDK
-import { IncredibleClient } from '@incredible-ai/sdk';
-import fs from 'fs';
-
-const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
-
-// Upload a file
-const fileStream = fs.createReadStream('document.pdf');
-const file = await client.files.upload({
-  file: fileStream,
-  purpose: 'assistants'
-});
-
-// Use the file in an answer request
-const response = await client.answer({
-  query: 'Summarize the key points from the document',
-  file_ids: [file.id]
-});
-
-console.log(response.answer);
-```
-
 ```bash cURL
 # Step 1: Request upload URL
 curl -X POST "https://api.incredible.one/v1/files/upload-url" \

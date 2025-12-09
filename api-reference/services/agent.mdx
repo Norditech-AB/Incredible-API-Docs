@@ -230,46 +230,6 @@ if response.tool_calls:
         print(f"Tool: {call.name}, Inputs: {call.inputs}")
 ```
 
-```ts TypeScript SDK
-import { IncredibleClient } from '@incredible-ai/sdk';
-import fs from 'fs';
-
-const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
-
-// Upload a file
-const fileStream = fs.createReadStream('data.csv');
-const file = await client.files.upload({
-  file: fileStream,
-  purpose: 'assistants'
-});
-
-// Agent can use file context with tools
-const response = await client.agent({
-  messages: [
-    { role: 'user', content: 'Analyze the sales data', file_ids: [file.id] }
-  ],
-  tools: [
-    {
-      name: 'analyze_data',
-      description: 'Analyze data from the provided file',
-      input_schema: {
-        type: 'object',
-        properties: {
-          column: { type: 'string', description: 'Column to analyze' }
-        },
-        required: ['column']
-      }
-    }
-  ]
-});
-
-if (response.tool_calls) {
-  response.tool_calls.forEach(call => {
-    console.log(`Tool: ${call.name}, Inputs:`, call.inputs);
-  });
-}
-```
-
 ```bash cURL
 # Step 1: Request upload URL
 curl -X POST "https://api.incredible.one/v1/files/upload-url" \
