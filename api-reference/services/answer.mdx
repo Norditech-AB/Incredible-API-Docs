@@ -36,11 +36,10 @@ This endpoint is particularly useful when you need to:
 
 Unlike the Conversation or Agent endpoints, Answer is designed for stateless interactions - each request is independent, making it perfect for FAQ systems, information retrieval, and data extraction tasks.
 
-## Making Requests
+## Using Answer
 
-To use the Answer API, send a POST request to `/v1/answer` with your question in the `query` parameter. The API will process your request and return a direct answer.
+The Answer endpoint is designed to generate concise answers to questions, extract information from your data, or convert unstructured text into structured formats. It's ideal for Q&A tasks, transforming text into JSON, or providing instant, context-based responses.
 
-## Examples
 
 <CodeGroup>
 
@@ -69,23 +68,6 @@ const response = await client.answer({
 console.log(response.answer);
 ```
 
-```python OpenAI SDK
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.incredible.one/v1",
-    api_key="YOUR_API_KEY"
-)
-
-response = client.chat.completions.create(
-    model="small-1",
-    messages=[
-        {"role": "user", "content": "What is the capital of France?"}
-    ]
-)
-print(response.choices[0].message.content)
-```
-
 ```bash cURL
 curl -X POST "https://api.incredible.one/v1/answer" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -97,37 +79,12 @@ curl -X POST "https://api.incredible.one/v1/answer" \
 
 </CodeGroup>
 
-## Request Parameters
-
-The Answer API accepts the following parameters to customize how your request is processed:
-
-### query (required)
-The question or prompt you want answered. This can be a simple question, a complex query, or instructions for data transformation. The API will analyze your query and generate an appropriate response.
+What is query? The question or prompt you want answered. This can be a simple question, a complex query, or instructions for data transformation. The API will analyze your query and generate an appropriate response.
 
 **Best practices:**
 - Be specific and clear in your questions
 - Include relevant context within the query if not using files
 - For complex queries, consider breaking them into smaller questions
-
-### response_format (optional)
-A JSON schema that defines the structure you want the answer to follow. When provided, the API will return structured data matching your schema instead of plain text. This is powerful for extracting structured information from unstructured sources.
-
-**Use cases:**
-- Extracting entities from text
-- Converting natural language to structured data
-- Building forms from descriptions
-- Data normalization and transformation
-
-### file_ids (optional)
-An array of file IDs to use as context for answering the query. Files must be uploaded first using the Files API. The Answer endpoint will use the content of these files to provide more accurate, context-aware responses.
-
-**Supported file types:**
-- PDFs, Word documents, text files
-- Spreadsheets (CSV, Excel)
-- Images (with OCR)
-
-### stream (optional)
-Boolean flag to enable streaming responses. When `true`, the API will return chunks of the answer as they're generated, allowing for real-time display. Default is `false`.
 
 ## Working with Files
 
@@ -175,6 +132,38 @@ const response = await client.answer({
 });
 
 console.log(response.answer);
+```
+
+```bash cURL
+# Step 1: Request upload URL
+curl -X POST "https://api.incredible.one/v1/files/upload-url" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "document.pdf"}'
+
+# Step 2: Upload file to returned upload_url
+curl -X PUT "UPLOAD_URL_FROM_STEP_1" \
+  -H "Content-Type: application/pdf" \
+  --data-binary @document.pdf
+
+# Step 3: Confirm upload
+curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "FILE_ID_FROM_STEP_1",
+    "filename": "document.pdf",
+    "file_size": 12345
+  }'
+
+# Step 4: Use file in answer request
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Summarize the key points from the document",
+    "file_ids": ["FILE_ID_FROM_STEP_1"]
+  }'
 ```
 
 </CodeGroup>
@@ -236,6 +225,23 @@ const response = await client.answer({
 });
 
 console.log(response.data);  // {"sentiment": "positive", "confidence": 0.95}
+```
+
+```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Analyze this review: '\''Great product, highly recommend!'\''",
+    "response_format": {
+      "type": "object",
+      "properties": {
+        "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral"]},
+        "confidence": {"type": "number"}
+      },
+      "required": ["sentiment"]
+    }
+  }'
 ```
 
 </CodeGroup>
