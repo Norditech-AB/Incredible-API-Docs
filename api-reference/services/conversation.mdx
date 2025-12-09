@@ -39,11 +39,9 @@ The Conversation API is designed for multi-turn dialogues where context and conv
 - Use **Answer** for single-question scenarios or stateless Q&A
 - Use **Agent** when you need autonomous tool calling and complex workflows
 
-## How it works
+## Using Conversation
 
-The Conversation endpoint processes a sequence of messages representing the dialogue history. Each message has a `role` (either "user" or "assistant") and `content`. The API uses this context to generate a contextually appropriate response.
-
-You're responsible for managing the conversation state in your application. Each request should include the full history you want the model to consider. This gives you complete control over context management and allows you to implement features like context pruning or conversation forking.
+The Conversation endpoint is designed for multi-turn dialogues where you maintain conversation context across exchanges. You send the full message history with each request, and the API generates contextually aware responses. This gives you complete control over conversation management, allowing features like context pruning or conversation forking.
 
 ## Examples
 
@@ -81,25 +79,6 @@ const response = await client.conversation({
 console.log(response.response || response.message);
 ```
 
-```python OpenAI SDK
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://api.incredible.one/v1",
-    api_key="YOUR_API_KEY"
-)
-
-response = client.chat.completions.create(
-    model="conversation",
-    messages=[
-        {"role": "user", "content": "Hello!"},
-        {"role": "assistant", "content": "Hi there!"},
-        {"role": "user", "content": "How are you?"}
-    ]
-)
-print(response.choices[0].message.content)
-```
-
 ```bash cURL
 curl -X POST "https://api.incredible.one/v1/conversation" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -115,15 +94,7 @@ curl -X POST "https://api.incredible.one/v1/conversation" \
 
 </CodeGroup>
 
-## Request Parameters
-
-### messages (required)
-An array of message objects representing the conversation history. Each message must have:
-- **role**: Either `"user"` (for user messages) or `"assistant"` (for AI responses)
-- **content**: The text content of the message
-- **file_ids** (optional): Array of file IDs to attach to a specific message
-
-Messages are processed in order, allowing the model to understand the full context of the conversation. You can include as much history as needed, though very long conversations may need to be pruned to stay within context limits.
+**What are messages?** An array of message objects representing the conversation history. Each message has a `role` (either "user" or "assistant") and `content`. Messages are processed in order, allowing the model to understand the full context of the conversation.
 
 **Best practices:**
 - Always provide enough context for the model to understand the current query
@@ -131,18 +102,9 @@ Messages are processed in order, allowing the model to understand the full conte
 - Alternate between user and assistant messages naturally
 - Don't include messages that are no longer relevant to the current topic
 
-### system_prompt (optional)
-A system-level instruction that defines the AI's behavior, personality, and constraints throughout the conversation. This is set once and influences all responses.
+**Optional: System Prompts** - You can include a `system_prompt` to define the AI's behavior, personality, and constraints. For example: `"You are a helpful customer service representative for Acme Corp."` or `"You are a technical expert who explains concepts in simple terms."` The system prompt shapes the assistant's tone and expertise level throughout the conversation.
 
-**Examples of system prompts:**
-- `"You are a helpful customer service representative for Acme Corp."`
-- `"You are a technical expert who explains concepts in simple terms."`
-- `"You are a creative writing assistant who helps brainstorm story ideas."`
-
-The system prompt shapes the assistant's tone, expertise level, and boundaries. It's applied before any user messages and remains active throughout the conversation.
-
-### stream (optional)
-Enable real-time streaming of responses. When `true`, you'll receive message chunks as they're generated rather than waiting for the complete response. Default is `false`.
+**Optional: Streaming** - Set `stream: true` to receive responses in real-time as they're generated. See the Streaming section below for details.
 
 ## Attaching Files to Conversations
 
@@ -196,6 +158,41 @@ const response = await client.conversation({
 });
 
 console.log(response.response);
+```
+
+```bash cURL
+# Step 1: Request upload URL
+curl -X POST "https://api.incredible.one/v1/files/upload-url" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "report.pdf"}'
+
+# Step 2: Upload file to returned upload_url
+curl -X PUT "UPLOAD_URL_FROM_STEP_1" \
+  -H "Content-Type: application/pdf" \
+  --data-binary @report.pdf
+
+# Step 3: Confirm upload
+curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "FILE_ID_FROM_STEP_1",
+    "filename": "report.pdf",
+    "file_size": 12345
+  }'
+
+# Step 4: Use file in conversation
+curl -X POST "https://api.incredible.one/v1/conversation" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "What'\''s in this document?", "file_ids": ["FILE_ID_FROM_STEP_1"]},
+      {"role": "assistant", "content": "This document contains a quarterly financial report."},
+      {"role": "user", "content": "What were the key findings?"}
+    ]
+  }'
 ```
 
 </CodeGroup>

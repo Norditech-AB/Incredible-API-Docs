@@ -41,9 +41,9 @@ The Agent API enables autonomous AI systems that can decide when and how to use 
 - **Workflow automation** - Orchestrate multi-step business processes
 - **Dynamic content generation** - Fetch real-time data to generate accurate, current responses
 
-## How Agent Tool Calling Works
+## Using Agent
 
-The Agent endpoint follows a request-response pattern for tool calling:
+The Agent endpoint enables autonomous tool calling through a simple request-response pattern:
 
 1. **Initial Request** - You send messages and define available tools
 2. **Agent Planning** - The model analyzes the request and decides which tools to call
@@ -52,18 +52,9 @@ The Agent endpoint follows a request-response pattern for tool calling:
 5. **Follow-up Request** - You send the tool results back to the agent
 6. **Final Response** - The agent uses tool results to generate the final answer
 
-This design gives you complete control over tool execution, security, and side effects. The agent plans what to do, but you control what actually happens.
+This gives you complete control over tool execution, security, and side effects. The agent plans what to do, but you control what actually happens.
 
-## Defining Tools
-
-Tools are defined using JSON Schema to specify their name, description, and input parameters. The agent uses these definitions to understand what each tool does and how to call it correctly.
-
-**Tool definition components:**
-- **name** - A clear, descriptive identifier for the tool
-- **description** - Explains what the tool does (helps the agent decide when to use it)
-- **input_schema** - JSON Schema defining required and optional parameters
-
-The quality of your tool descriptions directly impacts how well the agent uses them. Be specific about what each tool does, its limitations, and when it should be used.
+Tools are defined using JSON Schema with three key components: **name** (clear identifier), **description** (what it does and when to use it), and **input_schema** (parameter definitions). The quality of your tool descriptions directly impacts how well the agent uses them.
 
 ## Examples
 
@@ -161,31 +152,16 @@ curl -X POST "https://api.incredible.one/v1/agent" \
 
 </CodeGroup>
 
-## Request Parameters
+**What are messages?** The conversation history as an array of message objects. Each message has a `role` ("user" or "assistant") and `content`. The agent uses this context to understand the task and previous interactions. For multi-turn workflows, include previous tool call results in the message history so the agent can build on prior actions.
 
-### messages (required)
-The conversation history as an array of message objects. Each message should have a `role` ("user" or "assistant") and `content`. The agent uses this context to understand the task and previous interactions.
+**What are tools?** An array of tool definitions the agent can choose to call. Each tool needs three things:
 
-For multi-turn agent workflows, include previous tool call results in the message history so the agent can build on prior actions.
-
-### tools (required)
-An array of tool definitions that the agent can choose to call. Each tool must specify:
-
-**name** - The function identifier (e.g., `"get_weather"`, `"search_database"`)
-- Use clear, descriptive names that indicate the tool's purpose
-- Follow snake_case convention for consistency
-
-**description** - A natural language explanation of what the tool does
-- Be specific about the tool's capabilities and limitations
-- Include when the tool should (and shouldn't) be used
-- This is critical - the agent relies on descriptions to choose the right tool
-
-**input_schema** - A JSON Schema object defining the tool's parameters
-- Specify the `type`, `properties`, and `required` fields
-- Include `description` for each parameter to guide the agent
-- The agent will generate arguments matching this schema
+- **name** - Clear identifier (e.g., `"get_weather"`, `"search_database"`) using snake_case
+- **description** - Natural language explanation of what the tool does, its capabilities, limitations, and when to use it. Be specific—this is critical for the agent's decision-making
+- **input_schema** - JSON Schema defining the tool's parameters with `type`, `properties`, and `required` fields
 
 **Example tool definition:**
+
 ```json
 {
   "name": "search_products",
@@ -208,17 +184,9 @@ An array of tool definitions that the agent can choose to call. Each tool must s
 }
 ```
 
-### system_prompt (optional)
-Instructions that define the agent's behavior, personality, and constraints. Use this to:
-- Set the agent's role and expertise level
-- Define boundaries and limitations
-- Specify preferred tools or strategies
-- Control tone and response style
+**Optional: System Prompts** - Define the agent's behavior, personality, and constraints. For example: `"You are a helpful assistant with access to tools. Always verify information with the search tool before answering. Be concise and cite your sources."`
 
-**Example:** `"You are a helpful assistant with access to tools. Always verify information with the search tool before answering. Be concise and cite your sources."`
-
-### stream (optional)
-Enable real-time streaming to watch the agent's thinking process, tool calls, and responses as they happen. Default is `false`.
+**Optional: Streaming** - Set `stream: true` to watch the agent's thinking process, tool calls, and responses in real-time. See the Streaming section below for details.
 
 ## Working with Files in Agent Workflows
 
@@ -300,6 +268,52 @@ if (response.tool_calls) {
     console.log(`Tool: ${call.name}, Inputs:`, call.inputs);
   });
 }
+```
+
+```bash cURL
+# Step 1: Request upload URL
+curl -X POST "https://api.incredible.one/v1/files/upload-url" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "data.csv"}'
+
+# Step 2: Upload file to returned upload_url
+curl -X PUT "UPLOAD_URL_FROM_STEP_1" \
+  -H "Content-Type: text/csv" \
+  --data-binary @data.csv
+
+# Step 3: Confirm upload
+curl -X POST "https://api.incredible.one/v1/files/confirm-upload" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "FILE_ID_FROM_STEP_1",
+    "filename": "data.csv",
+    "file_size": 12345
+  }'
+
+# Step 4: Use file in agent request
+curl -X POST "https://api.incredible.one/v1/agent" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Analyze the sales data", "file_ids": ["FILE_ID_FROM_STEP_1"]}
+    ],
+    "tools": [
+      {
+        "name": "analyze_data",
+        "description": "Analyze data from the provided file",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "column": {"type": "string", "description": "Column to analyze"}
+          },
+          "required": ["column"]
+        }
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
