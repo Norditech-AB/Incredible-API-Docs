@@ -1,7 +1,6 @@
 ---
 title: "Generate Image"
 description: "Generate stunning images from text."
-openapi: "POST /v1/generate-image"
 ---
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
@@ -24,6 +23,98 @@ openapi: "POST /v1/generate-image"
     <div style={{ fontSize: '20px', color: '#9ca3af' }}>→</div>
   </div>
 </a>
+
+## Overview
+
+The Image Generation API transforms text descriptions into high-quality images using state-of-the-art AI models. Whether you need illustrations, product mockups, artistic creations, or marketing materials, this endpoint produces professional-grade images from simple text prompts.
+
+**Key capabilities:**
+- **Text-to-image generation** - Create any visual from natural language descriptions
+- **Multiple aspect ratios** - From square social media posts to ultrawide banners
+- **Style control** - Specify artistic styles, moods, and aesthetics
+- **Reproducibility** - Use seeds to regenerate the same image consistently
+- **Format flexibility** - Output as JPEG or PNG based on your needs
+- **Content safety** - Built-in moderation with configurable tolerance levels
+
+**Real-world applications:**
+- **Marketing and advertising** - Generate unique visuals for campaigns
+- **Content creation** - Illustrations for blogs, articles, and social media
+- **Product design** - Rapid prototyping and concept visualization
+- **E-commerce** - Product mockups and lifestyle images
+- **Gaming and entertainment** - Concept art and asset creation
+- **Education** - Visual aids and instructional materials
+- **Personalization** - Custom visuals for user-generated content
+
+## How Image Generation Works
+
+The API uses advanced diffusion models that have been trained on millions of image-text pairs. Here's the generation process:
+
+1. **Prompt Analysis** - Your text description is analyzed to understand subjects, styles, composition, and mood
+2. **Latent Generation** - The model generates the image in a compressed latent space
+3. **Refinement** - Multiple denoising steps progressively improve image quality
+4. **Upscaling** - The final image is upscaled to high resolution
+5. **Safety Check** - Content moderation filters are applied
+6. **Delivery** - The image is stored temporarily and a URL is returned
+
+**Generation time:** Typically 5-15 seconds depending on complexity and current load.
+
+## Writing Effective Prompts
+
+The quality of your generated images depends heavily on prompt quality. Here are strategies for better results:
+
+### Prompt Structure
+
+**Basic template:**
+```
+[Subject] [doing/being what] [setting/environment] [style/mood] [technical details]
+```
+
+**Examples:**
+- "A golden retriever puppy playing in a meadow, soft lighting, photorealistic, 8k"
+- "Futuristic cityscape at night, neon lights, cyberpunk style, cinematic composition"
+- "Watercolor painting of a lighthouse on rocky coast, pastel colors, impressionist"
+
+### Key Elements
+
+**Subject** - What's the main focus?
+- Be specific: "tabby cat" vs "cat"
+- Include details: "elderly man with white beard" vs "man"
+- Specify quantity: "three colorful hot air balloons"
+
+**Action/State** - What's happening?
+- "running through forest"
+- "floating in space"
+- "sitting peacefully"
+
+**Environment/Setting** - Where is this?
+- "in a modern kitchen"
+- "on a tropical beach at sunset"
+- "deep underwater coral reef"
+
+**Style/Mood** - How should it look?
+- Art styles: "oil painting," "digital art," "pencil sketch," "3D render"
+- Mood: "dramatic," "peaceful," "energetic," "mysterious"
+- Photography: "portrait mode," "wide angle," "macro photography"
+
+**Technical Details** - Quality and composition
+- "highly detailed," "8k resolution," "sharp focus"
+- "cinematic lighting," "volumetric lighting," "studio lighting"
+- "shallow depth of field," "bokeh background"
+
+### Prompt Tips
+
+**Do's:**
+- ✅ Be specific and descriptive
+- ✅ Use style references ("like Pixar animation")
+- ✅ Specify lighting and atmosphere
+- ✅ Include composition details ("centered," "close-up," "aerial view")
+- ✅ Mention quality ("high quality," "detailed," "professional")
+
+**Don'ts:**
+- ❌ Use vague descriptions ("nice image," "good looking")
+- ❌ Include multiple conflicting styles
+- ❌ Over-complicate with too many subjects
+- ❌ Use negative instructions (model interprets positively)
 
 ## Examples
 
@@ -72,14 +163,188 @@ curl -X POST "https://api.incredible.one/v1/generate-image" \
 
 </CodeGroup>
 
-## Parameters
+## Request Parameters
 
-- **prompt** (required) — Text description of the image
-- **aspect_ratio** (optional) — Image dimensions: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `21:9`, `9:21` (default: `16:9`)
-- **output_format** (optional) — `jpeg` or `png` (default: `jpeg`)
-- **seed** (optional) — Random seed for reproducibility
-- **prompt_upsampling** (optional) — Enhance prompt automatically (default: `false`)
-- **safety_tolerance** (optional) — Content moderation level 0-6 (default: `2`)
+### prompt (required)
+A detailed text description of the image you want to generate. The more specific and descriptive your prompt, the better the results.
+
+**Prompt length:** 1-2000 characters. Optimal length is 50-200 characters with key details.
+
+**See "Writing Effective Prompts" above for detailed guidance.**
+
+### aspect_ratio (optional)
+The dimensions of the generated image. Default: `16:9`.
+
+**Available ratios:**
+- `1:1` (Square) - 1024x1024px
+  - **Use for:** Social media posts, profile pictures, icons
+  - **Platforms:** Instagram posts, Twitter, LinkedIn
+  
+- `16:9` (Landscape) - 1920x1080px
+  - **Use for:** YouTube thumbnails, presentations, website headers
+  - **Platforms:** YouTube, blog headers, slides
+  
+- `9:16` (Portrait) - 1080x1920px
+  - **Use for:** Mobile content, Stories, vertical video thumbnails
+  - **Platforms:** Instagram Stories, TikTok, Snapchat
+  
+- `4:3` (Traditional) - 1024x768px
+  - **Use for:** Traditional displays, presentations
+  - **Classic format for standard content**
+  
+- `3:4` (Tall portrait) - 768x1024px
+  - **Use for:** Magazine covers, book covers, posters
+  - **Traditional portrait orientation**
+  
+- `21:9` (Ultrawide) - 2560x1080px
+  - **Use for:** Banners, cinematic content, wide displays
+  - **Dramatic panoramic scenes**
+  
+- `9:21` (Tall vertical) - 1080x2560px
+  - **Use for:** Full-screen mobile experiences, tall banners
+  - **Maximum vertical canvas**
+
+**Tip:** Choose aspect ratio based on your intended use case, not arbitrary preference.
+
+### output_format (optional)
+File format for the generated image. Options: `jpeg` (default) or `png`.
+
+**JPEG (default):**
+- Smaller file size
+- Faster generation
+- No transparency
+- Best for: Photographs, realistic scenes, web content
+
+**PNG:**
+- Larger file size
+- Lossless compression
+- Supports transparency
+- Best for: Graphics with transparency, logos, when quality is critical
+
+**When to use PNG:**
+- You need transparent backgrounds
+- Image will be further edited
+- Absolute quality preservation is required
+- File size is not a concern
+
+### seed (optional)
+Integer value for reproducible image generation. Range: 0-4,294,967,295.
+
+**How seeds work:**
+Using the same seed with the same prompt will generate nearly identical images. This is crucial for:
+- **Consistency** - Generate matching images across a series
+- **Iteration** - Make minor prompt adjustments while maintaining core image
+- **A/B testing** - Test variations systematically
+- **Version control** - Recreate exact images later
+
+**Example workflow:**
+```python
+# Generate initial image
+response1 = client.generate_image(prompt="sunset over ocean")
+seed = response1.seed  # Save the seed
+
+# Generate similar image with same seed
+response2 = client.generate_image(
+    prompt="sunset over ocean with sailboat",  # Slightly modified
+    seed=seed  # Same seed for consistency
+)
+```
+
+**Note:** Omit seed for random generation each time.
+
+### prompt_upsampling (optional)
+Automatically enhance your prompt for better results. Boolean, default: `false`.
+
+**When enabled:**
+- Adds quality modifiers ("highly detailed," "professional quality")
+- Improves style consistency
+- Adds technical terms for better rendering
+
+**Example transformation:**
+- Input: `"mountain landscape"`
+- Upsampled: `"majestic mountain landscape with snow-capped peaks, golden hour lighting, highly detailed, professional photography, 8k resolution"`
+
+**When to use:**
+- ✅ Short or basic prompts
+- ✅ When you want maximum quality automatically
+- ✅ For users who aren't prompt engineering experts
+
+**When not to use:**
+- ❌ You've already written a detailed prompt
+- ❌ You want precise control over every detail
+- ❌ Testing specific prompt formulations
+
+### safety_tolerance (optional)
+Content moderation level. Range: 0-6, default: `2`.
+
+**Tolerance levels:**
+- `0` - Most strict: Blocks anything remotely questionable
+- `2` - Moderate (default): Blocks clearly inappropriate content
+- `6` - Most permissive: Allows artistic and mature themes
+
+**What's moderated:**
+- Violence and gore
+- Adult content
+- Hate symbols
+- Illegal activities
+- Harmful or dangerous content
+
+**Recommendations:**
+- **0-1:** Children's content, educational materials, public-facing apps
+- **2-3:** General purpose applications, business content
+- **4-6:** Artistic projects, mature audiences, where context matters
+
+**Note:** Even at high tolerance levels, illegal content is always blocked.
+
+## Best Practices
+
+**Prompt Engineering:**
+- Iterate on prompts - first generation rarely perfect
+- Use style references from known artists or movements
+- Include lighting details for photorealistic images
+- Specify camera angles and composition
+- Add quality modifiers ("highly detailed," "sharp focus")
+
+**Performance & Cost:**
+- Cache frequently used images
+- Generate at lower resolutions for prototypes
+- Use seeds to avoid regenerating the same image
+- Batch similar requests together
+
+**Quality Optimization:**
+- Be specific about style and mood
+- Include technical photography/art terms
+- Experiment with different aspect ratios
+- Try prompt_upsampling for automatic enhancement
+
+**Integration Patterns:**
+- **Dynamic content** - Generate unique images for each user/session
+- **Asset libraries** - Bulk generate variations for design systems
+- **Personalization** - Create customized visuals based on user data
+- **Rapid prototyping** - Quickly visualize concepts for stakeholder review
+
+## Important Notes
+
+**Image URL Expiry:**
+Generated image URLs expire after 1 hour. Always download and save images immediately if you need them long-term.
+
+```python
+import requests
+from pathlib import Path
+
+# Generate image
+response = client.generate_image(prompt="...")
+
+# Download immediately
+image_data = requests.get(response.image_url).content
+Path("generated_image.jpg").write_bytes(image_data)
+```
+
+**Content Policy:**
+Images must comply with our content policy. Generations that violate policies will be rejected with an error.
+
+**Rate Limits:**
+Image generation is rate limited per API key. Contact support to increase limits for high-volume use cases.
 
 ## Response
 

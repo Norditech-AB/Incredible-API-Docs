@@ -6,11 +6,76 @@ openapi: 'POST /ocr/pdf'
 
 ## Overview
 
-Extract text from PDF documents with intelligent detection. The API automatically determines whether your PDF contains selectable text or is a scanned document, then uses the optimal extraction method:
+The OCR PDF endpoint intelligently extracts text from PDF documents of any type - whether they contain selectable text, are scanned images, or a combination of both. The API automatically detects the PDF type and uses the optimal extraction method, making it perfect for processing diverse document collections without manual preprocessing.
 
-- **Text-based PDFs**: Fast direct text extraction (no OCR needed)
-- **Scanned PDFs**: Full OCR processing with Mistral Document AI
-- **Mixed PDFs**: Handled intelligently based on content type
+**Intelligent Processing:**
+- **Text-based PDFs** - Fast direct extraction using PDF text layer (sub-second per page)
+- **Scanned PDFs** - Full OCR processing with Mistral Document AI (2-5 seconds per page)
+- **Mixed PDFs** - Intelligently processes each page with the appropriate method
+- **Automatic detection** - No need to specify document type
+
+**Key capabilities:**
+- **Multi-page support** - Process entire documents in one request
+- **Page-by-page results** - Access text from individual pages
+- **Layout preservation** - Maintains document structure and formatting
+- **High accuracy** - State-of-the-art OCR for scanned documents
+- **Batch processing** - Handle multiple pages efficiently
+- **Error resilience** - Continues processing even if individual pages fail
+
+**Real-world applications:**
+- **Contract analysis** - Extract text from legal documents
+- **Invoice processing** - Automate accounts payable workflows
+- **Document management** - Digitize paper archives
+- **Compliance** - Make scanned documents searchable
+- **Data extraction** - Pull structured data from forms and reports
+- **Research** - Extract text from academic papers
+- **Record keeping** - Convert physical records to digital text
+- **Accessibility** - Make scanned documents screen-reader compatible
+
+## How PDF Processing Works
+
+The API uses an intelligent multi-step process:
+
+1. **PDF Analysis** - Document is analyzed to determine content type
+2. **Method Selection** - Each page is categorized as text-based or image-based
+3. **Text Extraction** - For text PDFs, direct extraction from text layer
+4. **OCR Processing** - For scanned pages, Mistral Document AI performs OCR
+5. **Page Aggregation** - Results from all pages are combined
+6. **Output Generation** - Returns full document text plus per-page breakdowns
+
+**Processing time:**
+- Text-based PDFs: < 1 second per page
+- Scanned PDFs: 2-5 seconds per page
+- Total time depends on page count and document type
+
+**Why automatic detection matters:**
+Many document collections contain both types of PDFs. Manual sorting is time-consuming and error-prone. This endpoint handles everything automatically, optimizing performance while ensuring accuracy.
+
+## Text-based vs Scanned PDFs
+
+Understanding the difference helps you set expectations:
+
+**Text-based PDFs (Digital PDFs):**
+- Created digitally (Word, Google Docs, etc.)
+- Contain selectable text layer
+- Fast to process (no OCR needed)
+- 100% accurate text extraction
+- Examples: Digital forms, exported documents, e-books
+
+**Scanned PDFs (Image PDFs):**
+- Created from physical documents via scanner
+- Contains images of pages, not text
+- Requires OCR processing
+- Accuracy depends on scan quality
+- Examples: Scanned contracts, historical documents, faxes
+
+**Mixed PDFs:**
+- Some pages digital, some scanned
+- Common in compiled documents
+- Each page processed optimally
+- Examples: Reports with scanned attachments, annotated documents
+
+The API automatically handles all three types transparently.
 
 ## Authentication
 
@@ -285,3 +350,251 @@ for page in result["pages"]:
 ```
 
 **Status Code:** `422 Unprocessable Entity`
+
+## Best Practices
+
+**Document Preparation:**
+- Use high-quality scans (300+ DPI for optimal results)
+- Ensure pages are properly oriented before upload
+- Remove password protection before processing
+- Keep individual PDF files under 50MB for best performance
+- For very large documents, consider splitting into sections
+
+**Performance Optimization:**
+- Text-based PDFs process much faster than scanned PDFs
+- Process large documents asynchronously with progress tracking
+- Implement caching for frequently accessed documents
+- Consider parallel processing for document batches
+- Monitor processing time and adjust based on document type
+
+**Quality Assurance:**
+- Always check the `success` field before using extracted text
+- Review `pages_processed` vs `total_pages` to detect failures
+- Implement retry logic for failed pages
+- Validate critical data extracted from documents
+- Maintain original PDFs for reference
+
+**Cost Management:**
+- Cache OCR results to avoid reprocessing
+- Prioritize text-based PDF conversion when creating documents
+- Batch similar documents together for efficiency
+- Monitor API usage and optimize based on patterns
+
+## Integration Patterns
+
+**Document Management System:**
+```python
+def process_uploaded_pdf(pdf_file):
+    """Process uploaded PDF and store extracted text"""
+    response = requests.post(
+        "https://api.incredible.one/ocr/pdf",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        files={"file": pdf_file}
+    )
+    
+    result = response.json()
+    
+    if result["success"]:
+        # Store full document text
+        document_text = result["text"]
+        
+        # Store per-page text for navigation
+        pages = {
+            page["page_number"]: page["text"]
+            for page in result["pages"]
+            if page.get("success")
+        }
+        
+        # Save to database
+        save_document(
+            text=document_text,
+            pages=pages,
+            method=result["method"],
+            page_count=result["pages_processed"]
+        )
+        
+        return document_text
+    else:
+        raise Exception(f"PDF processing failed: {result['error']}")
+```
+
+**Invoice Processing Pipeline:**
+```python
+def extract_invoice_data(pdf_path):
+    """Extract and structure invoice data from PDF"""
+    # Step 1: Extract text with OCR
+    with open(pdf_path, "rb") as f:
+        ocr_result = requests.post(
+            "https://api.incredible.one/ocr/pdf",
+            headers={"Authorization": f"Bearer {API_KEY}"},
+            files={"file": f}
+        ).json()
+    
+    if not ocr_result["success"]:
+        return None
+    
+    # Step 2: Structure the extracted text
+    invoice_schema = {
+        "type": "object",
+        "properties": {
+            "invoice_number": {"type": "string"},
+            "date": {"type": "string"},
+            "vendor": {"type": "string"},
+            "total": {"type": "number"},
+            "line_items": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "description": {"type": "string"},
+                        "amount": {"type": "number"}
+                    }
+                }
+            }
+        }
+    }
+    
+    structured_data = client.answer(
+        query="Extract invoice details",
+        response_format=invoice_schema,
+        context=ocr_result["text"]
+    )
+    
+    return structured_data
+```
+
+**Batch Document Processing:**
+```python
+import concurrent.futures
+
+def process_pdf_batch(pdf_paths, max_workers=5):
+    """Process multiple PDFs in parallel"""
+    def process_single(path):
+        with open(path, "rb") as f:
+            response = requests.post(
+                "https://api.incredible.one/ocr/pdf",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                files={"file": f}
+            )
+        return path, response.json()
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_single, path) for path in pdf_paths]
+        results = {}
+        
+        for future in concurrent.futures.as_completed(futures):
+            path, result = future.result()
+            results[path] = result
+    
+    return results
+```
+
+**Searchable Archive Creation:**
+```python
+def create_searchable_archive(pdf_directory):
+    """Convert PDF archive to searchable text database"""
+    import os
+    from pathlib import Path
+    
+    documents = []
+    
+    for pdf_file in Path(pdf_directory).glob("*.pdf"):
+        print(f"Processing: {pdf_file.name}")
+        
+        with open(pdf_file, "rb") as f:
+            result = requests.post(
+                "https://api.incredible.one/ocr/pdf",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                files={"file": f}
+            ).json()
+        
+        if result["success"]:
+            documents.append({
+                "filename": pdf_file.name,
+                "text": result["text"],
+                "pages": result["pages_processed"],
+                "method": result["method"],
+                "page_data": result["pages"]
+            })
+            print(f"✓ Extracted {result['pages_processed']} pages")
+        else:
+            print(f"✗ Failed: {result['error']}")
+    
+    # Save to searchable database or index
+    index_documents(documents)
+    return documents
+```
+
+## Common Issues and Solutions
+
+**Issue:** Some pages failed to process
+- **Solution:** Check individual page errors in the `pages` array
+- **Solution:** Retry failed pages separately
+- **Solution:** Verify PDF is not corrupted
+- **Solution:** Check if pages are blank or contain only images
+
+**Issue:** Extracted text is garbled or incorrect
+- **Solution:** Verify PDF quality (for scanned documents, rescan at higher DPI)
+- **Solution:** Check if pages are properly oriented
+- **Solution:** Ensure text is clearly visible in original
+- **Solution:** Try preprocessing to improve contrast
+
+**Issue:** Processing is slow
+- **Solution:** Scanned PDFs take longer than text-based PDFs (expected)
+- **Solution:** Process large documents asynchronously
+- **Solution:** Consider splitting very large documents
+- **Solution:** Implement parallel processing for batches
+
+**Issue:** Timeout errors for large documents
+- **Solution:** Increase request timeout (recommend 5+ minutes for large documents)
+- **Solution:** Split PDF into smaller chunks
+- **Solution:** Implement retry logic with exponential backoff
+- **Solution:** Process pages in batches
+
+**Issue:** No text extracted from known text-based PDF
+- **Solution:** Check if PDF is password protected
+- **Solution:** Verify PDF is not corrupted
+- **Solution:** Try opening in PDF reader to confirm text layer exists
+- **Solution:** Check PDF version compatibility
+
+## Performance Guidelines
+
+**Document Size Recommendations:**
+- **Small (1-10 pages):** Process synchronously, < 30 seconds
+- **Medium (11-50 pages):** Consider async, 1-5 minutes
+- **Large (51-200 pages):** Always async, 5-20 minutes
+- **Very Large (200+ pages):** Split or batch process, 20+ minutes
+
+**Concurrent Processing:**
+- Safe to process multiple small PDFs in parallel
+- Limit concurrent requests based on your rate limits
+- Use threading/async for batch operations
+- Monitor API response times and adjust concurrency
+
+**Optimization Tips:**
+- Cache results for frequently accessed documents
+- Store extracted text in database for quick retrieval
+- Use CDN or fast storage for original PDFs
+- Implement smart retry logic for transient failures
+- Monitor costs and optimize based on document types
+
+## Advanced Use Cases
+
+**Multi-language Documents:**
+The OCR engine supports multiple languages automatically. No special configuration needed.
+
+**Table Extraction:**
+Tables are preserved in the markdown output (in `raw_response`). Parse markdown for structured table data.
+
+**Form Processing:**
+Extract form fields by combining OCR with structured output:
+1. Extract text with OCR
+2. Use Answer API with schema to structure form data
+3. Validate extracted values
+
+**Compliance & Audit:**
+Maintain audit trails by:
+- Storing `raw_response` for detailed metadata
+- Logging processing timestamps and methods
+- Tracking which pages used OCR vs text extraction
+- Archiving original PDFs alongside extracted text

@@ -22,7 +22,8 @@
                 "group": "Getting Started",
                 "pages": [
                   "index",
-                  "models"
+                  "models",
+                  "api-quickstart"
                 ]
               },
               {
@@ -164,8 +165,9 @@
                 ]
               },
               {
-                "group": "Account",
+                "group": "Help",
                 "pages": [
+                  "agents/faq",
                   "agents/delete-account"
                 ]
               }
