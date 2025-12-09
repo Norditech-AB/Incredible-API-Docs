@@ -1,0 +1,691 @@
+---
+title: 'Examples'
+sidebarTitle: 'Examples'
+description: 'Real-world Agent MAX use cases with complete code.'
+---
+
+# Agent MAX Examples
+
+<Note>
+**Agent MAX is currently in private beta.** These examples show what's possible. [Join the waitlist](https://form.typeform.com/to/TiiMHobk) to get access.
+</Note>
+
+These aren't toy demos. These are production-ready patterns for real tasks.
+
+<CardGroup cols={2}>
+  <Card title="Lead Research" icon="magnifying-glass" href="#lead-research">
+    Company research with contact enrichment
+  </Card>
+  <Card title="Churn Analysis" icon="chart-line" href="#churn-analysis">
+    Identify at-risk customers, draft outreach
+  </Card>
+  <Card title="Contract Review" icon="file-contract" href="#contract-review">
+    Extract risks from legal documents
+  </Card>
+  <Card title="Competitor Monitoring" icon="binoculars" href="#competitor-monitoring">
+    Track changes across competitor websites
+  </Card>
+  <Card title="Meeting Prep" icon="calendar" href="#meeting-prep">
+    Automatic briefing documents
+  </Card>
+  <Card title="Data Migration" icon="database" href="#data-migration">
+    Transform and validate large datasets
+  </Card>
+</CardGroup>
+
+---
+
+## Lead Research
+
+**Goal:** Given a company name, produce a complete research report with decision makers and contact info.
+
+**Time:** ~30 seconds  
+**Traditional approach:** ~5 minutes of manual searching
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+result = agent.run_with_results(
+    goal="""
+    Research the provided company thoroughly:
+    1. Company overview (size, industry, funding)
+    2. Recent news and announcements
+    3. Key decision makers (C-suite, VPs)
+    4. Tech stack if available
+    5. Potential pain points based on their industry
+    
+    Output a structured research brief I can use for outreach.
+    """,
+    data={
+        "company": {
+            "name": "Stripe",
+            "website": "stripe.com",
+            "industry": "fintech"
+        }
+    },
+    tools=[
+        web_search,
+        linkedin_search,
+        crunchbase_api,
+        builtwith_api  # tech stack detection
+    ],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "company_overview": {"type": "object"},
+            "recent_news": {"type": "array"},
+            "decision_makers": {"type": "array"},
+            "tech_stack": {"type": "array"},
+            "pain_points": {"type": "array"}
+        }
+    }
+)
+
+print(result.output)
+```
+
+```typescript TypeScript
+import { AgentMax } from '@incredible-ai/sdk';
+
+const agent = new AgentMax({ apiKey: 'YOUR_API_KEY' });
+
+const result = await agent.runWithResults({
+  goal: `
+    Research the provided company thoroughly:
+    1. Company overview (size, industry, funding)
+    2. Recent news and announcements
+    3. Key decision makers (C-suite, VPs)
+    4. Tech stack if available
+    5. Potential pain points based on their industry
+    
+    Output a structured research brief I can use for outreach.
+  `,
+  data: {
+    company: {
+      name: 'Stripe',
+      website: 'stripe.com',
+      industry: 'fintech'
+    }
+  },
+  tools: [webSearch, linkedInSearch, crunchbaseApi, builtWithApi],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      company_overview: { type: 'object' },
+      recent_news: { type: 'array' },
+      decision_makers: { type: 'array' },
+      tech_stack: { type: 'array' },
+      pain_points: { type: 'array' }
+    }
+  }
+});
+
+console.log(result.output);
+```
+
+</CodeGroup>
+
+**Sample Output (`result.output`):**
+
+```json
+{
+  "company_overview": {
+    "name": "Stripe",
+    "founded": 2010,
+    "headquarters": "San Francisco, CA",
+    "employees": 8000,
+    "valuation": "50B",
+    "industry": "Fintech / Payment Processing"
+  },
+  "recent_news": [
+    "Launched Stripe Billing v3 (March 2024)",
+    "Expanded to 5 new LATAM countries",
+    "Partnership with Shopify deepened"
+  ],
+  "decision_makers": [
+    { "name": "Patrick Collison", "title": "CEO", "linkedin": "linkedin.com/in/patrickcollison" },
+    { "name": "Claire Hughes Johnson", "title": "COO", "linkedin": "linkedin.com/in/chughes" },
+    { "name": "David Singleton", "title": "CTO", "linkedin": "linkedin.com/in/dsingleton" }
+  ],
+  "tech_stack": ["React", "Ruby on Rails", "AWS", "Kubernetes", "Kafka"],
+  "pain_points": [
+    "Scaling support for enterprise clients",
+    "Regulatory compliance in new markets",
+    "Competition from Adyen in EU market"
+  ]
+}
+```
+
+---
+
+## Churn Analysis
+
+**Goal:** Analyze customer data, identify churn risk, draft personalized outreach.
+
+**Input:** CSV with customer data  
+**Output:** Risk scores + ready-to-send email drafts
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Open files properly
+with open("customers.csv", "r") as customers, \
+     open("support_tickets.csv", "r") as tickets, \
+     open("usage_logs.csv", "r") as logs:
+    
+    result = agent.run_with_results(
+        goal="""
+        Analyze the customer data to identify churn risk:
+        
+        1. Calculate engagement metrics (login frequency, feature usage)
+        2. Identify customers with declining engagement
+        3. Cross-reference with support ticket sentiment
+        4. Score each customer 0-100 for churn risk
+        5. For top 20 at-risk customers, draft personalized outreach emails
+        
+        Focus on customers with >$10k ARR first.
+        """,
+        files=[customers, tickets, logs],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "object",
+                    "properties": {
+                        "total_analyzed": {"type": "integer"},
+                        "high_risk_count": {"type": "integer"},
+                        "total_arr_at_risk": {"type": "number"}
+                    }
+                },
+                "at_risk_customers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "customer_id": {"type": "string"},
+                            "company_name": {"type": "string"},
+                            "arr": {"type": "number"},
+                            "risk_score": {"type": "integer"},
+                            "risk_factors": {"type": "array", "items": {"type": "string"}},
+                            "draft_email": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+# Output is guaranteed to match the schema
+for customer in result.output["at_risk_customers"][:5]:
+    print(f"\n{'='*50}")
+    print(f"🚨 {customer['company_name']} - Risk: {customer['risk_score']}/100")
+    print(f"   ARR: ${customer['arr']:,.0f}")
+    print(f"   Factors: {', '.join(customer['risk_factors'])}")
+    print(f"\n   📧 Draft email:\n   {customer['draft_email'][:200]}...")
+```
+
+```typescript TypeScript
+import { AgentMax } from '@incredible-ai/sdk';
+import * as fs from 'fs';
+
+const agent = new AgentMax({ apiKey: 'YOUR_API_KEY' });
+
+const result = await agent.runWithResults({
+  goal: `
+    Analyze the customer data to identify churn risk:
+    
+    1. Calculate engagement metrics (login frequency, feature usage)
+    2. Identify customers with declining engagement
+    3. Cross-reference with support ticket sentiment
+    4. Score each customer 0-100 for churn risk
+    5. For top 20 at-risk customers, draft personalized outreach emails
+    
+    Focus on customers with >$10k ARR first.
+  `,
+  files: [
+    fs.createReadStream('customers.csv'),
+    fs.createReadStream('support_tickets.csv'),
+    fs.createReadStream('usage_logs.csv')
+  ],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      summary: {
+        type: 'object',
+        properties: {
+          total_analyzed: { type: 'integer' },
+          high_risk_count: { type: 'integer' },
+          total_arr_at_risk: { type: 'number' }
+        }
+      },
+      at_risk_customers: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            customer_id: { type: 'string' },
+            company_name: { type: 'string' },
+            arr: { type: 'number' },
+            risk_score: { type: 'integer' },
+            risk_factors: { type: 'array', items: { type: 'string' } },
+            draft_email: { type: 'string' }
+          }
+        }
+      }
+    }
+  }
+});
+
+console.log(result.output);
+```
+
+</CodeGroup>
+
+---
+
+## Contract Review
+
+**Goal:** Extract risk factors from legal documents with specific clause references.
+
+**Input:** PDF contract  
+**Output:** Structured risk assessment
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+with open("vendor_contract.pdf", "rb") as contract:
+    result = agent.run_with_results(
+        goal="""
+        Review this contract and identify potential risks:
+        
+        1. Liability clauses (caps, indemnification)
+        2. Termination conditions
+        3. Auto-renewal terms
+        4. Data handling requirements
+        5. Unusual or non-standard clauses
+        
+        For each risk, cite the specific section and page number.
+        Rate overall contract risk: Low / Medium / High
+        """,
+        files=[contract],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "overall_risk": {"type": "string", "enum": ["Low", "Medium", "High"]},
+                "summary": {"type": "string"},
+                "risks": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "category": {"type": "string"},
+                            "description": {"type": "string"},
+                            "severity": {"type": "string"},
+                            "section": {"type": "string"},
+                            "page": {"type": "integer"},
+                            "recommendation": {"type": "string"}
+                        }
+                    }
+                },
+                "key_dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "event": {"type": "string"},
+                            "date": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+print(f"Overall Risk: {result.output['overall_risk']}")
+print(f"\nSummary: {result.output['summary']}")
+print(f"\nKey Risks Found: {len(result.output['risks'])}")
+
+for risk in result.output['risks']:
+    print(f"\n⚠️  {risk['category']} ({risk['severity']})")
+    print(f"   {risk['description']}")
+    print(f"   📍 Section {risk['section']}, Page {risk['page']}")
+    print(f"   💡 {risk['recommendation']}")
+```
+
+</CodeGroup>
+
+---
+
+## Competitor Monitoring
+
+**Goal:** Track competitor changes and generate daily digest.
+
+**Setup:** Runs on schedule (daily/weekly)  
+**Output:** Email digest with changes
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Define competitors to track
+competitors = [
+    {"name": "Competitor A", "website": "competitora.com", "pricing_page": "competitora.com/pricing"},
+    {"name": "Competitor B", "website": "competitorb.com", "pricing_page": "competitorb.com/plans"},
+]
+
+result = agent.run_with_results(
+    goal="""
+    Monitor competitors for changes since yesterday:
+    
+    1. Check pricing pages for any changes
+    2. Look for new blog posts or announcements
+    3. Check for new features mentioned on marketing pages
+    4. Search news for mentions or press releases
+    5. Check their job postings for strategic hires
+    
+    Compare against yesterday's snapshot and highlight what's new.
+    """,
+    data={
+        "competitors": competitors,
+        "last_check": "2024-03-14"
+    },
+    tools=[
+        web_search,
+        page_snapshot,
+        diff_checker,
+        news_search
+    ],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "digest_date": {"type": "string"},
+            "competitors": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "changes_detected": {"type": "boolean"},
+                        "pricing_changes": {"type": "array"},
+                        "new_content": {"type": "array"},
+                        "job_postings": {"type": "array"}
+                    }
+                }
+            }
+        }
+    }
+)
+
+# Format and send the digest
+digest = format_digest(result.output)
+send_email(
+    to="team@company.com",
+    subject="🔍 Daily Competitor Digest - March 15, 2024",
+    body=digest
+)
+```
+
+</CodeGroup>
+
+**Sample Output (`result.output`):**
+
+```json
+{
+  "digest_date": "2024-03-15",
+  "competitors": [
+    {
+      "name": "Competitor A",
+      "changes_detected": true,
+      "pricing_changes": [
+        "Enterprise tier increased from $499 → $599/month",
+        "New 'Startup' tier added at $99/month"
+      ],
+      "new_content": [
+        "Blog: 'How We Scaled to 1M Users' - mentions AWS partnership"
+      ],
+      "job_postings": [
+        "Head of AI/ML"
+      ]
+    },
+    {
+      "name": "Competitor B",
+      "changes_detected": false,
+      "pricing_changes": [],
+      "new_content": [],
+      "job_postings": []
+    }
+  ]
+}
+```
+
+**Formatted Digest (after `format_digest()`):**
+
+```markdown
+# 🔍 Competitor Digest - March 15, 2024
+
+## Competitor A
+### 🆕 Changes Detected
+
+**Pricing Change** ⚠️
+- Enterprise tier increased from $499 → $599/month
+- New "Startup" tier added at $99/month
+
+**New Blog Post**
+- "How We Scaled to 1M Users" - mentions AWS partnership
+
+**Job Posting**
+- Hiring: "Head of AI/ML" - Suggests ML product investment
+
+---
+
+## Competitor B
+### ✅ No significant changes
+```
+
+---
+
+## Meeting Prep
+
+**Goal:** Generate a briefing document before any meeting.
+
+**Trigger:** Calendar event with external attendees  
+**Output:** Research brief in your inbox
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+from datetime import timedelta
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Triggered by calendar integration
+meeting = {
+    "title": "Partnership Discussion",
+    "attendees": ["john@techstartup.com", "sarah@techstartup.com"],
+    "company": "TechStartup Inc",
+    "time": "2024-03-15 14:00"
+}
+
+result = agent.run_with_results(
+    goal="""
+    Prepare a meeting brief for my upcoming call:
+    
+    1. Research the company (TechStartup Inc)
+       - What they do, size, funding stage
+       - Recent news or announcements
+    
+    2. Research the attendees
+       - John and Sarah's roles and backgrounds
+       - Any mutual connections
+       - Their recent LinkedIn activity/posts
+    
+    3. Prepare context
+       - Any previous interactions in our CRM
+       - Open deals or past conversations
+       - Support tickets or issues
+    
+    4. Suggest talking points and questions to ask
+    """,
+    data={"meeting": meeting},
+    tools=[
+        web_search,
+        linkedin_search,
+        crm_search,
+        email_search
+    ],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "company_info": {"type": "object"},
+            "attendees": {"type": "array"},
+            "previous_interactions": {"type": "array"},
+            "talking_points": {"type": "array"},
+            "questions_to_ask": {"type": "array"}
+        }
+    }
+)
+
+# Format and send to my email 30 min before meeting
+brief = format_meeting_brief(result.output)
+send_email(
+    to="me@company.com",
+    subject=f"📋 Meeting Brief: {meeting['title']} with {meeting['company']}",
+    body=brief,
+    send_at=meeting['time'] - timedelta(minutes=30)
+)
+```
+
+</CodeGroup>
+
+---
+
+## Data Migration
+
+**Goal:** Transform data from one format to another with validation.
+
+**Input:** Export from legacy system  
+**Output:** Clean, validated data for new system
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+import json
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+with open("legacy_export.csv", "r") as legacy_file:
+    result = agent.run_with_results(
+        goal="""
+        Migrate customer data from the legacy format to our new schema:
+        
+        1. Parse the legacy CSV export
+        2. Map fields to new schema:
+           - "cust_name" → "company_name"
+           - "contact_1" → "primary_contact.name"
+           - "email_1" → "primary_contact.email"
+           - etc.
+        3. Validate all email addresses
+        4. Standardize phone numbers to E.164 format
+        5. Deduplicate based on email domain
+        6. Flag records that need manual review
+        
+        Output the migrated data and a summary of issues.
+        """,
+        files=[legacy_file],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "migrated_records": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "company_name": {"type": "string"},
+                            "primary_contact": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "email": {"type": "string"},
+                                    "phone": {"type": "string"}
+                                }
+                            },
+                            "status": {"type": "string"}
+                        }
+                    }
+                },
+                "summary": {
+                    "type": "object",
+                    "properties": {
+                        "total_input": {"type": "integer"},
+                        "successfully_migrated": {"type": "integer"},
+                        "duplicates_removed": {"type": "integer"},
+                        "needs_review": {"type": "integer"}
+                    }
+                },
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "row": {"type": "integer"},
+                            "field": {"type": "string"},
+                            "issue": {"type": "string"},
+                            "original_value": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+print(f"Migration Summary:")
+print(f"  Input records: {result.output['summary']['total_input']}")
+print(f"  Migrated: {result.output['summary']['successfully_migrated']}")
+print(f"  Duplicates removed: {result.output['summary']['duplicates_removed']}")
+print(f"  Needs review: {result.output['summary']['needs_review']}")
+
+# Export for review
+with open('migration_issues.json', 'w') as f:
+    json.dump(result.output['issues'], f, indent=2)
+```
+
+</CodeGroup>
+
+---
+
+## Run Your Own
+
+Ready to build something? Start with the SDK:
+
+<CodeGroup>
+
+```python Python
+pip install incredible-python
+```
+
+```typescript TypeScript
+npm install @incredible-ai/sdk
+```
+
+</CodeGroup>
+
+<Card title="SDK Reference" icon="book" href="/agent-max/sdk">
+  Complete API documentation
+</Card>

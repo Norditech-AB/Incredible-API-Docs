@@ -1,0 +1,591 @@
+---
+title: 'SDK Reference'
+sidebarTitle: 'SDK Reference'
+description: 'Complete API and SDK documentation for Agent MAX.'
+---
+
+# Agent MAX SDK
+
+<Note>
+**Agent MAX is currently in private beta.** [Join the waitlist](https://form.typeform.com/to/TiiMHobk) to get early access.
+</Note>
+
+Agent MAX is available through our Python and TypeScript SDKs.
+
+<CardGroup cols={2}>
+  <Card title="Python SDK" icon="python">
+    `pip install incredible-python`
+  </Card>
+  <Card title="TypeScript SDK" icon="js">
+    `npm install @incredible-ai/sdk`
+  </Card>
+</CardGroup>
+
+---
+
+## Quick Start
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+# Initialize
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Use run_with_results() to get structured output back
+result = agent.run_with_results(
+    goal="Research competitors and summarize findings",
+    result_structure={
+        "type": "object",
+        "properties": {
+            "competitors": {"type": "array"},
+            "summary": {"type": "string"}
+        }
+    }
+)
+
+print(result.output)  # Guaranteed to match your schema
+```
+
+```typescript TypeScript
+import { AgentMax } from '@incredible-ai/sdk';
+
+// Initialize
+const agent = new AgentMax({ apiKey: 'YOUR_API_KEY' });
+
+// Use runWithResults() to get structured output back
+const result = await agent.runWithResults({
+  goal: 'Research competitors and summarize findings',
+  resultStructure: {
+    type: 'object',
+    properties: {
+      competitors: { type: 'array' },
+      summary: { type: 'string' }
+    }
+  }
+});
+
+console.log(result.output);  // Guaranteed to match your schema
+```
+
+</CodeGroup>
+
+---
+
+## Methods
+
+### `agent.run()`
+
+Execute a task for **side effects only** (sending emails, updating databases, etc.). Does not return meaningful output.
+
+<CodeGroup>
+
+```python Python
+# run() is for fire-and-forget tasks with side effects
+agent.run(
+    goal="Send personalized outreach emails to all at-risk customers",
+    files=[open("customers.csv", "rb")],  # Pass file objects
+    data={"context": "Q1 2024"},
+    tools=[crm_tool, email_tool],
+    max_steps=50,
+    timeout=300
+)
+
+# The task runs. Emails get sent. No structured output returned.
+print("Outreach campaign started!")
+```
+
+```typescript TypeScript
+import * as fs from 'fs';
+
+// run() is for fire-and-forget tasks with side effects
+await agent.run({
+  goal: 'Send personalized outreach emails to all at-risk customers',
+  files: [fs.createReadStream('customers.csv')],
+  data: { context: 'Q1 2024' },
+  tools: [crmTool, emailTool],
+  maxSteps: 50,
+  timeout: 300
+});
+
+// The task runs. Emails get sent. No structured output returned.
+console.log('Outreach campaign started!');
+```
+
+</CodeGroup>
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `goal` | string | ✅ | What you want the agent to accomplish |
+| `files` | File[] | ❌ | File objects to process |
+| `data` | object | ❌ | Additional context data |
+| `tools` | Tool[] | ❌ | Custom tools the agent can use |
+| `max_steps` | int | ❌ | Maximum steps (default: 100) |
+| `timeout` | int | ❌ | Timeout in seconds (default: 600) |
+
+<Warning>
+`run()` does not return structured output. Use `run_with_results()` if you need data back.
+</Warning>
+
+---
+
+### `agent.run_with_results()`
+
+Execute a task and get output matching a specific JSON schema. **Guaranteed.**
+
+<CodeGroup>
+
+```python Python
+# Open files properly
+with open("meeting_transcript.txt", "r") as f:
+    result = agent.run_with_results(
+        goal="Extract all action items from this meeting",
+        files=[f],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "action_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "task": {"type": "string"},
+                            "assignee": {"type": "string"},
+                            "due_date": {"type": "string"},
+                            "priority": {"type": "string", "enum": ["high", "medium", "low"]}
+                        },
+                        "required": ["task", "assignee"]
+                    }
+                },
+                "summary": {"type": "string"}
+            },
+            "required": ["action_items", "summary"]
+        }
+    )
+
+# result.output ALWAYS matches the schema
+for item in result.output["action_items"]:
+    print(f"- [{item['priority']}] {item['task']} → {item['assignee']}")
+```
+
+```typescript TypeScript
+import * as fs from 'fs';
+
+const result = await agent.runWithResults({
+  goal: 'Extract all action items from this meeting',
+  files: [fs.createReadStream('meeting_transcript.txt')],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      action_items: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            task: { type: 'string' },
+            assignee: { type: 'string' },
+            due_date: { type: 'string' },
+            priority: { type: 'string', enum: ['high', 'medium', 'low'] }
+          },
+          required: ['task', 'assignee']
+        }
+      },
+      summary: { type: 'string' }
+    },
+    required: ['action_items', 'summary']
+  }
+});
+
+// result.output ALWAYS matches the schema
+result.output.action_items.forEach(item => {
+  console.log(`- [${item.priority}] ${item.task} → ${item.assignee}`);
+});
+```
+
+</CodeGroup>
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `goal` | string | ✅ | What you want the agent to accomplish |
+| `result_structure` | object | ✅ | JSON Schema the output must match |
+| `files` | File[] | ❌ | File objects to process |
+| `data` | object | ❌ | Additional context data |
+| `tools` | Tool[] | ❌ | Custom tools the agent can use |
+
+---
+
+### `agent.stream()`
+
+Stream results as they're generated.
+
+<CodeGroup>
+
+```python Python
+for event in agent.stream(
+    goal="Write a detailed market analysis"
+):
+    if event.type == "step":
+        print(f"Step {event.step}: {event.action}")
+    elif event.type == "progress":
+        print(f"Progress: {event.message}")
+    elif event.type == "output":
+        print(f"Output chunk: {event.content}")
+    elif event.type == "done":
+        print(f"Complete! Total steps: {event.total_steps}")
+```
+
+```typescript TypeScript
+const stream = agent.stream({
+  goal: 'Write a detailed market analysis'
+});
+
+for await (const event of stream) {
+  if (event.type === 'step') {
+    console.log(`Step ${event.step}: ${event.action}`);
+  } else if (event.type === 'progress') {
+    console.log(`Progress: ${event.message}`);
+  } else if (event.type === 'output') {
+    console.log(`Output chunk: ${event.content}`);
+  } else if (event.type === 'done') {
+    console.log(`Complete! Total steps: ${event.totalSteps}`);
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Defining Custom Tools
+
+Tools let Agent MAX interact with your systems.
+
+<CodeGroup>
+
+```python Python
+from incredible import Tool
+
+# Define a tool
+crm_search = Tool(
+    name="search_crm",
+    description="Search the CRM for customer information",
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search query (company name, email, etc.)"
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Max results to return",
+                "default": 10
+            }
+        },
+        "required": ["query"]
+    },
+    # Handler function that executes when tool is called
+    handler=lambda params: your_crm_api.search(params["query"], params.get("limit", 10))
+)
+
+# Use the tool with run_with_results to get data back
+result = agent.run_with_results(
+    goal="Find all customers in the healthcare industry",
+    tools=[crm_search],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "customers": {"type": "array"},
+            "total_count": {"type": "integer"}
+        }
+    }
+)
+```
+
+```typescript TypeScript
+import { Tool } from '@incredible-ai/sdk';
+
+const crmSearch: Tool = {
+  name: 'search_crm',
+  description: 'Search the CRM for customer information',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: 'Search query (company name, email, etc.)'
+      },
+      limit: {
+        type: 'integer',
+        description: 'Max results to return',
+        default: 10
+      }
+    },
+    required: ['query']
+  },
+  handler: async (params) => {
+    return yourCrmApi.search(params.query, params.limit ?? 10);
+  }
+};
+
+// Use the tool with runWithResults to get data back
+const result = await agent.runWithResults({
+  goal: 'Find all customers in the healthcare industry',
+  tools: [crmSearch],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      customers: { type: 'array' },
+      total_count: { type: 'integer' }
+    }
+  }
+});
+```
+
+</CodeGroup>
+
+---
+
+## File Handling
+
+Agent MAX automatically handles common file types. **Pass proper file objects, not strings.**
+
+| Format | Handling |
+|--------|----------|
+| **PDF** | OCR + text extraction |
+| **CSV/Excel** | Parsed into structured data |
+| **Images** | OCR for text, vision for analysis |
+| **Audio** | Transcription |
+| **JSON** | Direct parsing |
+| **Text** | Direct reading |
+
+<CodeGroup>
+
+```python Python
+# Open files as proper file objects
+with open("report.pdf", "rb") as pdf, \
+     open("data.csv", "r") as csv, \
+     open("screenshot.png", "rb") as img:
+    
+    result = agent.run_with_results(
+        goal="Summarize these documents",
+        files=[pdf, csv, img],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string"}
+            }
+        }
+    )
+
+# Using pathlib
+from pathlib import Path
+
+pdf_file = Path("report.pdf").open("rb")
+result = agent.run_with_results(
+    goal="Extract key findings",
+    files=[pdf_file],
+    result_structure={"type": "object", "properties": {"findings": {"type": "array"}}}
+)
+pdf_file.close()
+```
+
+```typescript TypeScript
+import * as fs from 'fs';
+
+// Open files as streams
+const pdfStream = fs.createReadStream('report.pdf');
+const csvStream = fs.createReadStream('data.csv');
+const imgStream = fs.createReadStream('screenshot.png');
+
+const result = await agent.runWithResults({
+  goal: 'Summarize these documents',
+  files: [pdfStream, csvStream, imgStream],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      summary: { type: 'string' }
+    }
+  }
+});
+
+// Or using Buffer
+const pdfBuffer = fs.readFileSync('report.pdf');
+const result2 = await agent.runWithResults({
+  goal: 'Extract key findings',
+  files: [pdfBuffer],
+  resultStructure: { type: 'object', properties: { findings: { type: 'array' } } }
+});
+```
+
+</CodeGroup>
+
+---
+
+## Built-in Tools
+
+Agent MAX comes with these tools pre-configured:
+
+| Tool | Description |
+|------|-------------|
+| `web_search` | Search the web for information |
+| `web_scrape` | Extract content from web pages |
+| `code_execute` | Run Python/TypeScript code |
+| `file_read` | Read and parse files |
+| `file_write` | Create or modify files |
+
+Enable built-in tools:
+
+<CodeGroup>
+
+```python Python
+result = agent.run_with_results(
+    goal="Research latest AI news and summarize top 5 stories",
+    builtin_tools=["web_search", "web_scrape"],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "stories": {"type": "array"},
+            "summary": {"type": "string"}
+        }
+    }
+)
+```
+
+```typescript TypeScript
+const result = await agent.runWithResults({
+  goal: 'Research latest AI news and summarize top 5 stories',
+  builtinTools: ['web_search', 'web_scrape'],
+  resultStructure: {
+    type: 'object',
+    properties: {
+      stories: { type: 'array' },
+      summary: { type: 'string' }
+    }
+  }
+});
+```
+
+</CodeGroup>
+
+---
+
+## Error Handling
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax, AgentMaxError, TimeoutError, ValidationError
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+try:
+    result = agent.run(goal="Complex task")
+except TimeoutError:
+    print("Task took too long")
+except ValidationError as e:
+    print(f"Invalid input: {e.message}")
+except AgentMaxError as e:
+    print(f"Agent error: {e.message}")
+    print(f"Partial results: {e.partial_output}")
+    print(f"Steps completed: {e.steps_completed}")
+```
+
+```typescript TypeScript
+import { AgentMax, AgentMaxError, TimeoutError, ValidationError } from '@incredible-ai/sdk';
+
+const agent = new AgentMax({ apiKey: 'YOUR_API_KEY' });
+
+try {
+  const result = await agent.run({ goal: 'Complex task' });
+} catch (error) {
+  if (error instanceof TimeoutError) {
+    console.log('Task took too long');
+  } else if (error instanceof ValidationError) {
+    console.log(`Invalid input: ${error.message}`);
+  } else if (error instanceof AgentMaxError) {
+    console.log(`Agent error: ${error.message}`);
+    console.log(`Partial results: ${error.partialOutput}`);
+    console.log(`Steps completed: ${error.stepsCompleted}`);
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Webhooks
+
+Get notified when long-running tasks complete:
+
+<CodeGroup>
+
+```python Python
+result = agent.run(
+    goal="Long research task",
+    webhook_url="https://your-app.com/webhook",
+    webhook_events=["complete", "error", "step"]
+)
+
+# Returns immediately with task ID
+print(f"Task started: {result.task_id}")
+```
+
+```typescript TypeScript
+const result = await agent.run({
+  goal: 'Long research task',
+  webhookUrl: 'https://your-app.com/webhook',
+  webhookEvents: ['complete', 'error', 'step']
+});
+
+console.log(`Task started: ${result.taskId}`);
+```
+
+</CodeGroup>
+
+**Webhook Payload:**
+
+```json
+{
+  "event": "complete",
+  "task_id": "task_abc123",
+  "output": "Research findings...",
+  "tokens_used": 12450,
+  "execution_time": 45.2
+}
+```
+
+---
+
+## Rate Limits
+
+| Plan | Concurrent Tasks | Steps/minute |
+|------|-----------------|--------------|
+| **Free** | 1 | 100 |
+| **Pro** | 5 | 500 |
+| **Enterprise** | Unlimited | Unlimited |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Examples" icon="lightbulb" href="/agent-max/examples">
+    See Agent MAX in action
+  </Card>
+  <Card title="Python SDK" icon="python" href="/guides/python-sdk">
+    Full Python SDK documentation
+  </Card>
+  <Card title="TypeScript SDK" icon="js" href="/guides/typescript-sdk">
+    Full TypeScript SDK documentation
+  </Card>
+  <Card title="Deep Work Features" icon="shield" href="/agent-max/deep-work-features">
+    Learn about reliability features
+  </Card>
+</CardGroup>

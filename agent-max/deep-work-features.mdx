@@ -1,0 +1,312 @@
+---
+title: 'Deep Work Features'
+sidebarTitle: 'Deep Work Features'
+description: '11 capabilities that ensure Agent MAX completes complex tasks reliably.'
+---
+
+<Note>
+**Agent MAX is currently in private beta.** [Join the waitlist](https://form.typeform.com/to/TiiMHobk) to get early access.
+</Note>
+
+# Built for Deep Work
+
+Agent MAX isn't just a smarter model—it's an **execution engine** with 11 built-in capabilities that ensure complex tasks actually complete. 
+
+These aren't optional features. They're always on, working together to make agents reliable.
+
+<img
+  src="/images/agent_max_small_banner.png"
+  alt="Agent MAX Deep Work Features"
+  style={{ width: '100%', borderRadius: '12px', marginTop: '16px', marginBottom: '32px' }}
+/>
+
+---
+
+## 🎯 Anti-Hallucination
+
+**The agent uses real data. Always.**
+
+Every parameter, every function call, every output is validated against the actual context before execution. If the data isn't there, the agent won't make it up.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Input validation against available context; output verification before committing |
+  | **Result** | Near-zero hallucination on function calls |
+  | **Guarantee** | No fabricated data, no wrong parameters |
+  
+  **Technical details:**
+  - All function call parameters are validated against schema definitions
+  - Outputs are traced to source data in connected apps
+  - Agents reject requests that require information not present in context
+</Accordion>
+
+<Info>
+**Real impact:** In testing, Agent MAX achieved 99.7% accuracy on function call parameters vs. 89% for standard agent loops.
+</Info>
+
+---
+
+## 🔄 Anti-Loop
+
+**Stuck? The agent knows when to stop.**
+
+AI agents famously get stuck in loops, burning through credits while accomplishing nothing. Agent MAX detects repetitive patterns and terminates cleanly—preserving partial results.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Pattern detection for repeated actions; stuck-state recognition |
+  | **Result** | Clean termination when no progress is possible |
+  | **Guarantee** | No infinite loops, no runaway costs |
+  
+  **Technical details:**
+  - Action history is analyzed for repetition patterns
+  - Stuck detection triggers after configurable thresholds
+  - Graceful shutdown preserves partial results where possible
+</Accordion>
+
+<Warning>
+**Without this:** A single stuck agent can burn $50+ in API costs before you notice. Agent MAX catches this in seconds.
+</Warning>
+
+---
+
+## 🔬 Laser Focus
+
+**20+ steps? Still on track.**
+
+Long tasks are hard. Agents drift. Intermediate results distract from the goal. Agent MAX maintains goal alignment across even the longest workflows—re-anchoring at every step.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Goal anchoring; intermediate output filtering |
+  | **Result** | Consistent task completion without drift |
+  | **Guarantee** | No distraction from intermediate outputs |
+  
+  **Technical details:**
+  - Primary goal is preserved and re-referenced throughout execution
+  - Intermediate results are evaluated for relevance before influencing next steps
+  - Long tasks are chunked with goal validation at each checkpoint
+</Accordion>
+
+---
+
+## ✅ Start to Finish
+
+**It's not done until it's done.**
+
+Agent MAX doesn't stop at "mostly complete." Every step is verified. Every deliverable is checked. The task isn't marked done until everything is actually finished.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Step verification; completeness validation |
+  | **Result** | Full task execution with confirmation |
+  | **Guarantee** | No partial outputs, no silent failures |
+  
+  **Technical details:**
+  - Each step produces verifiable outputs
+  - Final validation checks all expected deliverables
+  - Incomplete runs are flagged with specific failure points
+</Accordion>
+
+---
+
+## 🎯 Precision Actions
+
+**Every function call is exact.**
+
+When Agent MAX calls a function, the parameters are right. Types match. Required fields are present. Constraints are respected. No more "close enough" function calls.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Schema validation; type checking; constraint enforcement |
+  | **Result** | Exact execution of requested actions |
+  | **Guarantee** | Agents do exactly what was asked |
+  
+  **Technical details:**
+  - Function schemas define required and optional parameters
+  - Type coercion follows strict rules
+  - Out-of-bounds values trigger validation errors, not silent failures
+</Accordion>
+
+---
+
+## 🧠 Deep Memory™
+
+**10x more context. 90% less cost.**
+
+Long tasks need long memories. Agent MAX automatically compresses context—keeping essential facts while summarizing the rest. The result: handle massive tasks without hitting token limits.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Context compression; relevance-weighted caching |
+  | **Result** | 10x more context capacity without forgetting |
+  | **Guarantee** | Large tasks and datasets stay in focus |
+  
+  **Technical details:**
+  - Automatic summarization of older context
+  - Key facts are preserved at full fidelity
+  - Cache invalidation based on task relevance
+</Accordion>
+
+<Tip>
+**Example:** A 50-step task that would normally consume 500K tokens runs on ~50K tokens with Deep Memory™.
+</Tip>
+
+---
+
+## 🛡️ Safety Built In
+
+**Guardrails by default.**
+
+You don't need to build error handling, validation, or safety checks. Agent MAX includes them out of the box: input sanitization, error boundaries, resource limits, automatic termination.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Multi-layer validation; error boundaries; automatic shutdown |
+  | **Result** | Protected execution without additional configuration |
+  | **Guarantee** | No safety engineering required |
+  
+  **Technical details:**
+  - Input sanitization on all external data
+  - Error boundaries prevent cascade failures
+  - Resource limits enforced at runtime
+  - Automatic termination on unsafe states
+</Accordion>
+
+---
+
+## ⚡ Fast Retries
+
+**Second chances are cheap.**
+
+When something fails, Agent MAX doesn't start over. It retries from cache—using the successful steps already completed. Result: retries cost 80% less.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Context caching; incremental retry |
+  | **Result** | 80% lower retry costs |
+  | **Guarantee** | Mistakes don't compound |
+  
+  **Technical details:**
+  - Successful action results are cached
+  - Failed actions retry with cached context
+  - Cache persistence configurable per task type
+</Accordion>
+
+```
+Traditional retry: Step 1 → Step 2 → Step 3 → FAIL → Step 1 → Step 2 → Step 3
+Agent MAX retry:   Step 1 → Step 2 → Step 3 → FAIL → [cached] → [cached] → Step 3
+```
+
+---
+
+## 🔧 Self-Heal
+
+**Errors get fixed automatically.**
+
+When an action fails, Agent MAX doesn't just retry blindly. It analyzes the failure, identifies the root cause, and tries an alternative approach. Built-in feedback loops enable automatic recovery.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Real-time validation; adaptive retry; feedback loops |
+  | **Result** | Automatic error recovery |
+  | **Guarantee** | Errors get fixed without restarting the task |
+  
+  **Technical details:**
+  - Failure patterns are analyzed for root cause
+  - Alternative approaches are attempted automatically
+  - Learning from failures improves subsequent attempts
+</Accordion>
+
+<Info>
+**Example:** API returns 429 rate limit? Agent MAX automatically backs off, retries with exponential delay, and continues where it left off.
+</Info>
+
+---
+
+## 🔀 Adaptive Routing
+
+**Right model. Right price. Every step.**
+
+Not every step needs GPT-4. Agent MAX analyzes each step's complexity and routes to the optimal model: fast and cheap for simple actions, powerful for complex reasoning.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Task complexity analysis; dynamic model selection |
+  | **Result** | Optimal cost/performance balance |
+  | **Guarantee** | Faster and cheaper, automatically |
+  
+  **Technical details:**
+  - Step complexity is estimated before execution
+  - Model routing based on reasoning requirements
+  - Cost optimization without quality degradation
+</Accordion>
+
+```
+Step 1: "Parse this JSON"        → GPT-4o-mini (fast, cheap)
+Step 2: "Analyze legal risk"     → Claude Opus (powerful)
+Step 3: "Format as markdown"     → GPT-4o-mini (fast, cheap)
+Step 4: "Draft executive summary"→ GPT-4 (balanced)
+```
+
+---
+
+## 💭 Agentic Reasoning
+
+**Think first. Act second.**
+
+Before executing, Agent MAX plans. It uses chain-of-thought reasoning to map out dependencies, identify potential blockers, and sequence steps optimally. Built on 30+ prompting frameworks from frontier AI research.
+
+<Accordion title="How it works">
+  | Aspect | Implementation |
+  |--------|---------------|
+  | **Mechanism** | Chain-of-thought planning; multi-framework prompting |
+  | **Result** | Better sequencing and higher reliability |
+  | **Guarantee** | Agents think before they act |
+  
+  **Technical details:**
+  - Planning phase generates execution strategy
+  - Multiple reasoning frameworks available
+  - Step sequencing optimized for task requirements
+</Accordion>
+
+---
+
+## Feature Comparison
+
+| Feature | What It Does | User Benefit |
+|---------|--------------|--------------|
+| **Anti-Hallucination** | Validates outputs against real data | No made-up data |
+| **Anti-Loop** | Detects and terminates stuck states | No runaway costs |
+| **Laser Focus** | Maintains goal across long tasks | Tasks stay on track |
+| **Start to Finish** | Verifies complete execution | No partial results |
+| **Precision Actions** | Schema validation on every call | Exact function execution |
+| **Deep Memory™** | 90% context compression | 10x more capacity |
+| **Safety Built In** | Guardrails out of the box | No safety code needed |
+| **Fast Retries** | Retry from cache | 80% cheaper retries |
+| **Self-Heal** | Automatic error recovery | Failures get fixed |
+| **Adaptive Routing** | Right model per step | Optimal cost |
+| **Agentic Reasoning** | Think-then-act planning | Better sequencing |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Live-Code Execution" icon="code" href="/agent-max/live-code">
+    Understand Agent MAX's technical superpower
+  </Card>
+  <Card title="Examples" icon="lightbulb" href="/agent-max/examples">
+    See these features in action
+  </Card>
+</CardGroup>

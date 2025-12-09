@@ -16,13 +16,13 @@
         "description": "Incredible API Documentation",
         "tabs": [
           {
-            "tab": "Documentation",
+            "tab": "Guides",
             "groups": [
               {
                 "group": "Getting Started",
                 "pages": [
                   "index",
-                  "api-reference/services/agent-max-engine"
+                  "models"
                 ]
               },
               {
@@ -62,6 +62,21 @@
                 "pages": [
                   "api-reference/ocr/image",
                   "api-reference/ocr/pdf"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Agent MAX",
+            "groups": [
+              {
+                "group": "Agent MAX",
+                "pages": [
+                  "agent-max/index",
+                  "agent-max/deep-work-features",
+                  "agent-max/live-code",
+                  "agent-max/examples",
+                  "agent-max/sdk"
                 ]
               }
             ]

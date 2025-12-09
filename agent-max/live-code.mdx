@@ -1,0 +1,337 @@
+---
+title: 'Live-Code Execution'
+sidebarTitle: 'Live-Code Execution'
+description: 'How Agent MAX executes code instead of playing telephone with tools.'
+---
+
+<Note>
+**Agent MAX is currently in private beta.** [Join the waitlist](https://form.typeform.com/to/TiiMHobk) to get early access.
+</Note>
+
+# The Agent MAX Superpower
+
+**Live-Code Execution** is what makes Agent MAX fundamentally different from every other AI agent framework. Instead of the slow, expensive "chat → tool → chat → tool" loop, Agent MAX writes and executes code.
+
+This single architectural decision makes agents:
+- **30-40% cheaper** (fewer tokens)
+- **10x faster** (parallel execution)
+- **More reliable** (real programming, not prompt-and-pray)
+
+---
+
+## The Traditional Agent Problem
+
+Here's how most AI agents work—slow, sequential, expensive:
+
+<Steps>
+  <Step title="Agent receives task">
+    "Find customers at churn risk"
+  </Step>
+  <Step title="Tool call #1">
+    `get_customers()` → Wait for response...
+  </Step>
+  <Step title="🔥 10,000 customers loaded into context">
+    Massive token cost. The model now has to process all this data.
+  </Step>
+  <Step title="Tool call #2">
+    `analyze_customer(customer_1)` → Wait...
+  </Step>
+  <Step title="Tool call #3">
+    `analyze_customer(customer_2)` → Wait...
+  </Step>
+  <Step title="Tool calls #4 through #10,000">
+    ... repeat 10,000 times. Sequential. Slow. Expensive.
+  </Step>
+</Steps>
+
+<Warning>
+**The result?** 50,000+ tokens burned. 10+ minutes of execution. A massive bill.
+</Warning>
+
+---
+
+## The Agent MAX Approach
+
+Agent MAX doesn't play telephone. **It writes and executes code.**
+
+<Steps>
+  <Step title="Agent MAX receives task">
+    "Find customers at churn risk"
+  </Step>
+  <Step title="Agent generates code">
+    Instead of making 10,000 API calls, it writes a script:
+    
+```python
+customers = get_customers()
+at_risk = [c for c in customers if c.churn_score > 0.7]
+emails = parallel_map(draft_outreach, at_risk[:50])
+results = send_batch(emails)
+return {"sent": len(results), "at_risk": len(at_risk)}
+```
+  </Step>
+  <Step title="Code executes in sandbox">
+    All 10,000 customers processed **locally**. Parallel execution. No round trips.
+  </Step>
+  <Step title="Only the result enters context">
+    Agent sees: `{"sent": 50, "at_risk": 847}` — **not** 10,000 customer objects.
+  </Step>
+</Steps>
+
+<Tip>
+**The result?** ~5,000 tokens. 20 seconds. 90% cheaper.
+</Tip>
+
+<CardGroup cols={2}>
+  <Card title="Token Efficient" icon="coins">
+    Only results enter context, not raw data
+  </Card>
+  <Card title="Parallel Execution" icon="bolt">
+    Process thousands of items simultaneously
+  </Card>
+  <Card title="Real Logic" icon="code">
+    Loops, filters, conditions—actual programming
+  </Card>
+  <Card title="Fast" icon="gauge-high">
+    One execution, not thousands of round trips
+  </Card>
+</CardGroup>
+
+---
+
+## How It Works
+
+### 1. Code Generation
+
+When Agent MAX needs to accomplish something, it writes a script:
+
+```python
+# Agent MAX generates this automatically
+async def execute_task():
+    # Fetch data
+    customers = await crm.get_all_customers()
+    orders = await db.get_recent_orders(days=30)
+    
+    # Process locally (never hits the model)
+    customer_orders = {}
+    for order in orders:
+        customer_orders.setdefault(order.customer_id, []).append(order)
+    
+    # Identify at-risk customers
+    at_risk = []
+    for customer in customers:
+        recent = customer_orders.get(customer.id, [])
+        if len(recent) < customer.avg_monthly_orders * 0.5:
+            at_risk.append({
+                "customer": customer,
+                "drop_rate": len(recent) / max(customer.avg_monthly_orders, 1)
+            })
+    
+    # Return summary (this is what the model sees)
+    return {
+        "total_analyzed": len(customers),
+        "at_risk_count": len(at_risk),
+        "top_risks": sorted(at_risk, key=lambda x: x["drop_rate"])[:10]
+    }
+```
+
+### 2. Sandboxed Execution
+
+The code runs in an isolated environment:
+- **Secure** — No access to your system
+- **Monitored** — Resource limits enforced
+- **Reversible** — Side effects can be rolled back
+
+### 3. Result Injection
+
+Only the final result enters the agent's context:
+
+```python
+# Instead of 10,000 customer objects, the agent sees:
+{
+    "total_analyzed": 10842,
+    "at_risk_count": 847,
+    "top_risks": [
+        {"customer": {"id": "c_123", "name": "Acme Inc"}, "drop_rate": 0.12},
+        # ... 9 more
+    ]
+}
+```
+
+The agent can now reason about the *results* without being overwhelmed by raw data.
+
+---
+
+## Real Example: Lead Research
+
+**Task:** "Research TechCorp and find decision makers"
+
+### Traditional Agent (Slow, Expensive)
+
+```
+Turn 1: Agent calls web_search("TechCorp")
+Turn 2: Agent reads 5 results, calls web_search("TechCorp leadership")
+Turn 3: Agent reads results, calls linkedin_search("TechCorp CTO")
+Turn 4: Agent reads profile, calls linkedin_search("TechCorp VP Engineering")
+Turn 5: Agent reads profile, calls web_search("TechCorp funding")
+... 15 more turns ...
+Turn 20: Agent finally compiles results
+```
+
+**Tokens used:** ~45,000  
+**Time:** ~3 minutes  
+**API calls:** 20 sequential
+
+### Agent MAX (Fast, Cheap)
+
+```python
+# Agent MAX generates and executes:
+async def research_company(company: str):
+    # Parallel searches
+    web_results, linkedin_results, funding_data = await asyncio.gather(
+        web_search(f"{company} overview"),
+        linkedin_search(f"{company} leadership team"),
+        crunchbase_search(company)
+    )
+    
+    # Extract decision makers
+    leaders = extract_leaders(linkedin_results)
+    
+    # Enrich with contact info
+    enriched = await asyncio.gather(*[
+        enrich_contact(leader) for leader in leaders[:5]
+    ])
+    
+    return {
+        "company": company,
+        "summary": summarize(web_results),
+        "funding": funding_data,
+        "decision_makers": enriched
+    }
+```
+
+**Tokens used:** ~12,000  
+**Time:** ~20 seconds  
+**API calls:** 8 parallel
+
+<Note>
+**73% fewer tokens. 9x faster.** Same result.
+</Note>
+
+---
+
+## What Can Agent MAX Code Do?
+
+<CardGroup cols={2}>
+  <Card title="Data Processing" icon="database">
+    Filter, transform, aggregate large datasets without loading them into context
+  </Card>
+  <Card title="Parallel API Calls" icon="arrows-split-up-and-left">
+    Call multiple tools simultaneously instead of one at a time
+  </Card>
+  <Card title="Complex Logic" icon="code-branch">
+    Conditionals, loops, error handling—real programming constructs
+  </Card>
+  <Card title="Local Computation" icon="calculator">
+    Math, string manipulation, data validation without round trips
+  </Card>
+</CardGroup>
+
+---
+
+## Supported Languages
+
+Agent MAX can generate and execute:
+
+| Language | Use Case |
+|----------|----------|
+| **Python** | Data processing, API orchestration, analysis |
+| **TypeScript** | Web scraping, API calls, JSON manipulation |
+| **SQL** | Database queries (when connected) |
+
+The agent automatically chooses the best language for each task.
+
+---
+
+## Security Model
+
+Live-Code Execution runs in a hardened sandbox:
+
+<AccordionGroup>
+  <Accordion title="Network Isolation">
+    Code can only access explicitly allowed endpoints (your tools and integrations). No arbitrary network access.
+  </Accordion>
+  
+  <Accordion title="Resource Limits">
+    Execution time, memory, and CPU are capped. Runaway code is terminated automatically.
+  </Accordion>
+  
+  <Accordion title="No Persistent State">
+    Each execution starts fresh. No data persists between runs unless explicitly saved through your tools.
+  </Accordion>
+  
+  <Accordion title="Audit Logging">
+    Every code execution is logged with full source code and results for review.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Comparing Approaches
+
+| Aspect | Traditional Agent | Agent MAX Live-Code |
+|--------|------------------|---------------------|
+| **Token efficiency** | Poor (raw data in context) | Excellent (only results) |
+| **Speed** | Slow (sequential) | Fast (parallel) |
+| **Complex logic** | Hacky (prompt engineering) | Native (real code) |
+| **Large datasets** | Breaks (context overflow) | Works (local processing) |
+| **Cost** | High | 30-40% lower |
+| **Debugging** | Hard (black box) | Easy (view generated code) |
+
+---
+
+## See It In Action
+
+```python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Agent MAX will generate and execute code to accomplish this
+result = agent.run_with_results(
+    goal="""
+    Analyze our customer database:
+    1. Find customers with declining order frequency
+    2. Cross-reference with support tickets
+    3. Generate risk scores
+    4. Draft personalized outreach for top 20 at-risk customers
+    """,
+    tools=[crm_api, support_api, email_draft],
+    data={"company_name": "Acme Corp"},
+    result_structure={
+        "type": "object",
+        "properties": {
+            "at_risk_customers": {"type": "array"},
+            "outreach_drafts": {"type": "array"}
+        }
+    }
+)
+
+# Structured output guaranteed
+print(result.output)
+
+# View the generated code (for debugging/auditing)
+print(result.execution_log)
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Examples" icon="lightbulb" href="/agent-max/examples">
+    See full examples with generated code
+  </Card>
+  <Card title="SDK Reference" icon="book" href="/agent-max/sdk">
+    API documentation for Agent MAX
+  </Card>
+</CardGroup>

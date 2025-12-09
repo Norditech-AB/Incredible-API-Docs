@@ -1,0 +1,340 @@
+---
+title: 'Agent MAX'
+sidebarTitle: 'Introduction'
+description: 'The most advanced AI agent engine. 90% cheaper. Near-zero hallucinations.'
+---
+
+<img
+  src="/images/agent_max_banner.png"
+  alt="Agent MAX - World's Most Advanced AI Agent Engine"
+  style={{ width: '100%', borderRadius: '12px', marginBottom: '32px' }}
+/>
+
+<Note>
+**Agent MAX is currently in private beta.** We're rolling out access gradually to ensure reliability at scale.
+
+<a href="https://form.typeform.com/to/TiiMHobk" target="_blank">
+  <button style={{ 
+    backgroundColor: '#FF6200', 
+    color: 'white', 
+    padding: '12px 24px', 
+    borderRadius: '8px', 
+    border: 'none', 
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginTop: '12px'
+  }}>
+    Join the Waitlist →
+  </button>
+</a>
+</Note>
+
+# Fire and Forget AI Agents
+
+**Agent MAX** is not another chatbot. It's an **execution engine** for Deep Work—complex tasks that take minutes (not seconds), require perfect accuracy, and must succeed without human intervention.
+
+<CardGroup cols={3}>
+  <Card title="90% Cheaper" icon="coins">
+    Smart context compression and model routing slash costs dramatically
+  </Card>
+  <Card title="Near-Zero Hallucination" icon="shield-check">
+    Every action validated against real data. No fabricated parameters.
+  </Card>
+  <Card title="Self-Healing" icon="rotate">
+    Automatic error recovery. Retries from cache, not from scratch.
+  </Card>
+</CardGroup>
+
+---
+
+## The Problem with AI Agents Today
+
+Most AI agents fail at real work. They:
+
+<CardGroup cols={2}>
+  <Card title="❌ Hallucinate" icon="ghost">
+    Make up data, call wrong functions, invent parameters
+  </Card>
+  <Card title="❌ Get Stuck" icon="circle-pause">
+    Loop forever, burn credits, never finish
+  </Card>
+  <Card title="❌ Lose Focus" icon="eyes">
+    Drift off-task during multi-step workflows
+  </Card>
+  <Card title="❌ Crash Silently" icon="skull">
+    Die mid-task with no way to recover
+  </Card>
+</CardGroup>
+
+**Agent MAX was built to solve all of this.**
+
+---
+
+## What Makes Agent MAX Different
+
+<Tabs>
+  <Tab title="🧠 Live-Code Execution">
+    **This is the superpower.**
+    
+    Traditional agents play telephone:
+    ```
+    Agent → Tool Call → Wait → Result → Agent → Tool Call → Wait...
+    ```
+    
+    Agent MAX writes and executes code:
+    ```python
+    # Agent MAX writes this, runs it, gets results
+    customers_at_risk = [c for c in customers if c.churn_score > 0.7]
+    emails = [draft_email(c) for c in customers_at_risk[:10]]
+    send_batch(emails)
+    # Only the final result goes back to the model
+    ```
+    
+    **Result:** 30-40% fewer tokens. 10x faster. Parallel tool calls.
+    
+    <Card title="Learn more about Live-Code Execution" icon="code" href="/agent-max/live-code">
+      Deep dive into Agent MAX's code execution architecture
+    </Card>
+  </Tab>
+  
+  <Tab title="🎯 11 Deep Work Features">
+    Agent MAX includes 11 reliability features that ensure tasks complete:
+    
+    | Feature | What It Does |
+    |---------|-------------|
+    | **Anti-Hallucination** | Validates every output against source data |
+    | **Anti-Loop** | Detects stuck states, terminates cleanly |
+    | **Laser Focus** | Maintains goal alignment across 20+ step tasks |
+    | **Start to Finish** | Verifies all steps complete before marking done |
+    | **Precision Actions** | Schema validation on every function call |
+    | **Deep Memory™** | 90% context compression, 10x capacity |
+    | **Safety Built In** | Guardrails, error boundaries, auto-termination |
+    | **Fast Retries** | 80% cheaper retries from cache |
+    | **Self-Heal** | Analyzes failures, tries alternative approaches |
+    | **Adaptive Routing** | Right model for each step (fast vs smart) |
+    | **Agentic Reasoning** | Chain-of-thought planning before execution |
+    
+    <Card title="Explore all 11 features" icon="list-check" href="/agent-max/deep-work-features">
+      Technical details on each capability
+    </Card>
+  </Tab>
+  
+  <Tab title="⚡ Fire & Forget">
+    **You provide inputs. Agent MAX handles everything else.**
+    
+    ```python
+    # For side effects (sending emails, updating CRM) - use run()
+    agent.run(
+        goal="Analyze churn risk and send outreach emails",
+        files=[open("customers.csv", "rb")],  # Real file objects
+        tools=[crm_search, send_email]
+    )
+    # Come back in 5 minutes. Emails sent. CRM updated.
+    
+    # For getting data back - use run_with_results()
+    result = agent.run_with_results(
+        goal="Analyze churn risk and identify top 10 at-risk customers",
+        files=[open("customers.csv", "rb")],
+        result_structure={"type": "object", "properties": {...}}
+    )
+    print(result.output)  # Guaranteed structured data
+    ```
+    
+    No loops to write. No state to manage. No babysitting.
+  </Tab>
+</Tabs>
+
+---
+
+## Quick Start
+
+<Warning>
+**Early Access Required** — The code examples below show what's possible with Agent MAX. [Join the waitlist](https://form.typeform.com/to/TiiMHobk) to get access.
+</Warning>
+
+Get started in 30 seconds:
+
+<CodeGroup>
+
+```python Python
+from incredible import AgentMax
+
+agent = AgentMax(api_key="YOUR_API_KEY")
+
+# Use run_with_results to get structured output back
+result = agent.run_with_results(
+    goal="Research top 3 competitors and summarize their pricing",
+    tools=[web_search],
+    result_structure={
+        "type": "object",
+        "properties": {
+            "competitors": {"type": "array"},
+            "summary": {"type": "string"}
+        }
+    }
+)
+
+print(result.output)  # Guaranteed to match your schema
+```
+
+```typescript TypeScript
+import { AgentMax } from '@incredible-ai/sdk';
+
+const agent = new AgentMax({ apiKey: 'YOUR_API_KEY' });
+
+// Use runWithResults to get structured output back
+const result = await agent.runWithResults({
+  goal: "Research top 3 competitors and summarize their pricing",
+  tools: [webSearch],
+  resultStructure: {
+    type: "object",
+    properties: {
+      competitors: { type: "array" },
+      summary: { type: "string" }
+    }
+  }
+});
+
+console.log(result.output);  // Guaranteed to match your schema
+```
+
+</CodeGroup>
+
+---
+
+## Real-World Examples
+
+<CardGroup cols={2}>
+  <Card title="🔍 Lead Research" icon="magnifying-glass" href="/agent-max/examples#lead-research">
+    **Input:** Company name  
+    **Output:** Full research report with contacts, funding, tech stack
+    
+    *Runs 15+ searches, cross-references data, validates accuracy*
+  </Card>
+  
+  <Card title="📊 Churn Analysis" icon="chart-line" href="/agent-max/examples#churn-analysis">
+    **Input:** Customer CSV  
+    **Output:** Risk scores + personalized outreach drafts
+    
+    *Processes thousands of rows, identifies patterns, drafts emails*
+  </Card>
+  
+  <Card title="📝 Contract Review" icon="file-contract" href="/agent-max/examples#contract-review">
+    **Input:** PDF contract  
+    **Output:** Risk assessment with specific clause references
+    
+    *OCR → Analysis → Structured output guaranteed*
+  </Card>
+  
+  <Card title="🤖 Competitor Monitoring" icon="binoculars" href="/agent-max/examples#competitor-monitoring">
+    **Input:** List of competitors  
+    **Output:** Daily digest of changes, launches, news
+    
+    *Scheduled runs, tracks changes over time*
+  </Card>
+</CardGroup>
+
+<Card title="See all examples with code" icon="code" href="/agent-max/examples">
+  Full code examples for each use case
+</Card>
+
+---
+
+## Structured Output (Guaranteed)
+
+Need JSON that matches a schema? Use `run_with_results()`. **Guaranteed.**
+
+```python
+# Open the file properly
+with open("meeting.mp3", "rb") as audio_file:
+    result = agent.run_with_results(
+        goal="Extract all action items from this meeting transcript",
+        files=[audio_file],
+        result_structure={
+            "type": "object",
+            "properties": {
+                "action_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "task": {"type": "string"},
+                            "assignee": {"type": "string"},
+                            "deadline": {"type": "string"}
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+# result.output ALWAYS matches the schema
+for item in result.output["action_items"]:
+    print(f"→ {item['task']} ({item['assignee']})")
+```
+
+---
+
+## When to Use Agent MAX
+
+<Tabs>
+  <Tab title="✅ Perfect For">
+    - **Multi-step workflows** — 5-50+ steps with dependencies
+    - **Long-running tasks** — Minutes, not seconds
+    - **High accuracy requirements** — Financial, legal, customer-facing
+    - **Autonomous operation** — Scheduled, triggered, unattended
+    - **Error resilience** — Must complete despite API failures
+    - **Large data processing** — Files, CSVs, documents
+  </Tab>
+  
+  <Tab title="❌ Use Something Else">
+    - Simple Q&A → Use [Answer endpoint](/api-reference/services/answer)
+    - Chat conversations → Use [Conversation endpoint](/api-reference/services/conversation)
+    - Single function calls → Use [Agent endpoint](/api-reference/services/agent)
+  </Tab>
+</Tabs>
+
+---
+
+## Pricing
+
+Agent MAX is **dramatically cheaper** than running equivalent agent loops yourself:
+
+| Metric | Traditional Agent Loop | Agent MAX |
+|--------|----------------------|-----------|
+| **Tokens per task** | ~50,000 | ~5,000 |
+| **Retry cost** | 100% (restart) | 20% (from cache) |
+| **Model usage** | Always expensive | Adaptive (cheap when possible) |
+
+<Note>
+Agent MAX is included in all Incredible API plans. Pay only for tokens used.
+</Note>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deep Work Features" icon="shield" href="/agent-max/deep-work-features">
+    Explore the 11 capabilities that make Agent MAX reliable
+  </Card>
+  <Card title="Live-Code Execution" icon="code" href="/agent-max/live-code">
+    Understand the technical architecture
+  </Card>
+  <Card title="Examples" icon="lightbulb" href="/agent-max/examples">
+    Real code for real use cases
+  </Card>
+  <Card title="SDK Reference" icon="book" href="/agent-max/sdk">
+    Complete API and SDK documentation
+  </Card>
+</CardGroup>
+
+---
+
+## Get Early Access
+
+Agent MAX is currently in private beta. We're onboarding teams gradually to ensure quality and gather feedback.
+
+<Card title="Join the Waitlist" icon="rocket" href="https://form.typeform.com/to/TiiMHobk">
+  **Be among the first to use Agent MAX.** Tell us about your use case and we'll get you set up.
+</Card>
