@@ -8,7 +8,7 @@
     "dark": "#FF6200"
   },
   "css": "body { color: white !important; } h1, h2, h3, h4, h5, h6 { color: white !important; } p, li, div { color: white !important; } footer a[href*='mintlify']{display:none!important;} footer [aria-label*='Mintlify']{display:none!important;} footer [alt*='Mintlify']{display:none!important;} footer [data-testid*='powered']{display:none!important;} footer .powered-by, footer .poweredBy, footer .mintlify-powered-by{display:none!important;} footer *:has(> a[href*='mintlify']){display:none!important;}",
-  "favicon": "/logo/Incredible-API-favicon.svg",
+  "favicon": "/images/favicon.svg",
   "navigation": {
     "products": [
       {
@@ -239,8 +239,8 @@
     }
   },
   "logo": {
-    "light": "/logo/Incredible-API-logo-lightmode.svg",
-    "dark": "/logo/Incredible-API-logo.svg"
+    "light": "/images/logo-lightmode.png",
+    "dark": "/images/logo-darkmode.svg"
   },
   "navbar": {
     "links": [
