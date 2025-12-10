@@ -118,6 +118,17 @@
                 ]
               }
             ]
+          },
+          {
+            "tab": "Security & Compliance",
+            "groups": [
+              {
+                "group": "Security & Compliance",
+                "pages": [
+                  "security-compliance"
+                ]
+              }
+            ]
           }
         ]
       },
@@ -189,6 +200,17 @@
                   "agents/guides/lead-research",
                   "agents/guides/meeting-prep",
                   "agents/guides/competitor-monitoring"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Security & Compliance",
+            "groups": [
+              {
+                "group": "Security & Compliance",
+                "pages": [
+                  "security-compliance"
                 ]
               }
             ]
