@@ -121,43 +121,18 @@ client = Incredible(api_key="YOUR_API_KEY")
 
 # Upload a file
 with open("report.pdf", "rb") as f:
-    file = client.files.upload(file=f, purpose="assistants")
+    file = client.files.upload(file=f)
 
 # Use the file in a conversation
 response = client.conversation(
     messages=[
-        {"role": "user", "content": "What's in this document?", "file_ids": [file.id]},
+        {"role": "user", "content": "What's in this document?", "file_ids": [file.file_id]},
         {"role": "assistant", "content": "This document contains a quarterly financial report."},
         {"role": "user", "content": "What were the key findings?"}
     ]
 )
 
 print(response.response)
-```
-
-```ts TypeScript SDK
-import { IncredibleClient } from '@incredible-ai/sdk';
-import fs from 'fs';
-
-const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
-
-// Upload a file
-const fileStream = fs.createReadStream('report.pdf');
-const file = await client.files.upload({
-  file: fileStream,
-  purpose: 'assistants'
-});
-
-// Use the file in a conversation
-const response = await client.conversation({
-  messages: [
-    { role: 'user', content: "What's in this document?", file_ids: [file.id] },
-    { role: 'assistant', content: 'This document contains a quarterly financial report.' },
-    { role: 'user', content: 'What were the key findings?' }
-  ]
-});
-
-console.log(response.response);
 ```
 
 ```bash cURL
