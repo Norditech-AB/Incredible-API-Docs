@@ -15,7 +15,32 @@ Upload files **once** during setup or when users first add them. Store the `file
 
 ## Quick Start
 
-**The Flow:**
+### Using the Python SDK (Recommended)
+
+The Python SDK provides a simple one-line upload method that handles all the steps automatically:
+
+```python
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Upload a file - SDK handles everything automatically
+with open("report.pdf", "rb") as f:
+    file = client.files.upload(file=f)
+
+# Use the file_id in any endpoint
+print(f"File uploaded! ID: {file.file_id}")
+
+# Now use it with Agent, Conversation, or Answer endpoints
+response = client.agent(
+    messages=[{"role": "user", "content": "Summarize this", "file_ids": [file.file_id]}],
+    tools=[...]
+)
+```
+
+### Manual Flow (for more control)
+
+If you need more control over the upload process, you can use the 3-step manual flow:
 
 1. Request an upload URL → get `file_id` and `upload_url`
 2. Upload file directly to storage using the URL (fast, no server bottleneck)
@@ -35,7 +60,54 @@ Upload files **once** during setup or when users first add them. Store the `file
 
 <CodeGroup>
 
-```python Python
+```python Python SDK (Recommended)
+from incredible_python import Incredible
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# ============================================
+# Upload with SDK - One line, handles everything!
+# ============================================
+
+with open("report.pdf", "rb") as f:
+    file = client.files.upload(file=f)
+
+file_id = file.file_id
+print(f"✅ File uploaded! ID: {file_id}")
+
+# 💾 IMPORTANT: Store file_id in your database!
+# save_to_database(user_id, file_id, "report.pdf")
+
+# ============================================
+# Reuse Forever (Use unlimited times)
+# ============================================
+
+# Use with Answer endpoint - quick Q&A about the file
+response = client.answer(
+    query="Summarize this report",
+    file_ids=[file_id]
+)
+print(response.answer)
+
+# Use with Conversation endpoint - multi-turn discussion
+response = client.conversation(
+    messages=[
+        {"role": "user", "content": "What are the key findings?", "file_ids": [file_id]}
+    ]
+)
+print(response.response)
+
+# Use with Agent endpoint - complex tasks with tool calling
+response = client.agent(
+    messages=[
+        {"role": "user", "content": "Analyze this report and create a chart", "file_ids": [file_id]}
+    ],
+    tools=[...]  # Your tool definitions
+)
+# Same file_id works across all endpoints, forever!
+```
+
+```python Python (Manual)
 import requests
 
 filename = "report.pdf"             # filename of the file to upload
@@ -263,6 +335,7 @@ Here's how to implement a proper file management system that uploads once and re
 ```python
 # Example: File library implementation
 from incredible_python import Incredible
+from datetime import datetime
 
 class FileLibrary:
     """
@@ -271,7 +344,6 @@ class FileLibrary:
     """
     
     def __init__(self, api_key, database):
-        self.api_key = api_key
         self.client = Incredible(api_key=api_key)
         self.db = database
     
@@ -286,44 +358,20 @@ class FileLibrary:
             print(f"✓ File already uploaded, reusing file_id: {existing['file_id']}")
             return existing['file_id']
         
-        # Step 1: Get upload URL
-        response = requests.post(
-            "https://api.incredible.one/v1/files/upload-url",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json={"filename": filename}
-        )
-        data = response.json()
-        file_id = data["file_id"]
-        upload_url = data["upload_url"]
-        
-        # Step 2: Upload to storage
+        # Upload using SDK - handles all steps automatically!
         with open(file_path, 'rb') as f:
-            file_bytes = f.read()
+            file = self.client.files.upload(file=f)
         
-        requests.put(upload_url, data=file_bytes)
-        
-        # Step 3: Confirm upload
-        response = requests.post(
-            "https://api.incredible.one/v1/files/confirm-upload",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json={
-                "file_id": file_id,
-                "filename": filename,
-                "file_size": len(file_bytes)
-            }
-        )
-        
-        # Step 4: Store file_id in database (CRITICAL!)
+        # Store file_id in database (CRITICAL!)
         self.db.save_file({
             "user_id": user_id,
-            "file_id": file_id,
+            "file_id": file.file_id,
             "filename": filename,
-            "file_size": len(file_bytes),
             "uploaded_at": datetime.now()
         })
         
-        print(f"✓ File uploaded successfully: {file_id}")
-        return file_id
+        print(f"✓ File uploaded successfully: {file.file_id}")
+        return file.file_id
     
     def get_user_files(self, user_id):
         """
