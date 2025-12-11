@@ -1,9 +1,7 @@
 ---
 title: 'Quickstart'
-description: 'Get started with Incredible API in minutes'
+description: 'Get started with Incredible API in under a minute'
 ---
-
-Welcome to **Incredible**! This guide will get you up and running in under 3 minutes.
 
 <a href="https://platform.incredible.one/settings/api-keys" target="_blank" style={{ textDecoration: 'none' }}>
   <div style={{ 
@@ -26,225 +24,63 @@ Welcome to **Incredible**! This guide will get you up and running in under 3 min
   </div>
 </a>
 
-## 🚀 Step 1: Make Your First API Call
-
-The Incredible API works without authentication for basic usage. Here's your first request:
+## Make Your First API Call
 
 <CodeGroup>
-  ```bash Shell
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "small-1",
-    "messages": [
-      { "role": "user", "content": "Hello, Incredible!" }
-    ]
-  }'
-  ```
-
   ```python Python
-import requests
+from incredible_python import Incredible
 
-response = requests.post(
-    "https://api.incredible.one/v1/chat-completion",
-    json={
-        "model": "small-1",
-        "messages": [
-            {"role": "user", "content": "Hello, Incredible!"}
-        ]
-    }
-)
-print(response.json())
+client = Incredible(api_key="YOUR_API_KEY")
+
+response = client.answer(query="Hello, Incredible!")
+print(response.answer)
   ```
 
   ```javascript JavaScript
-const response = await fetch("https://api.incredible.one/v1/chat-completion", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "small-1",
-    messages: [
-      { role: "user", content: "Hello, Incredible!" }
-    ]
-  })
-});
-const data = await response.json();
-console.log(data);
+import { IncredibleClient } from "@incredible-ai/sdk";
+
+const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
+
+const response = await client.answer({ query: "Hello, Incredible!" });
+console.log(response.answer);
+  ```
+
+  ```bash cURL
+curl -X POST "https://api.incredible.one/v1/answer" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Hello, Incredible!"}'
   ```
 </CodeGroup>
 
 **Response:**
+
 ```json
 {
-  "result": {
-    "thinking": "The user is greeting me...",
-    "response": [
-      {
-        "content": "Hello! I'm here to help you...",
-        "role": "assistant"
-      }
-    ]
-  }
+  "success": true,
+  "answer": "Hello! I'm here to help you with anything you need."
 }
 ```
 
-## 🔄 Step 2: Try Streaming
+That's it — you're up and running! 🎉
 
-Enable streaming for real-time responses:
+## What's Next?
 
-<CodeGroup>
-  ```bash Shell
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "small-1",
-    "stream": true,
-    "messages": [
-      { "role": "user", "content": "Count to 3" }
-    ]
-  }'
-  ```
-
-  ```python Python
-import requests
-
-response = requests.post(
-    "https://api.incredible.one/v1/chat-completion",
-    json={
-        "model": "small-1",
-        "stream": True,
-        "messages": [
-            {"role": "user", "content": "Count to 3"}
-        ]
-    },
-    stream=True
-)
-
-for line in response.iter_lines():
-    if line:
-        print(line.decode('utf-8'))
-  ```
-
-  ```javascript JavaScript
-const response = await fetch("https://api.incredible.one/v1/chat-completion", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "small-1",
-    stream: true,
-    messages: [
-      { role: "user", content: "Count to 3" }
-    ]
-  })
-});
-
-const reader = response.body.getReader();
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  console.log(new TextDecoder().decode(value));
-}
-  ```
-</CodeGroup>
-
-## 🛠️ Step 3: Test Function Calling
-
-Try a simple calculation:
-
-<CodeGroup>
-  ```bash Shell
-curl -X POST "https://api.incredible.one/v1/chat-completion" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "small-1",
-    "messages": [
-      { "role": "user", "content": "What is 15 + 27?" }
-    ],
-    "functions": [{
-      "name": "add_numbers",
-      "description": "Add two numbers",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "a": {"type": "number"},
-          "b": {"type": "number"}
-        },
-        "required": ["a", "b"]
-      }
-    }]
-  }'
-  ```
-
-  ```python Python
-import requests
-
-response = requests.post(
-    "https://api.incredible.one/v1/chat-completion",
-    json={
-        "model": "small-1",
-        "messages": [
-            {"role": "user", "content": "What is 15 + 27?"}
-        ],
-        "functions": [{
-            "name": "add_numbers",
-            "description": "Add two numbers",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "a": {"type": "number"},
-                    "b": {"type": "number"}
-                },
-                "required": ["a", "b"]
-            }
-        }]
-    }
-)
-print(response.json())
-  ```
-
-  ```javascript JavaScript
-const response = await fetch("https://api.incredible.one/v1/chat-completion", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "small-1",
-    messages: [
-      { role: "user", content: "What is 15 + 27?" }
-    ],
-    functions: [{
-      name: "add_numbers",
-      description: "Add two numbers",
-      parameters: {
-        type: "object",
-        properties: {
-          a: { type: "number" },
-          b: { type: "number" }
-        },
-        required: ["a", "b"]
-      }
-    }]
-  })
-});
-const data = await response.json();
-console.log(data);
-  ```
-</CodeGroup>
-
-## 🎯 What's Next?
-
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '16px' }}>
+<CardGroup cols={2}>
   <Card title="Core Concepts" icon="brain" href="/guides/core-concepts">
-    Understand what makes Incredible different.
+    Understand models, streaming, and how Incredible works
   </Card>
   <Card title="Function Calling" icon="wrench" href="/guides/function-calling">
-    Learn to use custom functions.
+    Let the AI call your functions and tools
   </Card>
-  <Card title="Integrations API" icon="link" href="/guides/integrations-api">
-    Connect to third-party services.
+  <Card title="Build an Agent" icon="robot" href="/agents">
+    Create autonomous AI workers that run on schedule
   </Card>
-</div>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all endpoints and parameters
+  </Card>
+</CardGroup>
 
 <div style={{ border: '1px solid #FF6200', borderRadius: '12px', padding: '16px', margin: '16px 0', background: 'rgba(255, 98, 0, 0.08)' }}>
   <strong>Need Help?</strong> Join our <a href="https://discord.com/invite/pNmdkxgBe2" style={{color: '#FF6200'}}>Discord community</a> or check the <a href="https://github.com/Norditech-AB/Incredible-API-Cookbook" style={{color: '#FF6200'}}>GitHub cookbook</a>.
 </div>
-
