@@ -80,6 +80,7 @@ tools = [
 ]
 
 response = client.agent(
+    system_prompt="You are a helpful assistant that uses tools to answer questions accurately.",
     messages=[{"role": "user", "content": "What is 25 * 4?"}],
     tools=tools
 )
@@ -89,7 +90,7 @@ if response.tool_calls:
     for call in response.tool_calls:
         print(f"Tool: {call.name}, Inputs: {call.inputs}")
 else:
-    print(response.content)
+    print(response.response)
 ```
 
 ```ts TypeScript SDK
@@ -98,6 +99,7 @@ import { IncredibleClient } from '@incredible-ai/sdk';
 const client = new IncredibleClient();
 
 const response = await client.agent({
+  system_prompt: 'You are a helpful assistant that uses tools to answer questions accurately.',
   messages: [
     { role: 'user', content: 'What is the weather in San Francisco?' }
   ],
@@ -131,6 +133,7 @@ curl -X POST "https://api.incredible.one/v1/agent" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "system_prompt": "You are a helpful assistant that uses tools to answer questions accurately.",
     "messages": [
       {"role": "user", "content": "What is the weather in San Francisco?"}
     ],
@@ -184,7 +187,7 @@ curl -X POST "https://api.incredible.one/v1/agent" \
 }
 ```
 
-**Optional: System Prompts** - Define the agent's behavior, personality, and constraints. For example: `"You are a helpful assistant with access to tools. Always verify information with the search tool before answering. Be concise and cite your sources."`
+**Optional: System Prompts** - Use the `system_prompt` parameter to define the agent's behavior, personality, and constraints. The system prompt is passed as a separate parameter, not as part of the messages array. For example: `system_prompt="You are a helpful assistant with access to tools. Always verify information with the search tool before answering. Be concise and cite your sources."`
 
 **Optional: Streaming** - Set `stream: true` to watch the agent's thinking process, tool calls, and responses in real-time. See the Streaming section below for details.
 
@@ -219,6 +222,7 @@ tools = [
 ]
 
 response = client.agent(
+    system_prompt="You are a data analyst assistant. Use the available tools to analyze data when needed.",
     messages=[
         {"role": "user", "content": "Analyze the sales data", "file_ids": [file.file_id]}
     ],
@@ -257,6 +261,7 @@ curl -X POST "https://api.incredible.one/v1/agent" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "system_prompt": "You are a data analyst assistant. Use the available tools to analyze data when needed.",
     "messages": [
       {"role": "user", "content": "Analyze the sales data", "file_ids": ["FILE_ID_FROM_STEP_1"]}
     ],
@@ -316,20 +321,22 @@ tools = [
 
 # Stream agent response
 stream = client.agent(
+    system_prompt="You are a helpful calculator assistant.",
     messages=[{"role": "user", "content": "What is 157 * 23?"}],
     tools=tools,
     stream=True
 )
 
-# Process streaming chunks
-for chunk in stream:
-    if hasattr(chunk, 'thinking') and chunk.thinking:
-        print(f"[Thinking: {chunk.thinking}]")
-    if hasattr(chunk, 'tool_call') and chunk.tool_call:
-        print(f"[Tool call: {chunk.tool_call.name}({chunk.tool_call.inputs})]")
-    if hasattr(chunk, 'content') and chunk.content:
-        print(chunk.content, end='', flush=True)
-    if hasattr(chunk, 'done') and chunk.done:
+# Process streaming events (returns dict-like objects)
+for event in stream:
+    if event.get("thinking"):
+        print(f"[Thinking: {event['thinking']}]")
+    if event.get("tool_call"):
+        tc = event["tool_call"]
+        print(f"[Tool call: {tc['name']}({tc['inputs']})]")
+    if event.get("content"):
+        print(event["content"], end="", flush=True)
+    if event.get("done"):
         print("\n[Stream complete]")
 ```
 
@@ -354,6 +361,7 @@ const tools = [
 
 // Stream agent response
 const stream = await client.agent({
+  system_prompt: 'You are a helpful calculator assistant.',
   messages: [{ role: 'user', content: 'What is 157 * 23?' }],
   tools,
   stream: true
@@ -381,6 +389,7 @@ curl -X POST "https://api.incredible.one/v1/agent" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "system_prompt": "You are a helpful calculator assistant.",
     "messages": [
       {"role": "user", "content": "What is 157 * 23?"}
     ],
@@ -443,6 +452,7 @@ Send your user's message along with tool definitions:
 
 ```python
 response = client.agent(
+    system_prompt="You are a helpful assistant with access to weather and time tools.",
     messages=[
         {"role": "user", "content": "What's the weather in Tokyo and what time is it there?"}
     ],
@@ -483,23 +493,24 @@ for call in response.tool_calls:
 ```
 
 ### Step 4: Send Results Back
-Create a follow-up request with the tool results. The agent needs to see both the original tool calls and their results:
+Add the tool results to the conversation and make a follow-up request:
 
 ```python
-follow_up_messages = [
-    {"role": "user", "content": "What's the weather in Tokyo and what time is it there?"},
-    {
-        "role": "assistant",
-        "tool_calls": response.tool_calls  # What the agent requested
-    },
-    {
-        "role": "tool",
-        "tool_call_results": tool_results  # What actually happened
-    }
-]
+# Add assistant's response to conversation
+if response.response:
+    messages.append({"role": "assistant", "content": response.response})
 
+# Add tool results as a user message
+result_summary = "\n".join([
+    f"Tool '{r['tool_call_id']}' result: {r['result']}" 
+    for r in tool_results
+])
+messages.append({"role": "user", "content": result_summary})
+
+# Get final response with tool results
 final_response = client.agent(
-    messages=follow_up_messages,
+    system_prompt="You are a helpful assistant with access to weather and time tools.",
+    messages=messages,
     tools=[weather_tool, time_tool]
 )
 ```
@@ -510,6 +521,103 @@ The agent processes the tool results and generates a comprehensive answer:
 ```python
 print(final_response.response)
 # "It's currently 15°C and partly cloudy in Tokyo. The local time is 3:45 PM JST."
+```
+
+## Complete Example: Interactive Calculator Agent
+
+Here's a complete, runnable example that demonstrates the full agent loop with tool calling:
+
+```python
+from incredible_python import Incredible
+import math
+
+client = Incredible(api_key="YOUR_API_KEY")
+
+# Define the calculator tool
+calculator_tool = {
+    "name": "calculate",
+    "description": "Perform math operations: add, subtract, multiply, divide, sqrt, power",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "operation": {
+                "type": "string",
+                "enum": ["add", "subtract", "multiply", "divide", "sqrt", "power"],
+                "description": "The math operation to perform"
+            },
+            "a": {"type": "number", "description": "First number"},
+            "b": {"type": "number", "description": "Second number (not needed for sqrt)"}
+        },
+        "required": ["operation", "a"]
+    }
+}
+
+def execute_calculate(inputs: dict) -> str:
+    """Execute the calculator tool."""
+    op = inputs["operation"]
+    a = inputs["a"]
+    b = inputs.get("b")
+    
+    if op == "add": return str(a + b)
+    elif op == "subtract": return str(a - b)
+    elif op == "multiply": return str(a * b)
+    elif op == "divide": return str(a / b) if b != 0 else "Error: division by zero"
+    elif op == "sqrt": return str(math.sqrt(a)) if a >= 0 else "Error: negative number"
+    elif op == "power": return str(a ** b)
+    return "Unknown operation"
+
+SYSTEM_PROMPT = "You are a helpful calculator assistant. Use the calculate tool for all math operations."
+
+def run_agent(user_message: str, messages: list) -> str:
+    """Run one turn of the agent, handling tool calls."""
+    messages.append({"role": "user", "content": user_message})
+    
+    response = client.agent(system_prompt=SYSTEM_PROMPT, messages=messages, tools=[calculator_tool])
+    
+    # Handle tool calls if any
+    if response.tool_calls:
+        for call in response.tool_calls:
+            print(f"🔧 Calling: {call.name}({call.inputs})")
+            result = execute_calculate(call.inputs)
+            print(f"   Result: {result}")
+        
+        # Add assistant response and tool results to conversation
+        if response.response:
+            messages.append({"role": "assistant", "content": response.response})
+        messages.append({"role": "user", "content": f"Tool result: {result}"})
+        
+        # Get final response
+        final = client.agent(system_prompt=SYSTEM_PROMPT, messages=messages, tools=[calculator_tool])
+        messages.append({"role": "assistant", "content": final.response})
+        return final.response
+    
+    messages.append({"role": "assistant", "content": response.response})
+    return response.response
+
+# Interactive loop
+messages = []
+print("Calculator Agent - type 'quit' to exit\n")
+
+while True:
+    user_input = input("You: ").strip()
+    if user_input.lower() == "quit":
+        break
+    
+    reply = run_agent(user_input, messages)
+    print(f"Agent: {reply}\n")
+```
+
+**Example session:**
+```
+You: What is 125 * 48?
+🔧 Calling: calculate({'operation': 'multiply', 'a': 125, 'b': 48})
+   Result: 6000
+Agent: 125 × 48 = 6,000
+
+You: Now divide that by 4
+🔧 Calling: calculate({'operation': 'divide', 'a': 6000, 'b': 4})
+   Result: 1500.0
+Agent: 6,000 ÷ 4 = 1,500
 ```
 
 ## Best Practices
