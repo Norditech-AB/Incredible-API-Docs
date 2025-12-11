@@ -1,0 +1,317 @@
+---
+title: "Tool Descriptions"
+description: "Write tool descriptions that help agents make smart decisions about when and how to use tools."
+---
+
+## Why Tool Descriptions Matter
+
+The agent decides which tools to use based almost entirely on the descriptions you provide. A vague description leads to tools being used incorrectly or not at all.
+
+```python
+tools = [
+    {
+        "name": "search_products",
+        "description": "...",  # This is critical!
+        "input_schema": {...}
+    }
+]
+```
+
+## The Anatomy of a Great Tool Description
+
+### 1. What the Tool Does
+
+Start with a clear, one-line explanation:
+
+```
+"Search the product catalog by name, category, or keyword."
+```
+
+### 2. What It Returns
+
+Tell the agent what to expect:
+
+```
+"Returns up to 10 matching products with name, price, and availability status."
+```
+
+### 3. When to Use It
+
+Be explicit about use cases:
+
+```
+"Use this when the user asks about products, pricing, or availability."
+```
+
+### 4. When NOT to Use It
+
+Equally important — prevent misuse:
+
+```
+"Do not use for order status—use get_order instead."
+```
+
+## Complete Examples
+
+### Example 1: Database Query Tool
+
+<Tabs>
+  <Tab title="✅ Excellent">
+    ```json
+    {
+      "name": "query_database",
+      "description": "Execute a read-only SQL query against the analytics database. Returns up to 1000 rows. Use this for any questions about user metrics, sales data, or historical trends. Tables available: users, orders, products, events. Do NOT use for real-time inventory—use check_inventory instead.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "The SQL query to execute. Must be a SELECT statement."
+          }
+        },
+        "required": ["sql"]
+      }
+    }
+    ```
+    
+    **Why this works:**
+    - Clear capability (read-only SQL)
+    - Explicit limits (1000 rows)
+    - Use cases listed (metrics, sales, trends)
+    - Available resources (table names)
+    - Disambiguation (not for inventory)
+  </Tab>
+  <Tab title="❌ Weak">
+    ```json
+    {
+      "name": "query_database",
+      "description": "Query the database.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string"
+          }
+        },
+        "required": ["sql"]
+      }
+    }
+    ```
+    
+    **Problems:**
+    - Which database?
+    - What can be queried?
+    - What are the limits?
+    - When should it be used?
+  </Tab>
+</Tabs>
+
+### Example 2: Weather API Tool
+
+<Tabs>
+  <Tab title="✅ Excellent">
+    ```json
+    {
+      "name": "get_weather",
+      "description": "Get current weather conditions for a location. Returns temperature (Fahrenheit), conditions (sunny/cloudy/rainy), humidity, and wind speed. Accepts city names ('San Francisco') or coordinates. Use for weather-related questions. For forecasts, use get_forecast instead.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "City name (e.g., 'London, UK') or coordinates ('37.7749,-122.4194')"
+          }
+        },
+        "required": ["location"]
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="❌ Weak">
+    ```json
+    {
+      "name": "get_weather",
+      "description": "Gets weather",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string"
+          }
+        },
+        "required": ["location"]
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Example 3: Email Tool
+
+<Tabs>
+  <Tab title="✅ Excellent">
+    ```json
+    {
+      "name": "send_email",
+      "description": "Send an email on behalf of the user. Requires explicit user confirmation before sending. Use when the user asks to send, reply to, or forward an email. Maximum 5 recipients. Cannot send attachments—use send_email_with_attachment for that.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Recipient email addresses (max 5)"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Email subject line"
+          },
+          "body": {
+            "type": "string",
+            "description": "Email body in plain text or HTML"
+          }
+        },
+        "required": ["to", "subject", "body"]
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="❌ Weak">
+    ```json
+    {
+      "name": "send_email",
+      "description": "Sends email",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "to": {"type": "string"},
+          "subject": {"type": "string"},
+          "body": {"type": "string"}
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Parameter Descriptions
+
+Don't neglect the `input_schema` properties — they're equally important:
+
+### Good Parameter Descriptions
+
+```json
+{
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Search query. Supports boolean operators (AND, OR, NOT) and phrase matching with quotes."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results to return (1-100, default 10)"
+    },
+    "sort_by": {
+      "type": "string",
+      "enum": ["relevance", "date", "price_asc", "price_desc"],
+      "description": "Sort order. Use 'relevance' for best matches, 'date' for newest first."
+    },
+    "filters": {
+      "type": "object",
+      "description": "Optional filters. Example: {\"category\": \"electronics\", \"in_stock\": true}"
+    }
+  }
+}
+```
+
+### Use Enums for Known Values
+
+When a parameter has a fixed set of valid values, use `enum`:
+
+```json
+{
+  "status": {
+    "type": "string",
+    "enum": ["pending", "processing", "shipped", "delivered", "cancelled"],
+    "description": "Filter orders by status"
+  }
+}
+```
+
+This prevents the agent from inventing invalid values.
+
+## Disambiguating Similar Tools
+
+When you have multiple tools that could seem similar, be explicit about differences:
+
+```json
+[
+  {
+    "name": "search_products",
+    "description": "Search the product catalog. Use for finding products by name, category, or features. Returns product info but NOT real-time inventory."
+  },
+  {
+    "name": "check_inventory", 
+    "description": "Check real-time inventory for a specific product. Use AFTER search_products when the user needs to know current stock levels. Requires a product_id from search_products."
+  },
+  {
+    "name": "get_product_details",
+    "description": "Get full details for a single product including specifications, reviews, and related products. Use when the user wants to learn more about a specific product they've already found."
+  }
+]
+```
+
+## Common Mistakes
+
+### 1. Too Short
+
+```
+❌ "Searches stuff"
+✅ "Search the company knowledge base for policies, procedures, and documentation. Returns relevant excerpts with source links."
+```
+
+### 2. Missing Use Cases
+
+```
+❌ "Creates a ticket"
+✅ "Create a support ticket in Jira. Use when the user reports a bug or requests a feature. Automatically sets priority based on description."
+```
+
+### 3. No Disambiguation
+
+```
+❌ "Gets user data"
+✅ "Get the current user's profile (name, email, preferences). For user activity history, use get_user_activity instead."
+```
+
+### 4. Vague Parameters
+
+```
+❌ "data": {"type": "object", "description": "The data"}
+✅ "data": {"type": "object", "description": "User profile fields to update. Valid fields: name, email, phone, timezone"}
+```
+
+## Quick Checklist
+
+<Check>Does the description explain **what** the tool does?</Check>
+<Check>Does it describe **what** the tool returns?</Check>
+<Check>Does it say **when** to use the tool?</Check>
+<Check>Does it clarify when **NOT** to use it (if there are similar tools)?</Check>
+<Check>Are all parameters well-described with examples?</Check>
+<Check>Are fixed values defined with `enum`?</Check>
+
+## Template
+
+Use this template for consistent, high-quality tool descriptions:
+
+```
+[One-line summary of what the tool does]. 
+Returns [what the response contains]. 
+Use when [specific use cases]. 
+[Any limitations or constraints].
+[Disambiguation from similar tools if needed].
+```
+
+---
+
+**Next:** [Message Formatting →](/guides/prompt-engineering/message-formatting)

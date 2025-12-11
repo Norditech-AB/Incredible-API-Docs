@@ -1,0 +1,252 @@
+---
+title: "Message Formatting"
+description: "Structure your messages for clarity and optimal model understanding."
+---
+
+## Message Basics
+
+Every conversation with the Agent API consists of messages with roles:
+
+```python
+messages = [
+    {"role": "user", "content": "What's the weather in Tokyo?"},
+    {"role": "assistant", "content": "Let me check that for you..."},
+    {"role": "user", "content": "Tool result: 22°C, sunny"},
+    {"role": "assistant", "content": "It's currently 22°C and sunny in Tokyo!"}
+]
+```
+
+How you format these messages significantly impacts the agent's understanding and response quality.
+
+## Structuring User Messages
+
+### Be Specific, Not Vague
+
+<Tabs>
+  <Tab title="✅ Specific">
+    ```
+    Find all orders from customer ID 12345 placed in the last 30 days 
+    that have a status of "pending" and total value over $100.
+    ```
+  </Tab>
+  <Tab title="❌ Vague">
+    ```
+    Find some recent orders.
+    ```
+  </Tab>
+</Tabs>
+
+### Break Down Complex Requests
+
+For multi-step tasks, use numbered lists:
+
+```
+I need you to:
+1. Search for all products in the "Electronics" category
+2. Filter to items with less than 10 units in stock
+3. For each item, check if there are pending orders
+4. Create a restock report with product name, current stock, and pending orders
+```
+
+### Provide Context When Relevant
+
+```
+We just launched a new pricing structure last week. When looking up 
+product prices, use the current catalog—don't rely on any cached data. 
+What's the current price for product SKU-789?
+```
+
+### Use Formatting for Clarity
+
+Markdown formatting helps with complex inputs:
+
+```
+Please analyze this data:
+
+| Product | Q1 Sales | Q2 Sales |
+|---------|----------|----------|
+| Widget  | 1,234    | 1,567    |
+| Gadget  | 892      | 1,103    |
+
+Focus on:
+- Quarter-over-quarter growth percentage
+- Which product performed better
+```
+
+## Handling Tool Results
+
+When providing tool results back to the agent, format them clearly:
+
+### Simple Results
+
+```python
+messages.append({
+    "role": "user", 
+    "content": "Tool result for get_weather: Temperature: 22°C, Conditions: Sunny, Humidity: 45%"
+})
+```
+
+### Structured Results
+
+For complex data, use JSON or formatted text:
+
+```python
+tool_result = {
+    "tool": "search_products",
+    "results": [
+        {"id": "123", "name": "Wireless Mouse", "price": 29.99, "stock": 45},
+        {"id": "456", "name": "USB Keyboard", "price": 49.99, "stock": 12}
+    ],
+    "total_matches": 2
+}
+
+messages.append({
+    "role": "user",
+    "content": f"Tool result: {json.dumps(tool_result, indent=2)}"
+})
+```
+
+### Error Results
+
+When a tool fails, provide helpful error information:
+
+```python
+messages.append({
+    "role": "user",
+    "content": """Tool 'get_order' failed:
+Error: Order not found
+Details: No order exists with ID ORD-99999
+Suggestion: Verify the order ID or search by customer email instead"""
+})
+```
+
+This helps the agent recover gracefully and suggest alternatives.
+
+## Multi-Turn Conversation Patterns
+
+### Pattern 1: Clarification Flow
+
+When the agent needs more information:
+
+```python
+# Initial request
+messages = [{"role": "user", "content": "Book a meeting with the team"}]
+
+# Agent asks for clarification
+response = client.agent(messages=messages, ...)
+# Response: "I'd be happy to book a meeting. Could you tell me:
+# 1. Which team members should I invite?
+# 2. What date and time works best?
+# 3. How long should the meeting be?"
+
+# User provides details
+messages.append({"role": "assistant", "content": response.response})
+messages.append({"role": "user", "content": """
+- Invite: alice@co.com, bob@co.com, carol@co.com
+- Date: Next Tuesday at 2pm
+- Duration: 1 hour
+"""})
+```
+
+### Pattern 2: Iterative Refinement
+
+When building on previous results:
+
+```python
+messages = [
+    {"role": "user", "content": "Search for laptops under $1000"},
+    {"role": "assistant", "content": "I found 15 laptops. Here are the top 5..."},
+    {"role": "user", "content": "Show me only the ones with at least 16GB RAM"},
+    {"role": "assistant", "content": "Narrowing to 16GB+ RAM, here are 6 options..."},
+    {"role": "user", "content": "Compare the top 2 in a table format"}
+]
+```
+
+### Pattern 3: Multi-Tool Workflow
+
+When multiple tools need to work together:
+
+```python
+# Step 1: User request
+messages = [{"role": "user", "content": "Get the weather in all cities where we have offices"}]
+
+# Step 2: Agent calls get_offices tool first
+# After getting offices: ["NYC", "London", "Tokyo"]
+
+# Step 3: Provide office results
+messages.append({"role": "assistant", "content": "Let me first find our office locations..."})
+messages.append({"role": "user", "content": "Tool result for get_offices: NYC, London, Tokyo"})
+
+# Step 4: Agent now calls get_weather for each city
+# Continue the loop...
+```
+
+## Providing Examples in Messages
+
+For complex tasks, include examples in your request:
+
+```
+Extract structured data from these customer reviews.
+
+Format each review as:
+{
+  "sentiment": "positive" | "negative" | "neutral",
+  "main_topic": "string",
+  "key_phrases": ["string", ...]
+}
+
+Example input: "Great product, fast shipping!"
+Example output: {"sentiment": "positive", "main_topic": "satisfaction", "key_phrases": ["great product", "fast shipping"]}
+
+Now process these reviews:
+1. "The quality is poor and it arrived late."
+2. "Works as expected, nothing special."
+3. "Best purchase I've made this year!"
+```
+
+## Managing Context Length
+
+### Keep Messages Focused
+
+Long conversation histories can overwhelm the model. Periodically summarize:
+
+```python
+# Instead of keeping 50 messages, summarize
+messages = [
+    {
+        "role": "user", 
+        "content": """Previous conversation summary:
+- User asked about Q3 sales data
+- Found total revenue of $1.2M
+- Identified top 3 products by volume
+- User requested comparison with Q2
+
+Current request: Show me the growth percentage for each product category."""
+    }
+]
+```
+
+### Trim Irrelevant Details
+
+```python
+# ❌ Including unnecessary verbosity
+{"role": "user", "content": f"Tool result: {huge_json_blob_with_all_fields}"}
+
+# ✅ Include only relevant data
+{"role": "user", "content": f"Tool result: Found 3 matching orders. Total value: $1,234.56"}
+```
+
+## Quick Reference
+
+| Scenario | Best Practice |
+|----------|---------------|
+| Complex requests | Use numbered lists |
+| Data input | Use tables or JSON |
+| Tool results | Include key data, omit noise |
+| Errors | Provide context and suggestions |
+| Long conversations | Summarize periodically |
+| Examples needed | Show input → output format |
+
+---
+
+**Next:** [Common Patterns →](/guides/prompt-engineering/patterns)

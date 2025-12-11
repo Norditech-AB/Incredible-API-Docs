@@ -1,0 +1,221 @@
+---
+title: "System Prompts"
+description: "Design system prompts that define agent behavior, personality, and constraints."
+---
+
+## What is a System Prompt?
+
+The system prompt is your primary way to control an agent's behavior. It's set once per conversation and influences every response the agent generates.
+
+```python
+response = client.agent(
+    system_prompt="You are a helpful customer support agent for Acme Corp...",
+    messages=[...],
+    tools=[...]
+)
+```
+
+Think of it as the agent's "operating instructions" — it defines who the agent is, how it should behave, and what rules it must follow.
+
+## The Anatomy of a Great System Prompt
+
+### 1. Role Definition
+
+Start by clearly defining what the agent is:
+
+<Tabs>
+  <Tab title="Good">
+    ```
+    You are a senior data analyst at a fintech company. You help users 
+    understand their financial data by querying databases and creating 
+    clear summaries. You have expertise in SQL, data visualization, 
+    and financial metrics.
+    ```
+    
+    **Why this works:**
+    - Specific role (data analyst, not generic assistant)
+    - Clear domain (fintech, financial data)
+    - Defined capabilities (SQL, visualization)
+  </Tab>
+  <Tab title="Weak">
+    ```
+    You are a helpful assistant.
+    ```
+    
+    **Problems:**
+    - Too generic
+    - No domain expertise implied
+    - No clear capabilities
+  </Tab>
+</Tabs>
+
+### 2. Behavioral Guidelines
+
+Define how the agent should act:
+
+```
+## Behavior
+- Always verify data before presenting conclusions
+- When uncertain, ask clarifying questions rather than guessing
+- Break down complex analyses into step-by-step explanations
+- Use the search_database tool before answering data questions
+- Never make up numbers or statistics
+```
+
+### 3. Tool Usage Instructions
+
+Guide the agent on when and how to use available tools:
+
+```
+## Tool Usage
+- Use `query_database` for any question about user data or metrics
+- Use `create_chart` when the user asks for visualizations
+- Always check current data—never rely on cached or assumed values
+- If a query fails, explain the error and suggest alternatives
+```
+
+### 4. Constraints and Boundaries
+
+Set clear limits:
+
+```
+## Constraints
+- Only access data the user has permission to view
+- Never modify or delete data without explicit confirmation
+- Keep responses under 500 words unless asked for detail
+- If asked about topics outside your expertise, acknowledge limits
+```
+
+### 5. Output Format
+
+Specify how responses should be structured:
+
+```
+## Response Format
+- Start with a brief summary (1-2 sentences)
+- Present data in tables when showing multiple values
+- End with suggested next steps or follow-up questions
+- Use markdown formatting for readability
+```
+
+## Complete Example
+
+Here's a production-ready system prompt for a customer support agent:
+
+```
+You are a customer support specialist for CloudStore, an e-commerce platform. 
+Your role is to help customers with orders, returns, and account issues.
+
+## Your Capabilities
+- Look up order status and history using the `get_orders` tool
+- Process returns and refunds using the `create_return` tool
+- Update customer information using the `update_account` tool
+- Search the knowledge base using the `search_help` tool
+
+## Behavior Guidelines
+- Be friendly but professional
+- Acknowledge the customer's concern before diving into solutions
+- Always verify the customer's identity before accessing account data
+- If you can't resolve an issue, offer to escalate to a human agent
+
+## Tool Usage
+- Always use `get_orders` to check order status—never guess shipping dates
+- Before processing a return, verify the order is within the return window
+- Use `search_help` for policy questions to ensure accuracy
+
+## Constraints
+- Never share one customer's data with another
+- Don't make promises about refunds without checking eligibility
+- Maximum of 3 tool calls per response—ask for guidance if more are needed
+
+## Response Format
+- Start by confirming you understand the customer's issue
+- Provide step-by-step guidance when explaining processes
+- End with a clear next action or confirmation that the issue is resolved
+```
+
+## Common Mistakes
+
+### Being Too Vague
+
+<Tabs>
+  <Tab title="❌ Vague">
+    ```
+    Be helpful and use tools when needed.
+    ```
+  </Tab>
+  <Tab title="✅ Specific">
+    ```
+    Use the search tool when answering factual questions. 
+    Use the calculator tool for any mathematical operations. 
+    Respond directly without tools for opinion-based questions.
+    ```
+  </Tab>
+</Tabs>
+
+### Conflicting Instructions
+
+<Tabs>
+  <Tab title="❌ Conflicting">
+    ```
+    Always be concise and brief.
+    ...
+    Provide detailed explanations with examples for every response.
+    ```
+  </Tab>
+  <Tab title="✅ Clear">
+    ```
+    Be concise by default. Provide detailed explanations only when:
+    - The user explicitly asks for more detail
+    - The topic is complex and requires step-by-step breakdown
+    - You're explaining an error or unexpected result
+    ```
+  </Tab>
+</Tabs>
+
+### Overloading with Instructions
+
+Too many rules can confuse the model. Prioritize the most important guidelines:
+
+<Tabs>
+  <Tab title="❌ Overloaded">
+    ```
+    [50 different rules covering every possible edge case]
+    ```
+  </Tab>
+  <Tab title="✅ Focused">
+    ```
+    ## Core Rules (Always Follow)
+    1. Never expose sensitive data
+    2. Use tools for real-time data, don't guess
+    3. Acknowledge when you don't know something
+    
+    ## Guidelines (Best Effort)
+    - Prefer concise responses
+    - Use formatting for readability
+    ```
+  </Tab>
+</Tabs>
+
+## Tips for Iteration
+
+1. **Start simple** — Begin with a basic prompt and add complexity as needed
+2. **Test edge cases** — See how the agent handles unusual requests
+3. **Watch tool usage** — Verify the agent uses tools appropriately
+4. **Check for consistency** — Same type of input should yield similar behavior
+5. **Refine based on failures** — Add specific guidance when the agent makes mistakes
+
+## Quick Reference
+
+| Section | Purpose | Example |
+|---------|---------|---------|
+| Role | Who is the agent? | "You are a code review assistant..." |
+| Capabilities | What can it do? | "You can search code, explain patterns..." |
+| Behavior | How should it act? | "Be thorough but concise..." |
+| Tool usage | When to use tools? | "Use search_code for questions about..." |
+| Constraints | What's off-limits? | "Never suggest deleting production code..." |
+| Format | How to structure output? | "Use code blocks, explain reasoning..." |
+
+---
+
+**Next:** [Tool Descriptions →](/guides/prompt-engineering/tool-descriptions)

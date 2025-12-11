@@ -35,6 +35,16 @@
                 ]
               },
               {
+                "group": "Prompt Engineering",
+                "pages": [
+                  "guides/prompt-engineering/index",
+                  "guides/prompt-engineering/system-prompts",
+                  "guides/prompt-engineering/tool-descriptions",
+                  "guides/prompt-engineering/message-formatting",
+                  "guides/prompt-engineering/patterns"
+                ]
+              },
+              {
                 "group": "File Support",
                 "pages": [
                   "api-reference/files/overview",
