@@ -436,16 +436,12 @@ Upload and manage files:
 ```python
 # Upload file
 with open("document.pdf", "rb") as f:
-    response = client.files.upload(
-        file=f,
-        purpose="assistants"  # "assistants", "vision", "ocr"
-    )
+    response = client.files.upload(file=f)
     print(f"File ID: {response.file_id}")
 
 # Upload from URL
 response = client.files.upload_url(
-    url="https://example.com/document.pdf",
-    purpose="ocr"
+    url="https://example.com/document.pdf"
 )
 
 # List files

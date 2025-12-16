@@ -1,0 +1,54 @@
+---
+title: "Prompt Engineering"
+description: "Master the art of crafting effective prompts for AI agents and LLM applications."
+---
+
+## Why Prompt Engineering Matters
+
+The difference between a mediocre AI integration and a great one often comes down to how you communicate with the model. Well-crafted prompts lead to:
+
+- **More accurate responses** — The model understands exactly what you need
+- **Consistent behavior** — Reliable outputs across different inputs
+- **Better tool usage** — Agents call the right tools with correct arguments
+- **Reduced costs** — Fewer retries and failed interactions
+
+## What You'll Learn
+
+<CardGroup cols={2}>
+  <Card title="System Prompts" icon="cog" href="/guides/prompt-engineering/system-prompts">
+    Design system prompts that define agent behavior, personality, and constraints.
+  </Card>
+  <Card title="Tool Descriptions" icon="wrench" href="/guides/prompt-engineering/tool-descriptions">
+    Write tool descriptions that help agents make smart decisions about when and how to use tools.
+  </Card>
+  <Card title="Message Formatting" icon="message" href="/guides/prompt-engineering/message-formatting">
+    Structure your messages for clarity and optimal model understanding.
+  </Card>
+  <Card title="Common Patterns" icon="lightbulb" href="/guides/prompt-engineering/patterns">
+    Proven prompt patterns for common agent workflows and use cases.
+  </Card>
+</CardGroup>
+
+## Quick Reference
+
+### The Prompt Quality Checklist
+
+<Check>**Specific** — Avoids vague terms like "good" or "appropriate"</Check>
+<Check>**Structured** — Uses clear formatting (lists, sections, examples)</Check>
+<Check>**Contextual** — Provides relevant background information</Check>
+<Check>**Constrained** — Defines boundaries and limitations</Check>
+<Check>**Testable** — Can verify if the output meets requirements</Check>
+
+### Before You Start
+
+The Agent API uses three key areas where prompt engineering applies:
+
+1. **System Prompt** — Defines the agent's role, behavior, and constraints
+2. **Tool Descriptions** — Tells the agent what each tool does and when to use it
+3. **User Messages** — The actual requests and context you send
+
+Each area has different best practices, covered in the guides above.
+
+---
+
+**Start with:** [System Prompts →](/guides/prompt-engineering/system-prompts)

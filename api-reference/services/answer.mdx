@@ -101,37 +101,15 @@ client = Incredible(api_key="YOUR_API_KEY")
 
 # Upload a file
 with open("document.pdf", "rb") as f:
-    file = client.files.upload(file=f, purpose="assistants")
+    file = client.files.upload(file=f)
 
 # Use the file in an answer request
 response = client.answer(
     query="Summarize the key points from the document",
-    file_ids=[file.id]
+    file_ids=[file.file_id]
 )
 
 print(response.answer)
-```
-
-```ts TypeScript SDK
-import { IncredibleClient } from '@incredible-ai/sdk';
-import fs from 'fs';
-
-const client = new IncredibleClient({ apiKey: "YOUR_API_KEY" });
-
-// Upload a file
-const fileStream = fs.createReadStream('document.pdf');
-const file = await client.files.upload({
-  file: fileStream,
-  purpose: 'assistants'
-});
-
-// Use the file in an answer request
-const response = await client.answer({
-  query: 'Summarize the key points from the document',
-  file_ids: [file.id]
-});
-
-console.log(response.answer);
 ```
 
 ```bash cURL
